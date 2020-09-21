@@ -4,7 +4,6 @@
 #include "pch.h"
 #include "VehicleInfo.h"
 #include "CAlertData.h"
-#include "cstringt.h"
 #include "afxdialogex.h"
 
 
@@ -56,9 +55,9 @@ BOOL CAlertData::OnInitDialog()
 	return TRUE;
 }
 
-void CAlertData::UpdateAlert(unsigned int iF7_0, unsigned char* pVinStr)
+void CAlertData::UpdateAlert(unsigned int iF7_0, CString cstrVin)
 {
-	CString cstrVin(pVinStr);
+	//CString cstrVin(pVinStr);
 	((CEdit*)GetDlgItem(IDC_EDIT_ALERTVIN))->SetWindowTextW(cstrVin);
 
 	bool bFlag = iF7_0 % 2 > 0 ? true : false;
@@ -104,19 +103,19 @@ void CAlertData::UpdateAlert(unsigned int iF7_0, unsigned char* pVinStr)
 	((CStatic*)GetDlgItem(IDC_STATIC13))->EnableWindow(bFlag);
 
 	bFlag = (iF7_0 / 16384) % 2 > 0 ? true : false;
-	((CStatic*)GetDlgItem(IDC_STATIC13))->EnableWindow(bFlag);
-
-	bFlag = (iF7_0 / 32768) % 2 > 0 ? true : false;
 	((CStatic*)GetDlgItem(IDC_STATIC14))->EnableWindow(bFlag);
 
-	bFlag = (iF7_0 / 65536) % 2 > 0 ? true : false;
+	bFlag = (iF7_0 / 32768) % 2 > 0 ? true : false;
 	((CStatic*)GetDlgItem(IDC_STATIC15))->EnableWindow(bFlag);
 
-	bFlag = (iF7_0 / 131072) % 2 > 0 ? true : false;
+	bFlag = (iF7_0 / 65536) % 2 > 0 ? true : false;
 	((CStatic*)GetDlgItem(IDC_STATIC16))->EnableWindow(bFlag);
 
-	bFlag = (iF7_0 / 262144) % 2 > 0 ? true : false;
+	bFlag = (iF7_0 / 131072) % 2 > 0 ? true : false;
 	((CStatic*)GetDlgItem(IDC_STATIC17))->EnableWindow(bFlag);
+
+	bFlag = (iF7_0 / 262144) % 2 > 0 ? true : false;
+	((CStatic*)GetDlgItem(IDC_STATIC18))->EnableWindow(bFlag);
 }
 
 

@@ -97,9 +97,14 @@
 #define IDC_STATIC11                    1063
 #define IDC_EDIT_VEHICLEOFFLINETODAY    1063
 #define IDC_STATIC12                    1064
+#define IDC_EDIT_VEHICLEONLINELASTWEEK  1064
 #define IDC_STATIC13                    1065
+#define IDC_EDIT_VEHICLERECHARGELASTWEEK 1065
 #define IDC_STATIC14                    1066
+#define IDC_EDIT_VEHICLEFAULTLASTWEEK   1066
 #define IDC_STATIC15                    1067
+#define IDC_EDIT_VEHICLEOFFLINETODAY2   1067
+#define IDC_EDIT_VEHICLEOFFLINELASTWEEK 1067
 #define IDC_STATIC16                    1068
 #define IDC_STATIC17                    1069
 #define IDC_STATIC18                    1070

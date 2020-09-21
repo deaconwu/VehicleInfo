@@ -80,10 +80,12 @@ LRESULT CVehicleInfoDlg::OnUpdateStatistic(WPARAM wParam, LPARAM lParam)
 
 LRESULT CVehicleInfoDlg::OnRealAlert(WPARAM wParam, LPARAM lParam)
 {
-	uint32_t iF7_0 = wParam;
-	uint8_t* pVinStr = (uint8_t*)lParam;
-	m_alertData.UpdateAlert(iF7_0, pVinStr);
-
+	STALERTDATAPOST* pAlertPost = (STALERTDATAPOST*)wParam;
+	//uint32_t iF7_0 = wParam;
+	CString vinStr(pAlertPost->chVin);
+	//vinStr.Format(_T("%s"), (uint8_t*)lParam);
+	m_alertData.UpdateAlert(pAlertPost->F7_0, vinStr);
+	//Sleep(100);
 	return 0;
 }
 

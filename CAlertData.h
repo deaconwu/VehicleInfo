@@ -16,7 +16,7 @@ public:
 	enum { IDD = IDD_ALERTDATA };
 #endif
 
-	void UpdateAlert(unsigned int iF7_0, unsigned char* pVinStr);
+	void UpdateAlert(unsigned int iF7_0, CString cstrVin);
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持

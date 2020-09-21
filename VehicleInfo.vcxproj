@@ -92,7 +92,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;HAVE_REMOTE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>Datagram</AdditionalIncludeDirectories>
     </ClCompile>
@@ -116,7 +116,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;HAVE_REMOTE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>Datagram</AdditionalIncludeDirectories>
     </ClCompile>
@@ -198,9 +198,11 @@
     <ClInclude Include="Datagram\CInfoSocket.h" />
     <ClInclude Include="Datagram\InfoType.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="VehicleInfo.h" />
     <ClInclude Include="VehicleInfoDlg.h" />
+    <ClInclude Include="WeekDay.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CAlertData.cpp" />
@@ -209,8 +211,10 @@
     <ClCompile Include="CStatistics.cpp" />
     <ClCompile Include="Datagram\CInfoRecord.cpp" />
     <ClCompile Include="Datagram\CInfoSocket.cpp" />
+    <ClCompile Include="pch.cpp" />
     <ClCompile Include="VehicleInfo.cpp" />
     <ClCompile Include="VehicleInfoDlg.cpp" />
+    <ClCompile Include="WeekDay.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="VehicleInfo.rc" />

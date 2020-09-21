@@ -53,7 +53,7 @@ BOOL CVehicleInfoApp::InitInstance()
 	CWinApp::InitInstance();
 	HWND hwnd = AfxGetApp()->GetMainWnd()->GetSafeHwnd();
 	//AfxGetApp()->GetMainWnd()->ShowWindow(SW_SHOW);
-	SetWindowPos(hwnd, HWND_NOTOPMOST, 100, 100, 950, 1600, SWP_NOMOVE);
+	SetWindowPos(hwnd, HWND_NOTOPMOST, 100, 100, 950, 1400, SWP_NOMOVE);
 
 	AfxEnableControlContainer();
 
