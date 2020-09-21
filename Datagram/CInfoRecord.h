@@ -4,6 +4,7 @@
 #include "CInfoSocket.h"
 
 #define UM_STATISTIC WM_USER+1
+#define UM_ALERT WM_USER+2
 
 class CInfoRecord //: public CSingleton<CInfoRecord>
 {

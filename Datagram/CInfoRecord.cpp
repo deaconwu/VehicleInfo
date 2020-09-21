@@ -669,6 +669,8 @@ void CInfoRecord::OnStatistic()
 {
 	STCIRCLEQUEUE circleQue[20000];
 	long vehicleNum = GetQueInfo(circleQue);
+
+
 }
 
 void CInfoRecord::OnRealTimeRecv(HWND hWnd)
@@ -792,9 +794,11 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 			CInfoRecord::GetInstance()->RecordInfo(pos, infoData);
 
 			//触发主线程统计车辆数据
-			PostMessage(hWnd, UM_STATISTIC, NULL, NULL);
+			//PostMessage(hWnd, UM_STATISTIC, NULL, NULL);
 			//if (infoData.F7_0 > 0)
 			//	CInfoRecord::GetInstance()->WriteVin();
+			if (infoData.F7_0 > 0)
+				PostMessage(hWnd, UM_ALERT, (WPARAM)infoData.F7_0, (LPARAM)strVin);
 		}
 
 		num++;
