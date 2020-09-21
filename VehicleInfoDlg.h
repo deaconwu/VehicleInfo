@@ -5,6 +5,7 @@
 #pragma once
 #include "CQuery.h"
 #include "CStatistics.h"
+#include "CAlertData.h"
 
 // CVehicleInfoDlg 对话框
 class CVehicleInfoDlg : public CDialogEx
@@ -22,6 +23,8 @@ public:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
 
 	LRESULT OnUpdateStatistic(WPARAM wParam, LPARAM lParam);
+	LRESULT OnRealAlert(WPARAM wParam, LPARAM lParam);
+
 // 实现
 protected:
 	HICON m_hIcon;
@@ -35,7 +38,8 @@ protected:
 public:
 	CTabCtrl m_tab;
 	//CRealTimeRecv m_realTimeRecv;
-	CStatistics m_statistics;
 	CQuery m_query;
+	CStatistics m_statistics;
+	CAlertData m_alertData;
 	afx_msg void OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult);
 };

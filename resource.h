@@ -95,7 +95,6 @@
 #define IDC_STATIC8                     1062
 #define IDC_EDIT_VEHICLEFAULTTODAY      1062
 #define IDC_STATIC11                    1063
-#define IDC_EDIT_VEHICLEONLINETODAY2    1063
 #define IDC_EDIT_VEHICLEOFFLINETODAY    1063
 #define IDC_STATIC12                    1064
 #define IDC_STATIC13                    1065
@@ -104,6 +103,7 @@
 #define IDC_STATIC16                    1068
 #define IDC_STATIC17                    1069
 #define IDC_STATIC18                    1070
+#define IDC_EDIT_ALERTVIN               1071
 
 // Next default values for new objects
 // 
@@ -111,7 +111,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        136
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1057
+#define _APS_NEXT_CONTROL_VALUE         1072
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

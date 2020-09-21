@@ -358,7 +358,6 @@ void CQuery::OnBnClickedBtnAlertdata()
 		if ((m_alertData / 262144) % 2 > 0)
 			strContent.Append(_T("车载储能装置类型过充报警 "));
 	}
-		
 
 	MessageBox(strContent, _T("报警数据"), MB_OK | MB_ICONINFORMATION);
 }

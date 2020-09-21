@@ -69,11 +69,21 @@ BEGIN_MESSAGE_MAP(CVehicleInfoDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1, &CVehicleInfoDlg::OnTcnSelchangeTab1)
 	ON_MESSAGE(UM_STATISTIC, &CVehicleInfoDlg::OnUpdateStatistic)
+	ON_MESSAGE(UM_ALERT, &CVehicleInfoDlg::OnRealAlert)
 END_MESSAGE_MAP()
 
 LRESULT CVehicleInfoDlg::OnUpdateStatistic(WPARAM wParam, LPARAM lParam)
 {
 	CInfoRecord::GetInstance()->OnStatistic();
+	return 0;
+}
+
+LRESULT CVehicleInfoDlg::OnRealAlert(WPARAM wParam, LPARAM lParam)
+{
+	uint32_t iF7_0 = wParam;
+	uint8_t* pVinStr = (uint8_t*)lParam;
+	m_alertData.UpdateAlert(iF7_0, pVinStr);
+
 	return 0;
 }
 
@@ -113,6 +123,7 @@ BOOL CVehicleInfoDlg::OnInitDialog()
 
 	m_query.Create(IDD_QUERY, &m_tab);
 	m_statistics.Create(IDD_STATISTICS, &m_tab);
+	m_alertData.Create(IDD_ALERTDATA, &m_tab);
 
 	CRect tabRect;
 	m_tab.GetClientRect(tabRect);
@@ -120,14 +131,17 @@ BOOL CVehicleInfoDlg::OnInitDialog()
 	tabRect.right -= 1;
 	tabRect.top += 22;
 	tabRect.bottom -= 1;
-	m_statistics.MoveWindow(&tabRect);
 	m_query.MoveWindow(&tabRect);
+	m_statistics.MoveWindow(&tabRect);
+	m_alertData.MoveWindow(&tabRect);
 
 	m_tab.InsertItem(0, _T("车辆查询"));
 	m_tab.InsertItem(1, _T("基础统计"));
+	m_tab.InsertItem(2, _T("实时报警"));
 
 	m_query.ShowWindow(SW_SHOW);
 	m_statistics.ShowWindow(SW_HIDE);
+	m_alertData.ShowWindow(SW_HIDE);
 
 	m_tab.SetCurSel(0);
 
@@ -194,13 +208,19 @@ void CVehicleInfoDlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 	{
 	case 0:
 		m_statistics.ShowWindow(SW_HIDE);
+		m_alertData.ShowWindow(SW_HIDE);
 		m_query.ShowWindow(SW_SHOW);
 		break;
 	case 1:
 		m_statistics.ShowWindow(SW_SHOW);
 		m_query.ShowWindow(SW_HIDE);
+		m_alertData.ShowWindow(SW_HIDE);
 		m_statistics.OnQueryStatis();
 		break;
+	case 2:
+		m_statistics.ShowWindow(SW_HIDE);
+		m_query.ShowWindow(SW_HIDE);
+		m_alertData.ShowWindow(SW_SHOW);
 	default:
 		break;
 	}
