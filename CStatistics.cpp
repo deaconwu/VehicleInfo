@@ -12,6 +12,8 @@
 
 IMPLEMENT_DYNAMIC(CStatistics, CDialogEx)
 
+static STCIRCLEQUEUE g_circleQue[MAX_VEHICLENUM] = {};
+
 CStatistics::CStatistics(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_STATISTICS, pParent)
 {
@@ -57,8 +59,9 @@ BOOL CStatistics::OnInitDialog()
 
 void CStatistics::OnQueryStatis()
 {
-	STCIRCLEQUEUE circleQue[20000];
-	long vehicleNum = CInfoRecord::GetInstance()->GetQueInfo(circleQue);
+	//STCIRCLEQUEUE circleQue[MAX_VEHICLENUM] = {};
+	memset(g_circleQue, 0, sizeof(g_circleQue));
+	long vehicleNum = CInfoRecord::GetInstance()->GetQueInfo(g_circleQue);
 	CString csStr;
 
 	SYSTEMTIME st;
@@ -94,36 +97,36 @@ void CStatistics::OnQueryStatis()
 
 	for (long i = 0; i < vehicleNum; i++)
 	{
-		long rear = circleQue[i].rear;
+		long rear = g_circleQue[i].rear;
 
 		bool bToday = false;
-		if ((st.wYear%100) == circleQue[i].pElem[rear - 1].F8_0[0]
-			&& st.wMonth == circleQue[i].pElem[rear - 1].F8_0[1]
-			&& st.wDay == circleQue[i].pElem[rear - 1].F8_0[2])
+		if ((st.wYear%100) == g_circleQue[i].pElem[rear - 1].F8_0[0]
+			&& st.wMonth == g_circleQue[i].pElem[rear - 1].F8_0[1]
+			&& st.wDay == g_circleQue[i].pElem[rear - 1].F8_0[2])
 		{
 			bToday = true;
 		}
 
-		if (circleQue[i].pElem[rear - 1].F1_0 == 1)
+		if (g_circleQue[i].pElem[rear - 1].F1_0 == 1)
 		{
 			onLineNum += 1;
 			if (bToday)
 				onLineNumToday += 1;
 		}
 
-		if (circleQue[i].pElem[rear - 1].F1_0 == 2)
+		if (g_circleQue[i].pElem[rear - 1].F1_0 == 2)
 		{
 			if (bToday)
 				offLineNumToday += 1;
 		}
 
-		if (circleQue[i].pElem[rear - 1].F1_1 == 1 || circleQue[i].pElem[rear - 1].F1_1 == 2)
+		if (g_circleQue[i].pElem[rear - 1].F1_1 == 1 || g_circleQue[i].pElem[rear - 1].F1_1 == 2)
 		{
 			if (bToday)
 				rechargeNumToday += 1;
 		}
 
-		if (circleQue[i].pElem[rear - 1].F7_0 > 0)
+		if (g_circleQue[i].pElem[rear - 1].F7_0 > 0)
 		{
 			if (bToday)
 				faultNumToday += 1;
@@ -136,35 +139,35 @@ void CStatistics::OnQueryStatis()
 		bool bfaultTag = false;
 		for (long j = rear - 1; j >= 0; j--)
 		{
-			if (circleQue[i].pElem[j].F1_4> maxValue)
-				maxValue = circleQue[i].pElem[j].F1_4;
+			if (g_circleQue[i].pElem[j].F1_4> maxValue)
+				maxValue = g_circleQue[i].pElem[j].F1_4;
 
-			uint16_t year = circleQue[i].pElem[rear - 1].F8_0[0] % 100 + 2000;
-			uint16_t month = circleQue[i].pElem[rear - 1].F8_0[1];
-			uint16_t day = circleQue[i].pElem[rear - 1].F8_0[2];
+			uint16_t year = g_circleQue[i].pElem[rear - 1].F8_0[0] % 100 + 2000;
+			uint16_t month = g_circleQue[i].pElem[rear - 1].F8_0[1];
+			uint16_t day = g_circleQue[i].pElem[rear - 1].F8_0[2];
 			int nWeek = WeekIndex(st.wYear, st.wMonth, st.wDay);
 			
 			if (nWeek == nWeekLast)
 			{
-				if (circleQue[i].pElem[j].F1_0 == 1 && !bOnlineTag)
+				if (g_circleQue[i].pElem[j].F1_0 == 1 && !bOnlineTag)
 				{
 					onLineNumLastWeek += 1;
 					bOnlineTag = true;
 				}
 
-				if (circleQue[i].pElem[j].F1_0 == 2 && !bOfflineTag)
+				if (g_circleQue[i].pElem[j].F1_0 == 2 && !bOfflineTag)
 				{
 					offLineNumLastWeek += 1;
 					bOfflineTag = true;
 				}
 
-				if ((circleQue[i].pElem[j].F1_1 == 1 || circleQue[i].pElem[j].F1_1 == 2) && !bRechargeTag)
+				if ((g_circleQue[i].pElem[j].F1_1 == 1 || g_circleQue[i].pElem[j].F1_1 == 2) && !bRechargeTag)
 				{
 					rechargeNumLastWeek += 1;
 					bRechargeTag = true;
 				}
 
-				if (circleQue[i].pElem[rear - 1].F7_0 > 0 && !bfaultTag)
+				if (g_circleQue[i].pElem[rear - 1].F7_0 > 0 && !bfaultTag)
 				{
 					faultNumLastWeek += 1;
 					bfaultTag = true;

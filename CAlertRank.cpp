@@ -10,6 +10,8 @@
 
 IMPLEMENT_DYNAMIC(CAlertRank, CDialogEx)
 
+static STCIRCLEQUEUE g_circleQue[MAX_VEHICLENUM] = {};
+
 CAlertRank::CAlertRank(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_ALERTRANK, pParent)
 {
@@ -200,8 +202,9 @@ void CAlertRank::RankSort(int iType)
 	SYSTEMTIME st;
 	GetLocalTime(&st);
 
-	STCIRCLEQUEUE circleQue[20000];
-	long vehicleNum = CInfoRecord::GetInstance()->GetQueInfo(circleQue);
+	//STCIRCLEQUEUE circleQue[MAX_VEHICLENUM] = {};
+	memset(g_circleQue, 0, sizeof(g_circleQue));
+	long vehicleNum = CInfoRecord::GetInstance()->GetQueInfo(g_circleQue);
 
 	PSTALERTDATALINK pNode = NULL;
 	PSTALERTDATALINK pLast = NULL;
@@ -211,19 +214,18 @@ void CAlertRank::RankSort(int iType)
 	{
 		uint32_t iAlertTimes = 0;
 
-		long rear = circleQue[i].rear;
+		long rear = g_circleQue[i].rear;
 		for (long j = rear - 1; j >= 0; j--)
 		{
-			if ((st.wYear % 100) == circleQue[i].pElem[j].F8_0[0]
-				&& st.wMonth == circleQue[i].pElem[j].F8_0[1]
-				&& st.wDay == circleQue[i].pElem[j].F8_0[2])
+			if ((st.wYear % 100) == g_circleQue[i].pElem[j].F8_0[0]
+				&& st.wMonth == g_circleQue[i].pElem[j].F8_0[1]
+				&& st.wDay == g_circleQue[i].pElem[j].F8_0[2])
 			{
-				//))
-				if (circleQue[i].pElem[j].F7_0 > 0 && iType<0)
+				if (g_circleQue[i].pElem[j].F7_0 > 0 && iType<0)
 				{
 					iAlertTimes += 1;
 				}
-				else if (CheckAlertFlag(circleQue[i].pElem[j].F7_0, iType))
+				else if (CheckAlertFlag(g_circleQue[i].pElem[j].F7_0, iType))
 				{
 					iAlertTimes += 1;
 				}
