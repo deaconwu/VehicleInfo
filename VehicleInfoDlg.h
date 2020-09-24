@@ -22,8 +22,6 @@ public:
 
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
-
-	LRESULT OnUpdateStatistic(WPARAM wParam, LPARAM lParam);
 	LRESULT OnRealAlert(WPARAM wParam, LPARAM lParam);
 
 // 实现
@@ -32,9 +30,9 @@ protected:
 
 	// 生成的消息映射函数
 	virtual BOOL OnInitDialog();
-	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
-	afx_msg void OnPaint();
-	afx_msg HCURSOR OnQueryDragIcon();
+
+	//afx_msg void OnPaint();
+	//afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 public:
 	CTabCtrl m_tab;

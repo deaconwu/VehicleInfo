@@ -3,7 +3,6 @@
 // 供 VehicleInfo.rc 使用
 //
 #define IDM_ABOUTBOX                    0x0010
-#define IDD_ABOUTBOX                    100
 #define IDS_ABOUTBOX                    101
 #define IDD_VEHICLEINFO_DIALOG          102
 #define IDP_SOCKETS_INIT_FAILED         103

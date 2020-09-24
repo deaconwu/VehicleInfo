@@ -6,6 +6,7 @@
 #include "framework.h"
 #include "VehicleInfo.h"
 #include "VehicleInfoDlg.h"
+#include "CInfoRecord.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -85,6 +86,7 @@ BOOL CVehicleInfoApp::InitInstance()
 	{
 		// TODO: 在此放置处理何时用
 		//  “取消”来关闭对话框的代码
+		CInfoRecord::GetInstance()->OnClose();
 	}
 	else if (nResponse == -1)
 	{
