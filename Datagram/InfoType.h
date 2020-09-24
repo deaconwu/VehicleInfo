@@ -8,8 +8,10 @@ typedef unsigned int uint32_t;
 
 #define BUFFER_SIZE 65535
 #define VIN_LENGTH  17
-#define QUEUE_SIZE  1000   //队列长度
+#define QUEUE_SIZE  500   //队列长度
 #define CELLNUM_PER_FRAM 200 //本帧最大电池数
+#define ALERTTIMES_REANK_NUM 20
+#define MAX_VEHICLENUM 200000
 
 #pragma pack (1)
 // typedef struct RecData
@@ -135,25 +137,40 @@ typedef struct RecvDataType9
 typedef struct CircleQueue
 {
 	STRECVDATA* pElem;
-	long front;
-	long rear;
+	uint32_t front;
+	uint32_t rear;
 } STCIRCLEQUEUE;
 
 //记录信息类型8
 typedef struct CircleQueueType8
 {
 	STRECVDATATYPE8* pElem;
-	long front;
-	long rear;
+	uint32_t front;
+	uint32_t rear;
 } STCIRCLEQUEUETYPE8;
 
 //记录信息类型9
 typedef struct CircleQueueType9
 {
 	STRECVDATATYPE9* pElem;
-	long front;
-	long rear;
+	uint32_t front;
+	uint32_t rear;
 } STCIRCLEQUEUETYPE9;
+
+typedef struct AlertDataPost
+{
+	uint8_t chVin[VIN_LENGTH];
+	uint32_t F7_0;
+} STALERTDATAPOST;
+
+typedef struct AlertDataLink
+{
+	uint8_t chVin[VIN_LENGTH+1];
+	uint32_t iAlertTimes;
+	struct AlertDataLink* pPre;
+	struct AlertDataLink* pNext;
+} STALERTDATALINK, *PSTALERTDATALINK;
+
 /***********************************************/
 #pragma pack()
 #endif

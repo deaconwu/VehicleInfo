@@ -46,7 +46,7 @@ SOCKET CInfoSocket::OnConnect()
 	sockaddr_in serAddr;
 	serAddr.sin_family = AF_INET;
 	serAddr.sin_port = htons(65315);
-	serAddr.sin_addr.S_un.S_addr = inet_addr("10.130.161.12");
+	serAddr.sin_addr.S_un.S_addr = inet_addr("10.130.161.1");
 	if (connect(m_pSocket, (sockaddr *)&serAddr, sizeof(serAddr)) == SOCKET_ERROR)
 	{
 		closesocket(m_pSocket);

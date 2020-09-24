@@ -30,6 +30,12 @@ public:
 		m_bLockFlag = bFlag;
 	}
 
+	void FetchVinCode(long pos, uint8_t chVin[])
+	{
+		memset(chVin, 0, (VIN_LENGTH+1) * sizeof(uint8_t));
+		memcpy(chVin, m_chVin[pos], VIN_LENGTH * sizeof(uint8_t));
+	}
+
 	void OnRealTimeRecv(HWND hWnd);
 
 	void WriteVin();
@@ -54,12 +60,12 @@ public:
 private:
 	void SortVin();
 
-	uint8_t m_chVin[200000][VIN_LENGTH + 1]; //每辆车vin码
+	uint8_t m_chVin[MAX_VEHICLENUM][VIN_LENGTH + 1]; //每辆车vin码
 
 	//每辆车历史记录
-	STCIRCLEQUEUE m_circleQue[20000];	//队列形式存放，整车数据、驱动电机数据、车辆位置、极值数据、报警数据、时间数据
-	STRECVDATATYPE8 m_dataType8[20000];	//电压数据
-	STRECVDATATYPE9 m_dataType9[20000];	//温度数据
+	STCIRCLEQUEUE m_circleQue[MAX_VEHICLENUM];	//队列形式存放，整车数据、驱动电机数据、车辆位置、极值数据、报警数据、时间数据
+	STRECVDATATYPE8 m_dataType8[MAX_VEHICLENUM];	//电压数据
+	STRECVDATATYPE9 m_dataType9[MAX_VEHICLENUM];	//温度数据
 
 	long m_vehicleNum;
 	bool m_bLockFlag;	//录入新vin码涉及到排序移位，点击查询，需要等待查询完成再继续录入排序

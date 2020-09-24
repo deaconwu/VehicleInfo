@@ -1,10 +1,10 @@
 #include <thread>
 #include <stdio.h>
 #include <stdlib.h>
+#include "..\pch.h"
 #include "CInfoRecord.h"
 
 DWORD WINAPI OnReceiveThread(LPVOID lparam);
-DWORD WINAPI OnStatisticThread(LPVOID lparam);
 
 CInfoRecord* CInfoRecord::m_pInstance = NULL;
 
@@ -324,7 +324,7 @@ void CInfoRecord::SortVin()
 
 long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 {
-	if (m_vehicleNum >= 200000)
+	if (m_vehicleNum >= MAX_VEHICLENUM)
 	{
 		return -1;
 	}
@@ -667,7 +667,7 @@ long CInfoRecord::RecordInfoType9(long pos, const char* pRecv)
 
 void CInfoRecord::OnStatistic()
 {
-	STCIRCLEQUEUE circleQue[20000];
+	STCIRCLEQUEUE circleQue[MAX_VEHICLENUM];
 	long vehicleNum = GetQueInfo(circleQue);
 
 
@@ -797,11 +797,18 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 			//PostMessage(hWnd, UM_STATISTIC, NULL, NULL);
 			//if (infoData.F7_0 > 0)
 			//	CInfoRecord::GetInstance()->WriteVin();
+
 			if (infoData.F7_0 > 0)
-				PostMessage(hWnd, UM_ALERT, (WPARAM)infoData.F7_0, (LPARAM)strVin);
+			{
+				STALERTDATAPOST alertPost = {};
+				memcpy(alertPost.chVin, strVin, sizeof(strVin));
+				alertPost.F7_0 = infoData.F7_0;
+				PostMessage(hWnd, UM_ALERT, (WPARAM)&alertPost, 0);
+				//num++;
+			}
 		}
 
-		num++;
+		//num++;
 	}
 
 	CInfoSocket::GetInstance()->OnClose();
