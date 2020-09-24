@@ -10,7 +10,14 @@ class CInfoRecord //: public CSingleton<CInfoRecord>
 {
 public:
 	CInfoRecord();
-	~CInfoRecord() {}
+	~CInfoRecord()
+	{
+		if (NULL != m_pInstance)
+		{
+			delete m_pInstance;
+			m_pInstance = NULL;
+		}
+	}
 
 	static CInfoRecord* GetInstance()
 	{
@@ -38,6 +45,8 @@ public:
 
 	void OnRealTimeRecv(HWND hWnd);
 
+	void OnClose();
+
 	void WriteVin();
 	long FindVinPos(uint8_t pVin[]);
 	long InsertVinAndSort(uint8_t pVin[]);
@@ -55,8 +64,6 @@ public:
 	//录入车辆信息9
 	long RecordInfoType9(long pos, const char* pRecv);
 
-	void OnStatistic();
-
 private:
 	void SortVin();
 
@@ -69,6 +76,8 @@ private:
 
 	long m_vehicleNum;
 	bool m_bLockFlag;	//录入新vin码涉及到排序移位，点击查询，需要等待查询完成再继续录入排序
+
+	HANDLE m_hThread;
 
 	static CInfoRecord* m_pInstance;
 };

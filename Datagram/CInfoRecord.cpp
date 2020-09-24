@@ -270,7 +270,7 @@ void CInfoRecord::WriteVin()
 	fclose(fpWrite);
 }
 
-CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNum(0)
+CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNum(0), m_hThread(NULL)
 {
 	memset(m_chVin, 0, sizeof(m_chVin));
 	memset(m_circleQue, 0, sizeof(m_circleQue));
@@ -446,6 +446,9 @@ void CInfoRecord::RecordInfo(long pos, STRECVDATA stRecv)
 	do
 	{
 	} while (m_bLockFlag);
+
+	if (NULL == m_circleQue[pos].pElem)
+		return;
 
 	if ((m_circleQue[pos].rear + 1) % QUEUE_SIZE == m_circleQue[pos].front)
 	{
@@ -665,14 +668,6 @@ long CInfoRecord::RecordInfoType9(long pos, const char* pRecv)
 	return offset;
 }
 
-void CInfoRecord::OnStatistic()
-{
-	STCIRCLEQUEUE circleQue[MAX_VEHICLENUM];
-	long vehicleNum = GetQueInfo(circleQue);
-
-
-}
-
 void CInfoRecord::OnRealTimeRecv(HWND hWnd)
 {
 	SOCKET pSocket = CInfoSocket::GetInstance()->OnConnect();
@@ -684,9 +679,58 @@ void CInfoRecord::OnRealTimeRecv(HWND hWnd)
 	DWORD dwThreadId = 0;
 	DWORD dwMainThread = GetCurrentThreadId();
 
-	HANDLE hThread = CreateThread(NULL, NULL, OnReceiveThread, hWnd, 0, &dwThreadId);
+	m_hThread = CreateThread(NULL, NULL, OnReceiveThread, hWnd, 0, &dwThreadId);
 
-	//CInfoSocket::GetInstance()->OnClose();
+	if (NULL == m_hThread)
+		CInfoSocket::GetInstance()->OnClose();
+}
+
+void CInfoRecord::OnClose()
+{
+	m_bLockFlag = true;
+	CInfoSocket::GetInstance()->OnClose();
+	CloseHandle(m_hThread);
+
+	for (long i = 0; i < m_vehicleNum; i++)
+	{
+		if (m_circleQue[i].pElem != NULL)
+		{
+			free(m_circleQue[i].pElem);
+			m_circleQue[i].pElem = NULL;
+		}
+
+		if (m_dataType8[i].pF8_1 != NULL)
+		{
+			for (int j = 0; j < m_dataType8[i].F8_0; j++)
+			{
+				if (NULL != m_dataType8[i].pF8_1[j].pF8_1_6)
+				{
+					free(m_dataType8[i].pF8_1[j].pF8_1_6);
+					m_dataType8[i].pF8_1[j].pF8_1_6 = NULL;
+				}
+			}
+
+			free(m_dataType8[i].pF8_1);
+			m_dataType8[i].pF8_1 = NULL;
+		}
+
+		if (m_dataType9[i].pF9_1 != NULL)
+		{
+			for (uint8_t j = 0; j < m_dataType9[i].F9_0; j++)
+			{
+				if (NULL != m_dataType9[i].pF9_1[j].pF9_1_2)
+				{
+					free(m_dataType9[i].pF9_1[j].pF9_1_2);
+					m_dataType9[i].pF9_1[j].pF9_1_2 = NULL;
+				}
+			}
+
+			free(m_dataType9[i].pF9_1);
+			m_dataType9[i].pF9_1 = NULL;
+		}
+	}
+
+	m_bLockFlag = false;
 }
 
 DWORD WINAPI OnReceiveThread(LPVOID lparam)
