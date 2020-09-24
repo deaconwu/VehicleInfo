@@ -12,6 +12,7 @@
 #define IDD_QUERY                       131
 #define IDD_ALERTDATA                   132
 #define IDD_STATISTICS                  134
+#define IDD_ALERTRANK                   136
 #define IDC_TAB1                        1000
 #define IDC_EDIT_VINCODE                1001
 #define IDC_STATIC_VINCODE              1002
@@ -103,20 +104,21 @@
 #define IDC_STATIC14                    1066
 #define IDC_EDIT_VEHICLEFAULTLASTWEEK   1066
 #define IDC_STATIC15                    1067
-#define IDC_EDIT_VEHICLEOFFLINETODAY2   1067
 #define IDC_EDIT_VEHICLEOFFLINELASTWEEK 1067
 #define IDC_STATIC16                    1068
 #define IDC_STATIC17                    1069
 #define IDC_STATIC18                    1070
 #define IDC_EDIT_ALERTVIN               1071
+#define IDC_COMBO_RANKTYPE              1072
+#define IDC_LIST_RANK                   1074
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        136
+#define _APS_NEXT_RESOURCE_VALUE        138
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1072
+#define _APS_NEXT_CONTROL_VALUE         1075
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

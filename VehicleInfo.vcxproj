@@ -190,6 +190,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CAlertData.h" />
+    <ClInclude Include="CAlertRank.h" />
     <ClInclude Include="CQuery.h" />
     <ClInclude Include="CRealTimeRecv.h" />
     <ClInclude Include="CStatistics.h" />
@@ -206,6 +207,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CAlertData.cpp" />
+    <ClCompile Include="CAlertRank.cpp" />
     <ClCompile Include="CQuery.cpp" />
     <ClCompile Include="CRealTimeRecv.cpp" />
     <ClCompile Include="CStatistics.cpp" />

@@ -126,6 +126,7 @@ BOOL CVehicleInfoDlg::OnInitDialog()
 	m_query.Create(IDD_QUERY, &m_tab);
 	m_statistics.Create(IDD_STATISTICS, &m_tab);
 	m_alertData.Create(IDD_ALERTDATA, &m_tab);
+	m_alertRank.Create(IDD_ALERTRANK, &m_tab);
 
 	CRect tabRect;
 	m_tab.GetClientRect(tabRect);
@@ -136,14 +137,17 @@ BOOL CVehicleInfoDlg::OnInitDialog()
 	m_query.MoveWindow(&tabRect);
 	m_statistics.MoveWindow(&tabRect);
 	m_alertData.MoveWindow(&tabRect);
+	m_alertRank.MoveWindow(&tabRect);
 
 	m_tab.InsertItem(0, _T("车辆查询"));
 	m_tab.InsertItem(1, _T("基础统计"));
 	m_tab.InsertItem(2, _T("实时报警"));
+	m_tab.InsertItem(3, _T("报警排名"));
 
 	m_query.ShowWindow(SW_SHOW);
 	m_statistics.ShowWindow(SW_HIDE);
 	m_alertData.ShowWindow(SW_HIDE);
+	m_alertRank.ShowWindow(SW_HIDE);
 
 	m_tab.SetCurSel(0);
 
@@ -209,20 +213,31 @@ void CVehicleInfoDlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 	switch (m_tab.GetCurSel())
 	{
 	case 0:
+		m_query.ShowWindow(SW_SHOW);
 		m_statistics.ShowWindow(SW_HIDE);
 		m_alertData.ShowWindow(SW_HIDE);
-		m_query.ShowWindow(SW_SHOW);
+		m_alertRank.ShowWindow(SW_HIDE);
 		break;
 	case 1:
-		m_statistics.ShowWindow(SW_SHOW);
 		m_query.ShowWindow(SW_HIDE);
+		m_statistics.ShowWindow(SW_SHOW);
 		m_alertData.ShowWindow(SW_HIDE);
+		m_alertRank.ShowWindow(SW_HIDE);
 		m_statistics.OnQueryStatis();
 		break;
 	case 2:
 		m_statistics.ShowWindow(SW_HIDE);
 		m_query.ShowWindow(SW_HIDE);
 		m_alertData.ShowWindow(SW_SHOW);
+		m_alertRank.ShowWindow(SW_HIDE);
+		break;
+	case 3:
+		m_statistics.ShowWindow(SW_HIDE);
+		m_query.ShowWindow(SW_HIDE);
+		m_alertData.ShowWindow(SW_HIDE);
+		m_alertRank.ShowWindow(SW_SHOW);
+		m_alertRank.RankSort();
+		break;
 	default:
 		break;
 	}

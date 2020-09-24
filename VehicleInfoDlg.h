@@ -6,6 +6,7 @@
 #include "CQuery.h"
 #include "CStatistics.h"
 #include "CAlertData.h"
+#include "CAlertRank.h"
 
 // CVehicleInfoDlg 对话框
 class CVehicleInfoDlg : public CDialogEx
@@ -41,5 +42,6 @@ public:
 	CQuery m_query;
 	CStatistics m_statistics;
 	CAlertData m_alertData;
+	CAlertRank m_alertRank;
 	afx_msg void OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult);
 };
