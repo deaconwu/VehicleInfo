@@ -5,6 +5,7 @@
 
 #define UM_STATISTIC WM_USER+1
 #define UM_ALERT WM_USER+2
+#define UM_CLOSE WM_USER+3
 
 class CInfoRecord //: public CSingleton<CInfoRecord>
 {
@@ -43,8 +44,10 @@ public:
 		memcpy(chVin, m_chVin[pos], VIN_LENGTH * sizeof(uint8_t));
 	}
 
-	void OnRealTimeRecv(HWND hWnd);
+	bool OnRealTimeRecv(HWND hWnd, sockaddr_in serAddr);
+	bool OnStopRecv();
 
+	void OnReset();
 	void OnClose();
 
 	void WriteVin();
@@ -78,6 +81,7 @@ private:
 	bool m_bLockFlag;	//录入新vin码涉及到排序移位，点击查询，需要等待查询完成再继续录入排序
 
 	HANDLE m_hThread;
+	DWORD m_dwThreadId;
 
 	static CInfoRecord* m_pInstance;
 };

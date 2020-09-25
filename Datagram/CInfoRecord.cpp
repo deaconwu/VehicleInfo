@@ -8,7 +8,7 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam);
 
 CInfoRecord* CInfoRecord::m_pInstance = NULL;
 
-long SetRecvData(const char* pRecv, STRECVDATA& stRecv)
+long SetRecvData(const char* pRecv, STRECVDATA& stRecv, long leftOffset)
 {
 	uint8_t infoType = *pRecv;
 	long offset = sizeof(infoType);
@@ -226,6 +226,8 @@ long SetRecvData(const char* pRecv, STRECVDATA& stRecv)
 		if (uchar > 0)
 		{
 			offset += uchar * sizeof(uint32_t);
+			if (offset >= leftOffset)
+				break;
 		}
 
 		uchar = *(pRecv + offset);	//驱动电机故障总数
@@ -233,6 +235,8 @@ long SetRecvData(const char* pRecv, STRECVDATA& stRecv)
 		if (uchar > 0)
 		{
 			offset += uchar * sizeof(uint32_t);
+			if (offset >= leftOffset)
+				break;
 		}
 
 		uchar = *(pRecv + offset);	//发动机故障总数
@@ -240,6 +244,8 @@ long SetRecvData(const char* pRecv, STRECVDATA& stRecv)
 		if (uchar > 0)
 		{
 			offset += uchar * sizeof(uint32_t);
+			if (offset >= leftOffset)
+				break;
 		}
 
 		uchar = *(pRecv + offset);	//其它故障总数
@@ -247,6 +253,8 @@ long SetRecvData(const char* pRecv, STRECVDATA& stRecv)
 		if (uchar > 0)
 		{
 			offset += uchar * sizeof(uint32_t);
+			if (offset >= leftOffset)
+				break;
 		}
 
 		break;
@@ -270,7 +278,7 @@ void CInfoRecord::WriteVin()
 	fclose(fpWrite);
 }
 
-CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNum(0), m_hThread(NULL)
+CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNum(0), m_hThread(NULL), m_dwThreadId(0)
 {
 	memset(m_chVin, 0, sizeof(m_chVin));
 	memset(m_circleQue, 0, sizeof(m_circleQue));
@@ -375,6 +383,12 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 		}
 	}
 
+	STRECVDATA* pElem = (STRECVDATA*)malloc(sizeof(STRECVDATA) * QUEUE_SIZE);
+	if (NULL == pElem)
+	{
+		return -1;
+	}
+
 	for (long i = m_vehicleNum; i > insertPos; i--)
 	{
 		memcpy(m_chVin[i], m_chVin[i - 1], VIN_LENGTH + 1);
@@ -389,11 +403,7 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 
 	memcpy(m_chVin[insertPos], (char*)pVin, VIN_LENGTH + 1);
 
-	m_circleQue[insertPos].pElem = (STRECVDATA*)malloc(sizeof(STRECVDATA) * QUEUE_SIZE);
-	if (NULL == m_circleQue[insertPos].pElem)
-	{
-		return -1;
-	}
+	m_circleQue[insertPos].pElem = pElem;
 	memset(m_circleQue[insertPos].pElem, 0, sizeof(STRECVDATA) * QUEUE_SIZE);
 	m_circleQue[insertPos].front = 0;
 	m_circleQue[insertPos].rear = 0;
@@ -495,18 +505,16 @@ long CInfoRecord::RecordInfoType8(long pos, const char* pRecv)
 		m_dataType8[pos].pF8_1 = NULL;
 	}
 
-	m_dataType8[pos].pF8_1 = (RecvDataType8_1*)malloc((*pRecv) * sizeof(RecvDataType8_1));
+	m_dataType8[pos].F8_0 = *pRecv;
+	m_dataType8[pos].pF8_1 = (RecvDataType8_1*)malloc(m_dataType8[pos].F8_0 * sizeof(RecvDataType8_1));
 	if (NULL == m_dataType8[pos].pF8_1)
 	{
 		return 0;
 	}
 
-	memset(m_dataType8[pos].pF8_1, 0, (*pRecv) * sizeof(RecvDataType8_1));
-	m_dataType8[pos].F8_0 = *pRecv;
+	memset(m_dataType8[pos].pF8_1, 0, m_dataType8[pos].F8_0 * sizeof(RecvDataType8_1));
+	
 	offset += sizeof(m_dataType8[pos].F8_0);
-
-	//if (m_dataType8[pos].F8_0 > 1)
-	//	printf("\n");
 
 	for (uint8_t i = 0; i < m_dataType8[pos].F8_0; i++)
 	{
@@ -619,9 +627,6 @@ long CInfoRecord::RecordInfoType9(long pos, const char* pRecv)
 		return 0;
 	}
 
-	//if (m_dataType9[pos].F9_0 > 1)
-	//	printf("\n");
-
 	memset(m_dataType9[pos].pF9_1, 0, m_dataType9[pos].F9_0 * sizeof(RecvDataType9_1));
 	for (uint8_t i = 0; i < m_dataType9[pos].F9_0; i++)
 	{
@@ -668,29 +673,37 @@ long CInfoRecord::RecordInfoType9(long pos, const char* pRecv)
 	return offset;
 }
 
-void CInfoRecord::OnRealTimeRecv(HWND hWnd)
+bool CInfoRecord::OnRealTimeRecv(HWND hWnd, sockaddr_in serAddr)
 {
-	SOCKET pSocket = CInfoSocket::GetInstance()->OnConnect();
-	if (pSocket == INVALID_SOCKET)
+	if (NULL != m_hThread)
 	{
-		return;
+		CloseHandle(m_hThread);
+		m_hThread = NULL;
 	}
 
-	DWORD dwThreadId = 0;
-	DWORD dwMainThread = GetCurrentThreadId();
+	SOCKET pSocket = CInfoSocket::GetInstance()->OnConnect(serAddr);
+	if (pSocket == INVALID_SOCKET)
+	{
+		return false;
+	}
 
-	m_hThread = CreateThread(NULL, NULL, OnReceiveThread, hWnd, 0, &dwThreadId);
+	m_hThread = CreateThread(NULL, NULL, OnReceiveThread, hWnd, 0, &m_dwThreadId);
 
 	if (NULL == m_hThread)
 		CInfoSocket::GetInstance()->OnClose();
+
+	return true;
 }
 
-void CInfoRecord::OnClose()
+bool CInfoRecord::OnStopRecv()
 {
-	m_bLockFlag = true;
-	CInfoSocket::GetInstance()->OnClose();
-	CloseHandle(m_hThread);
+	OnClose();
 
+	return true;
+}
+
+void CInfoRecord::OnReset()
+{
 	for (long i = 0; i < m_vehicleNum; i++)
 	{
 		if (m_circleQue[i].pElem != NULL)
@@ -730,15 +743,45 @@ void CInfoRecord::OnClose()
 		}
 	}
 
+	memset(m_chVin, 0, sizeof(m_chVin));
+	memset(m_circleQue, 0, sizeof(m_circleQue));
+	memset(m_dataType8, 0, sizeof(m_dataType8));
+	memset(m_dataType9, 0, sizeof(m_dataType9));
+
 	m_bLockFlag = false;
+	m_vehicleNum = 0;
+	m_dwThreadId = 0;
+}
+
+void CInfoRecord::OnClose()
+{
+	CInfoSocket::GetInstance()->OnClose();
+
+// 	DWORD dwExitCode;
+// 	GetExitCodeThread(m_hThread, &dwExitCode);
+// 	if (dwExitCode == STILL_ACTIVE)
+// 	{
+// 		TerminateThread(m_hThread, dwExitCode);
+// 		CloseHandle(m_hThread);
+// 	}
+// 
+// 	GetExitCodeThread(m_hThread, &dwExitCode);
+
+	
 }
 
 DWORD WINAPI OnReceiveThread(LPVOID lparam)
 {
 	HWND hWnd = (HWND)lparam;
 	int num = 0;
+
 	while (1)
 	{
+		if (CInfoSocket::GetInstance()->CheckClose())
+		{
+			PostMessage(hWnd, UM_CLOSE, NULL, 0);
+			break;
+		}
 		//if (num > 10)
 		//	break;
 		SYSTEMTIME st;
@@ -746,7 +789,8 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 
 		char recvData[BUFFER_SIZE] = {};
 		INT recvSize = CInfoSocket::GetInstance()->OnReceive(recvData);
-		DWORD a = GetLastError();
+		DWORD dwLastErr = GetLastError();
+
 		if (recvSize <= 0)
 		{
 			continue;
@@ -812,10 +856,11 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 			{
 				uint8_t infoType = recvData[latestOffset];
 				long localOffset = 0;
+				long leftOffset = (ushortsw - 24) + curOffset - latestOffset;
 
 				if (infoType == 1 || infoType == 2 || infoType == 5 || infoType == 6 || infoType == 7)
 				{
-					localOffset = SetRecvData(&recvData[latestOffset], infoData);
+					localOffset = SetRecvData(&recvData[latestOffset], infoData, leftOffset);
 				}
 				else if (infoType == 8)
 				{
@@ -855,7 +900,7 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 		//num++;
 	}
 
-	CInfoSocket::GetInstance()->OnClose();
+	//CInfoSocket::GetInstance()->OnClose();
 
 	return 0;
 }

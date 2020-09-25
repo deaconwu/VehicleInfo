@@ -25,8 +25,11 @@ uint32_t SWAPDWORD1(const char* pRecv)
 
 CInfoSocket* CInfoSocket::m_pInstance = NULL;
 
-SOCKET CInfoSocket::OnConnect()
+SOCKET CInfoSocket::OnConnect(const sockaddr_in serAddr)
 {
+	if (m_pSocket != INVALID_SOCKET)
+		OnClose();
+
 	//≥ı ºªØWSA
 	WORD sockVersion = MAKEWORD(2, 2);
 	WSADATA wsaData;
@@ -43,14 +46,11 @@ SOCKET CInfoSocket::OnConnect()
 		return INVALID_SOCKET;
 	}
 
-	sockaddr_in serAddr;
-	serAddr.sin_family = AF_INET;
-	serAddr.sin_port = htons(65315);
-	serAddr.sin_addr.S_un.S_addr = inet_addr("10.130.161.1");
 	if (connect(m_pSocket, (sockaddr *)&serAddr, sizeof(serAddr)) == SOCKET_ERROR)
 	{
 		closesocket(m_pSocket);
 		WSACleanup();
+		m_pSocket = INVALID_SOCKET;
 		return INVALID_SOCKET;
 	}
 
@@ -61,10 +61,16 @@ VOID CInfoSocket::OnClose()
 {
 	closesocket(m_pSocket);
 	WSACleanup();
+	m_pSocket = INVALID_SOCKET;
 }
 
 INT CInfoSocket::OnReceive(char recvData[])
 {
+	if (INVALID_SOCKET == m_pSocket)
+	{
+		return -1;
+	}
+
 	INT optVal = 0;
 	INT optLen = sizeof(optVal);
 	getsockopt(m_pSocket, SOL_SOCKET, SO_RCVBUF, (char*)&optVal, &optLen);

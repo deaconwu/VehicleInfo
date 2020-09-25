@@ -42,7 +42,9 @@ public:
 		return m_pInstance;
 	}
 
-	SOCKET OnConnect();
+	bool CheckClose() { return m_pSocket == INVALID_SOCKET; }
+
+	SOCKET OnConnect(const sockaddr_in serAddr);
 
 	INT OnReceive(char recvData[]);
 

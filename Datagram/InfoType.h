@@ -6,12 +6,12 @@ typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int uint32_t;
 
-#define BUFFER_SIZE 65535
+#define BUFFER_SIZE 65537
 #define VIN_LENGTH  17
-#define QUEUE_SIZE  30   //队列长度
+#define QUEUE_SIZE  1000   //队列长度
 #define CELLNUM_PER_FRAM 200 //本帧最大电池数
 #define ALERTTIMES_REANK_NUM 20
-#define MAX_VEHICLENUM 70000
+#define MAX_VEHICLENUM 200000
 
 #pragma pack (1)
 // typedef struct RecData
