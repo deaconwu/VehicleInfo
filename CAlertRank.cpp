@@ -199,6 +199,12 @@ bool CAlertRank::CheckAlertFlag(uint32_t iData, int iType)
 
 void CAlertRank::RankSort(int iType)
 {
+	if (CInfoSocket::GetInstance()->CheckClose())
+	{
+		MessageBox(_T("未连接"), _T("提示"), MB_OK | MB_ICONERROR);
+		return;
+	}
+
 	SYSTEMTIME st;
 	GetLocalTime(&st);
 

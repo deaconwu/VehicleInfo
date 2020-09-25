@@ -110,6 +110,14 @@
 #define IDC_EDIT_ALERTVIN               1071
 #define IDC_COMBO_RANKTYPE              1072
 #define IDC_LIST_RANK                   1074
+#define IDC_EDIT_MEMTOTAL               1075
+#define IDC_EDIT_VMEMTOTAL              1076
+#define IDC_EDIT_MEMFREE                1077
+#define IDC_IPADDRESS                   1077
+#define IDC_EDIT_VMEMFREE               1078
+#define IDC_EDIT_PORT                   1078
+#define IDC_BTN_CONNECT                 1079
+#define IDC_BTN_DISCONNECT              1080
 
 // Next default values for new objects
 // 
@@ -117,7 +125,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        138
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1075
+#define _APS_NEXT_CONTROL_VALUE         1081
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

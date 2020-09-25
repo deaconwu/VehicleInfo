@@ -32,6 +32,9 @@ BEGIN_MESSAGE_MAP(CVehicleInfoDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1, &CVehicleInfoDlg::OnTcnSelchangeTab1)
 	ON_MESSAGE(UM_ALERT, &CVehicleInfoDlg::OnRealAlert)
+	ON_MESSAGE(UM_CLOSE, &CVehicleInfoDlg::OnRealStop)
+	ON_BN_CLICKED(IDC_BTN_CONNECT, &CVehicleInfoDlg::OnBnClickedBtnConnect)
+	ON_BN_CLICKED(IDC_BTN_DISCONNECT, &CVehicleInfoDlg::OnBnClickedBtnDisconnect)
 END_MESSAGE_MAP()
 
 LRESULT CVehicleInfoDlg::OnRealAlert(WPARAM wParam, LPARAM lParam)
@@ -39,6 +42,16 @@ LRESULT CVehicleInfoDlg::OnRealAlert(WPARAM wParam, LPARAM lParam)
 	STALERTDATAPOST* pAlertPost = (STALERTDATAPOST*)wParam;
 	CString vinStr(pAlertPost->chVin);
 	m_alertData.UpdateAlert(pAlertPost->F7_0, vinStr);
+
+	return 0;
+}
+
+LRESULT CVehicleInfoDlg::OnRealStop(WPARAM wParam, LPARAM lParam)
+{
+	CInfoRecord::GetInstance()->OnReset();
+
+	(CButton*)GetDlgItem(IDC_BTN_DISCONNECT)->EnableWindow(false);
+	(CButton*)GetDlgItem(IDC_BTN_CONNECT)->EnableWindow(true);
 
 	return 0;
 }
@@ -55,8 +68,6 @@ BOOL CVehicleInfoDlg::OnInitDialog()
 	//SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-	CInfoRecord::GetInstance()->OnRealTimeRecv(this->m_hWnd);
-
 	m_query.Create(IDD_QUERY, &m_tab);
 	m_statistics.Create(IDD_STATISTICS, &m_tab);
 	m_alertData.Create(IDD_ALERTDATA, &m_tab);
@@ -84,6 +95,9 @@ BOOL CVehicleInfoDlg::OnInitDialog()
 	m_alertRank.ShowWindow(SW_HIDE);
 
 	m_tab.SetCurSel(0);
+
+	(CButton*)GetDlgItem(IDC_BTN_CONNECT)->EnableWindow(true);
+	(CButton*)GetDlgItem(IDC_BTN_DISCONNECT)->EnableWindow(false);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -160,4 +174,34 @@ void CVehicleInfoDlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 	default:
 		break;
 	}
+}
+
+
+void CVehicleInfoDlg::OnBnClickedBtnConnect()
+{
+	sockaddr_in serAddr;
+	serAddr.sin_family = AF_INET;
+	CIPAddressCtrl* pIPAddr = (CIPAddressCtrl*)GetDlgItem(IDC_IPADDRESS);
+	pIPAddr->GetAddress(serAddr.sin_addr.S_un.S_un_b.s_b1, serAddr.sin_addr.S_un.S_un_b.s_b2, serAddr.sin_addr.S_un.S_un_b.s_b3, serAddr.sin_addr.S_un.S_un_b.s_b4);
+
+	CString portStr;
+	CEdit* pEdit = (CEdit*)GetDlgItem(IDC_EDIT_PORT);
+	pEdit->GetWindowText(portStr);
+	int iPort = _ttoi(portStr);
+	serAddr.sin_port = htons(iPort);
+
+	if (!CInfoRecord::GetInstance()->OnRealTimeRecv(this->m_hWnd, serAddr))
+	{
+		MessageBox(_T("连接失败"), _T("提示"), MB_OK | MB_ICONERROR);
+		return;
+	}
+
+	(CButton*)GetDlgItem(IDC_BTN_CONNECT)->EnableWindow(false);
+	(CButton*)GetDlgItem(IDC_BTN_DISCONNECT)->EnableWindow(true);
+}
+
+
+void CVehicleInfoDlg::OnBnClickedBtnDisconnect()
+{
+	CInfoRecord::GetInstance()->OnStopRecv();
 }

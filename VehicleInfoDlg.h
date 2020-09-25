@@ -23,6 +23,7 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
 	LRESULT OnRealAlert(WPARAM wParam, LPARAM lParam);
+	LRESULT OnRealStop(WPARAM wParam, LPARAM lParam);
 
 // 实现
 protected:
@@ -42,4 +43,6 @@ public:
 	CAlertData m_alertData;
 	CAlertRank m_alertRank;
 	afx_msg void OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnBnClickedBtnConnect();
+	afx_msg void OnBnClickedBtnDisconnect();
 };

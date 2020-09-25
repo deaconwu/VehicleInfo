@@ -53,6 +53,11 @@ BOOL CStatistics::OnInitDialog()
 	(CEdit*)GetDlgItem(IDC_EDIT_VEHICLERECHARGELASTWEEK)->EnableWindow(false);
 	(CEdit*)GetDlgItem(IDC_EDIT_VEHICLEFAULTLASTWEEK)->EnableWindow(false);
 	(CEdit*)GetDlgItem(IDC_EDIT_VEHICLEOFFLINELASTWEEK)->EnableWindow(false);
+
+	(CEdit*)GetDlgItem(IDC_EDIT_MEMTOTAL)->EnableWindow(false);
+	(CEdit*)GetDlgItem(IDC_EDIT_MEMFREE)->EnableWindow(false);
+	(CEdit*)GetDlgItem(IDC_EDIT_VMEMTOTAL)->EnableWindow(false);
+	(CEdit*)GetDlgItem(IDC_EDIT_VMEMFREE)->EnableWindow(false);
 	
 	return TRUE;
 }
@@ -60,6 +65,12 @@ BOOL CStatistics::OnInitDialog()
 void CStatistics::OnQueryStatis()
 {
 	//STCIRCLEQUEUE circleQue[MAX_VEHICLENUM] = {};
+	if (CInfoSocket::GetInstance()->CheckClose())
+	{
+		MessageBox(_T("未连接"), _T("提示"), MB_OK | MB_ICONERROR);
+		return;
+	}
+
 	memset(g_circleQue, 0, sizeof(g_circleQue));
 	long vehicleNum = CInfoRecord::GetInstance()->GetQueInfo(g_circleQue);
 	CString csStr;
@@ -97,7 +108,12 @@ void CStatistics::OnQueryStatis()
 
 	for (long i = 0; i < vehicleNum; i++)
 	{
+		if (!g_circleQue[i].pElem)
+			continue;
+
 		long rear = g_circleQue[i].rear;
+		if (rear == 0)
+			continue;
 
 		bool bToday = false;
 		if ((st.wYear%100) == g_circleQue[i].pElem[rear - 1].F8_0[0]
@@ -259,4 +275,30 @@ void CStatistics::OnBnClickedBtnRefresh()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	OnQueryStatis();
+
+	MEMORYSTATUS mem;//定义一个内存状态变量
+	DWORD MemTotal, MemFree, VMemTotal, VMemFree;//存储内存状态信息
+
+	GlobalMemoryStatus(&mem); //存储内存状态信息
+	MemTotal = mem.dwTotalPhys;//得到总内存大小（单位b）
+	MemFree = mem.dwAvailPhys;//得到剩余内存大小（单位b）
+	VMemTotal = mem.dwTotalVirtual;//得到总虚拟内存大小（单位b）
+	VMemFree = mem.dwAvailVirtual;//得到剩余虚拟内存内存大小（单位b）
+
+	CString csStr;
+	csStr = _T("");
+	csStr.Format(_T("%lu"), MemTotal);
+	((CEdit*)GetDlgItem(IDC_EDIT_MEMTOTAL))->SetWindowTextW(csStr);
+
+	csStr = _T("");
+	csStr.Format(_T("%lu"), MemFree);
+	((CEdit*)GetDlgItem(IDC_EDIT_MEMFREE))->SetWindowTextW(csStr);
+
+	csStr = _T("");
+	csStr.Format(_T("%lu"), VMemTotal);
+	((CEdit*)GetDlgItem(IDC_EDIT_VMEMTOTAL))->SetWindowTextW(csStr);
+
+	csStr = _T("");
+	csStr.Format(_T("%lu"), VMemFree);
+	((CEdit*)GetDlgItem(IDC_EDIT_VMEMFREE))->SetWindowTextW(csStr);
 }

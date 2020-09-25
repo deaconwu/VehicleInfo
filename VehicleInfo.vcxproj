@@ -98,6 +98,14 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
+      <HeapCommitSize>
+      </HeapCommitSize>
+      <HeapReserveSize>
+      </HeapReserveSize>
+      <StackReserveSize>
+      </StackReserveSize>
+      <LargeAddressAware>true</LargeAddressAware>
+      <SwapRunFromCD>true</SwapRunFromCD>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -122,6 +130,14 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
+      <HeapCommitSize>
+      </HeapCommitSize>
+      <HeapReserveSize>
+      </HeapReserveSize>
+      <StackReserveSize>
+      </StackReserveSize>
+      <LargeAddressAware>true</LargeAddressAware>
+      <SwapRunFromCD>true</SwapRunFromCD>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
