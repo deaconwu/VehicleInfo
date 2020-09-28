@@ -3,7 +3,7 @@
 #include "InfoType.h"
 #include "CInfoSocket.h"
 
-#define UM_STATISTIC WM_USER+1
+#define UM_HISTORY WM_USER+1
 #define UM_ALERT WM_USER+2
 #define UM_CLOSE WM_USER+3
 
@@ -58,14 +58,16 @@ public:
 
 	long GetQueInfo(STCIRCLEQUEUE circleQue[]);
 
+	void GetVinInfo(uint8_t chVin[][VIN_LENGTH + 1]);
+
 	//录入车辆信息，信息类型1~7
 	void RecordInfo(long pos, STRECVDATA stRecv);
 
 	//录入车辆信息8
-	long RecordInfoType8(long pos, const char* pRecv);
+	long RecordInfoType8(long pos, const char* pRecv, long leftOffset);
 
 	//录入车辆信息9
-	long RecordInfoType9(long pos, const char* pRecv);
+	long RecordInfoType9(long pos, const char* pRecv, long leftOffset);
 
 private:
 	void SortVin();
@@ -81,7 +83,6 @@ private:
 	bool m_bLockFlag;	//录入新vin码涉及到排序移位，点击查询，需要等待查询完成再继续录入排序
 
 	HANDLE m_hThread;
-	DWORD m_dwThreadId;
 
 	static CInfoRecord* m_pInstance;
 };

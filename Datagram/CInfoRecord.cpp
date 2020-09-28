@@ -278,7 +278,7 @@ void CInfoRecord::WriteVin()
 	fclose(fpWrite);
 }
 
-CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNum(0), m_hThread(NULL), m_dwThreadId(0)
+CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNum(0), m_hThread(NULL)
 {
 	memset(m_chVin, 0, sizeof(m_chVin));
 	memset(m_circleQue, 0, sizeof(m_circleQue));
@@ -446,6 +446,11 @@ long CInfoRecord::GetQueInfo(STCIRCLEQUEUE circleQue[])
 	return m_vehicleNum;
 }
 
+void CInfoRecord::GetVinInfo(uint8_t chVin[][VIN_LENGTH + 1])
+{
+	memcpy(chVin, m_chVin, sizeof(m_chVin));
+}
+
 void CInfoRecord::RecordInfo(long pos, STRECVDATA stRecv)
 {
 	if (pos >= m_vehicleNum || pos < 0)
@@ -473,7 +478,7 @@ void CInfoRecord::RecordInfo(long pos, STRECVDATA stRecv)
 	m_circleQue[pos].rear = (m_circleQue[pos].rear + 1) % QUEUE_SIZE;
 }
 
-long CInfoRecord::RecordInfoType8(long pos, const char* pRecv)
+long CInfoRecord::RecordInfoType8(long pos, const char* pRecv, long leftOffset)
 {
 	if (pos >= m_vehicleNum || pos < 0)
 		return 0;
@@ -572,6 +577,11 @@ long CInfoRecord::RecordInfoType8(long pos, const char* pRecv)
 
 		for (int x = 0; x < m_dataType8[pos].pF8_1[i].F8_1_5; x++)	//单体电池电压
 		{
+// 			if (offset > leftOffset)
+// 			{
+// 				break;
+// 			}
+
 			ushort = *(pRecv + offset);
 			ushortsw = SWAPWORD(ushort);
 			m_dataType8[pos].pF8_1[i].pF8_1_6[x] = ushortsw;
@@ -586,7 +596,7 @@ long CInfoRecord::RecordInfoType8(long pos, const char* pRecv)
 	return offset;
 }
 
-long CInfoRecord::RecordInfoType9(long pos, const char* pRecv)
+long CInfoRecord::RecordInfoType9(long pos, const char* pRecv, long leftOffset)
 {
 	if (pos >= m_vehicleNum || pos < 0)
 		return 0;
@@ -659,6 +669,11 @@ long CInfoRecord::RecordInfoType9(long pos, const char* pRecv)
 
 		for (uint8_t j = 0; j < m_dataType9[pos].pF9_1[i].F9_1_1; j++)
 		{
+			if (offset > leftOffset)
+			{
+				break;
+			}
+
 			//各温度探针检测到的温度值
 			m_dataType9[pos].pF9_1[i].pF9_1_2[j] = *(pRecv + offset);
 			offset += sizeof(m_dataType9[pos].pF9_1[i].pF9_1_2[j]);
@@ -687,7 +702,8 @@ bool CInfoRecord::OnRealTimeRecv(HWND hWnd, sockaddr_in serAddr)
 		return false;
 	}
 
-	m_hThread = CreateThread(NULL, NULL, OnReceiveThread, hWnd, 0, &m_dwThreadId);
+	DWORD dwThreadId;
+	m_hThread = CreateThread(NULL, NULL, OnReceiveThread, hWnd, 0, &dwThreadId);
 
 	if (NULL == m_hThread)
 		CInfoSocket::GetInstance()->OnClose();
@@ -750,30 +766,22 @@ void CInfoRecord::OnReset()
 
 	m_bLockFlag = false;
 	m_vehicleNum = 0;
-	m_dwThreadId = 0;
 }
 
 void CInfoRecord::OnClose()
 {
 	CInfoSocket::GetInstance()->OnClose();
-
-// 	DWORD dwExitCode;
-// 	GetExitCodeThread(m_hThread, &dwExitCode);
-// 	if (dwExitCode == STILL_ACTIVE)
-// 	{
-// 		TerminateThread(m_hThread, dwExitCode);
-// 		CloseHandle(m_hThread);
-// 	}
-// 
-// 	GetExitCodeThread(m_hThread, &dwExitCode);
-
-	
 }
 
 DWORD WINAPI OnReceiveThread(LPVOID lparam)
 {
 	HWND hWnd = (HWND)lparam;
 	int num = 0;
+
+	SYSTEMTIME st;
+	memset(&st, 0, sizeof(st));
+	SYSTEMTIME datePre;
+	memset(&datePre, 0, sizeof(datePre));
 
 	while (1)
 	{
@@ -784,8 +792,19 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 		}
 		//if (num > 10)
 		//	break;
-		SYSTEMTIME st;
+		
 		GetLocalTime(&st);
+
+		//触发主线程统计历史数据
+		//if (datePre.wDay!=st.wDay || datePre.wMonth != st.wMonth || datePre.wYear!=st.wYear)
+		if (num > 100)
+		{
+			SendMessage(hWnd, UM_HISTORY, (WPARAM)&st.wDayOfWeek, NULL);
+		}
+
+		datePre.wYear = st.wYear;
+		datePre.wMonth = st.wMonth;
+		datePre.wDay = st.wDay;
 
 		char recvData[BUFFER_SIZE] = {};
 		INT recvSize = CInfoSocket::GetInstance()->OnReceive(recvData);
@@ -838,7 +857,7 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 				|| infoData.F8_0[1] > st.wMonth
 				|| infoData.F8_0[2] > st.wDay)
 			{
-				infoData.F8_0[0] = (uint8_t)st.wYear % 100;
+				infoData.F8_0[0] = (uint8_t)(st.wYear % 100);
 				infoData.F8_0[1] = (uint8_t)st.wMonth;
 				infoData.F8_0[2] = (uint8_t)st.wDay;
 
@@ -854,6 +873,9 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 			//信息类型信息体
 			while (latestOffset<(ushortsw-24)+curOffset && latestOffset<recvSize-1)
 			{
+				if (memcmp(&recvData[latestOffset], "##", 2) == 0)
+					break;
+
 				uint8_t infoType = recvData[latestOffset];
 				long localOffset = 0;
 				long leftOffset = (ushortsw - 24) + curOffset - latestOffset;
@@ -865,15 +887,16 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 				else if (infoType == 8)
 				{
 					latestOffset += 1;
-					localOffset = CInfoRecord::GetInstance()->RecordInfoType8(pos, &recvData[latestOffset]);
+					localOffset = CInfoRecord::GetInstance()->RecordInfoType8(pos, &recvData[latestOffset], leftOffset);
 				}
 				else if (infoType == 9)
 				{
 					latestOffset += 1;
-					localOffset = CInfoRecord::GetInstance()->RecordInfoType9(pos, &recvData[latestOffset]);
+					localOffset = CInfoRecord::GetInstance()->RecordInfoType9(pos, &recvData[latestOffset], leftOffset);
 				}
 				else
 				{
+					//latestOffset += leftOffset;
 					break;
 				}
 
@@ -882,8 +905,6 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 
 			CInfoRecord::GetInstance()->RecordInfo(pos, infoData);
 
-			//触发主线程统计车辆数据
-			//PostMessage(hWnd, UM_STATISTIC, NULL, NULL);
 			//if (infoData.F7_0 > 0)
 			//	CInfoRecord::GetInstance()->WriteVin();
 
@@ -897,7 +918,7 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 			}
 		}
 
-		//num++;
+		num++;
 	}
 
 	//CInfoSocket::GetInstance()->OnClose();

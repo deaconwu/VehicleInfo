@@ -8,7 +8,7 @@ typedef unsigned int uint32_t;
 
 #define BUFFER_SIZE 65537
 #define VIN_LENGTH  17
-#define QUEUE_SIZE  1000   //队列长度
+#define QUEUE_SIZE  10000   //队列长度
 #define CELLNUM_PER_FRAM 200 //本帧最大电池数
 #define ALERTTIMES_REANK_NUM 20
 #define MAX_VEHICLENUM 200000
@@ -170,6 +170,12 @@ typedef struct AlertDataLink
 	struct AlertDataLink* pPre;
 	struct AlertDataLink* pNext;
 } STALERTDATALINK, *PSTALERTDATALINK;
+
+typedef struct DayVehicle
+{
+	long lVehicleNum;
+	WORD wDayOfWeek;
+} STDAYVEHICLE;
 
 /***********************************************/
 #pragma pack()
