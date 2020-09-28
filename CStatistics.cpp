@@ -33,31 +33,31 @@ BOOL CStatistics::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 	
-	(CEdit*)GetDlgItem(IDC_EDIT_VEHICLESUM)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_VEHICLEONLINE)->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_VEHICLESUM))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_VEHICLEONLINE))->EnableWindow(false);
 
 	//节能减排
-	(CEdit*)GetDlgItem(IDC_EDIT_MILEAGESUN)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_CARBONEMISSION)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_FUELTHRIFT)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_POWERCONSUME)->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_MILEAGESUN))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_CARBONEMISSION))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_FUELTHRIFT))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_POWERCONSUME))->EnableWindow(false);
 	
 	//当日车辆
-	(CEdit*)GetDlgItem(IDC_EDIT_VEHICLEONLINETODAY)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_VEHICLERECHARGETODAY)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_VEHICLEFAULTTODAY)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_VEHICLEOFFLINETODAY)->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_VEHICLEONLINETODAY))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_VEHICLERECHARGETODAY))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_VEHICLEFAULTTODAY))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_VEHICLEOFFLINETODAY))->EnableWindow(false);
 
 	//上周车辆
-	(CEdit*)GetDlgItem(IDC_EDIT_VEHICLEONLINELASTWEEK)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_VEHICLERECHARGELASTWEEK)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_VEHICLEFAULTLASTWEEK)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_VEHICLEOFFLINELASTWEEK)->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_VEHICLEONLINELASTWEEK))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_VEHICLERECHARGELASTWEEK))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_VEHICLEFAULTLASTWEEK))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_VEHICLEOFFLINELASTWEEK))->EnableWindow(false);
 
-	(CEdit*)GetDlgItem(IDC_EDIT_MEMTOTAL)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_MEMFREE)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_VMEMTOTAL)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_VMEMFREE)->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_MEMTOTAL))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_MEMFREE))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_VMEMTOTAL))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_VMEMFREE))->EnableWindow(false);
 	
 	return TRUE;
 }
@@ -148,6 +148,8 @@ void CStatistics::OnQueryStatis()
 				faultNumToday += 1;
 		}
 
+		mileageSum += g_circleQue[i].pElem[rear-1].F1_4;
+		/*
 		uint32_t maxValue = 0;
 		bool bOnlineTag = false;
 		bool bOfflineTag = false;
@@ -190,7 +192,7 @@ void CStatistics::OnQueryStatis()
 				}
 			}
 		}
-		mileageSum += maxValue;
+		mileageSum += maxValue;*/
 	}
 
 	//在线车辆数
@@ -277,7 +279,7 @@ void CStatistics::OnBnClickedBtnRefresh()
 	OnQueryStatis();
 
 	MEMORYSTATUS mem;//定义一个内存状态变量
-	DWORD MemTotal, MemFree, VMemTotal, VMemFree;//存储内存状态信息
+	SIZE_T MemTotal, MemFree, VMemTotal, VMemFree;//存储内存状态信息
 
 	GlobalMemoryStatus(&mem); //存储内存状态信息
 	MemTotal = mem.dwTotalPhys;//得到总内存大小（单位b）

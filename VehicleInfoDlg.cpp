@@ -8,6 +8,7 @@
 #include "VehicleInfoDlg.h"
 #include "afxdialogex.h"
 #include "CInfoRecord.h"
+#include "CHistoryRecord.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -33,6 +34,7 @@ BEGIN_MESSAGE_MAP(CVehicleInfoDlg, CDialogEx)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1, &CVehicleInfoDlg::OnTcnSelchangeTab1)
 	ON_MESSAGE(UM_ALERT, &CVehicleInfoDlg::OnRealAlert)
 	ON_MESSAGE(UM_CLOSE, &CVehicleInfoDlg::OnRealStop)
+	ON_MESSAGE(UM_HISTORY, &CVehicleInfoDlg::OnHistoryRecord)
 	ON_BN_CLICKED(IDC_BTN_CONNECT, &CVehicleInfoDlg::OnBnClickedBtnConnect)
 	ON_BN_CLICKED(IDC_BTN_DISCONNECT, &CVehicleInfoDlg::OnBnClickedBtnDisconnect)
 END_MESSAGE_MAP()
@@ -50,8 +52,18 @@ LRESULT CVehicleInfoDlg::OnRealStop(WPARAM wParam, LPARAM lParam)
 {
 	CInfoRecord::GetInstance()->OnReset();
 
-	(CButton*)GetDlgItem(IDC_BTN_DISCONNECT)->EnableWindow(false);
-	(CButton*)GetDlgItem(IDC_BTN_CONNECT)->EnableWindow(true);
+	((CIPAddressCtrl*)GetDlgItem(IDC_IPADDRESS))->EnableWindow(true);
+	((CEdit*)GetDlgItem(IDC_EDIT_PORT))->EnableWindow(true);
+	((CButton*)GetDlgItem(IDC_BTN_DISCONNECT))->EnableWindow(false);
+	((CButton*)GetDlgItem(IDC_BTN_CONNECT))->EnableWindow(true);
+
+	return 0;
+}
+
+LRESULT CVehicleInfoDlg::OnHistoryRecord(WPARAM wParam, LPARAM lParam)
+{
+	WORD* pDayOfWeek = (WORD*)wParam;
+	CHistoryRecord::GetInstance()->OnRecord(*pDayOfWeek);
 
 	return 0;
 }
@@ -96,8 +108,8 @@ BOOL CVehicleInfoDlg::OnInitDialog()
 
 	m_tab.SetCurSel(0);
 
-	(CButton*)GetDlgItem(IDC_BTN_CONNECT)->EnableWindow(true);
-	(CButton*)GetDlgItem(IDC_BTN_DISCONNECT)->EnableWindow(false);
+	((CButton*)GetDlgItem(IDC_BTN_CONNECT))->EnableWindow(true);
+	((CButton*)GetDlgItem(IDC_BTN_DISCONNECT))->EnableWindow(false);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -196,8 +208,10 @@ void CVehicleInfoDlg::OnBnClickedBtnConnect()
 		return;
 	}
 
-	(CButton*)GetDlgItem(IDC_BTN_CONNECT)->EnableWindow(false);
-	(CButton*)GetDlgItem(IDC_BTN_DISCONNECT)->EnableWindow(true);
+	((CButton*)GetDlgItem(IDC_BTN_CONNECT))->EnableWindow(false);
+	((CButton*)GetDlgItem(IDC_BTN_DISCONNECT))->EnableWindow(true);
+	((CIPAddressCtrl*)GetDlgItem(IDC_IPADDRESS))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_PORT))->EnableWindow(false);
 }
 
 

@@ -24,6 +24,7 @@ public:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
 	LRESULT OnRealAlert(WPARAM wParam, LPARAM lParam);
 	LRESULT OnRealStop(WPARAM wParam, LPARAM lParam);
+	LRESULT OnHistoryRecord(WPARAM wParam, LPARAM lParam);
 
 // 实现
 protected:

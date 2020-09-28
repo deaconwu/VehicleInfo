@@ -33,38 +33,38 @@ BOOL CQuery::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	((CEdit*)GetDlgItem(IDC_EDIT_VINCODE))->SetLimitText(VIN_LENGTH);
-	(CEdit*)GetDlgItem(IDC_EDIT_GATHERTIME)->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_GATHERTIME))->EnableWindow(false);
 
 	//整车
-	(CEdit*)GetDlgItem(IDC_EDIT_VEHICLESTATE)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_RECHARGESTATE)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_RUNMODE)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_SPEED)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_MILEAGE)->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_VEHICLESTATE))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_RECHARGESTATE))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_RUNMODE))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_SPEED))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_MILEAGE))->EnableWindow(false);
 
 	//驱动电机
-	(CEdit*)GetDlgItem(IDC_EDIT_MOTORSTATE)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_MOTORROTATESPEED)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_MOTORTORQUE)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_MOTORTEMP)->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_MOTORSTATE))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_MOTORROTATESPEED))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_MOTORTORQUE))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_MOTORTEMP))->EnableWindow(false);
 
 	//车辆位置
-	(CEdit*)GetDlgItem(IDC_EDIT_LONGTITUDE)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_LATITUDE)->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_LONGTITUDE))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_LATITUDE))->EnableWindow(false);
 
 	//极值
-	(CEdit*)GetDlgItem(IDC_EDIT_MAXVOLTNO)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_VOLTMAXVALUE)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_MINVOLTNO)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_VOLTMINVALUE)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_MAXTEMPPROPNO)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_MAXTEMPVALUE)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_MINTEMPPROPNO)->EnableWindow(false);
-	(CEdit*)GetDlgItem(IDC_EDIT_MINTEMPVALUE)->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_MAXVOLTNO))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_VOLTMAXVALUE))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_MINVOLTNO))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_VOLTMINVALUE))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_MAXTEMPPROPNO))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_MAXTEMPVALUE))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_MINTEMPPROPNO))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_MINTEMPVALUE))->EnableWindow(false);
 
-	(CButton*)GetDlgItem(IDC_BTN_ALERTDATA)->EnableWindow(false);
-	(CButton*)GetDlgItem(IDC_BTN_MAPLOCATION)->EnableWindow(false);
-	(CButton*)GetDlgItem(IDC_BTN_DIAGNOSIS)->EnableWindow(false);
+	((CButton*)GetDlgItem(IDC_BTN_ALERTDATA))->EnableWindow(false);
+	((CButton*)GetDlgItem(IDC_BTN_MAPLOCATION))->EnableWindow(false);
+	((CButton*)GetDlgItem(IDC_BTN_DIAGNOSIS))->EnableWindow(false);
 
 	return TRUE;
 }
@@ -97,7 +97,7 @@ void CQuery::OnBnClickedBtnQuery()
 	bool bRet = CInfoRecord::GetInstance()->QueryLatestInfo((uint8_t*)chVin, stData);
 	if (!bRet)
 	{
-		(CButton*)GetDlgItem(IDC_BTN_ALERTDATA)->EnableWindow(false);
+		((CButton*)GetDlgItem(IDC_BTN_ALERTDATA))->EnableWindow(false);
 		MessageBox(_T("该车辆不存在"), _T("提示"), MB_OK | MB_ICONERROR);
 		return;
 	}
@@ -283,7 +283,7 @@ void CQuery::OnBnClickedBtnQuery()
 	//报警数据
 	m_alertData = stData.F7_0;
 
-	(CButton*)GetDlgItem(IDC_BTN_ALERTDATA)->EnableWindow(true);
+	((CButton*)GetDlgItem(IDC_BTN_ALERTDATA))->EnableWindow(true);
 }
 
 

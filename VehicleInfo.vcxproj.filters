@@ -63,6 +63,9 @@
     <ClInclude Include="CAlertRank.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="CHistoryRecord.h">
+      <Filter>Datagram</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="VehicleInfo.cpp">
@@ -97,6 +100,9 @@
     </ClCompile>
     <ClCompile Include="CAlertRank.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CHistoryRecord.cpp">
+      <Filter>Datagram</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
