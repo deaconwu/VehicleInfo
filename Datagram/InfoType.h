@@ -95,20 +95,26 @@ typedef struct
 } RecvDataType8_1;
 */
 
+typedef struct RecvDataType8_1_4
+{
+	uint16_t F8_1_4_1;      //本帧起始电池序号
+	uint8_t F8_1_4_2;       //本帧单体电池总数
+	uint16_t* pF8_1_4_3;    //单体电池电压
+	struct RecvDataType8_1_4* pNext;
+} RecvDataType8_1_4;
+
 typedef struct
 {
 	uint8_t F8_1_0;       //可充电储能子系统号
 	uint16_t F8_1_1;      //可充电储能装置电压
 	uint16_t F8_1_2;      //可充电储能装置电流
 	uint16_t F8_1_3;      //单体电池总数
-	uint16_t F8_1_4;      //本帧起始电池序号
-	uint8_t F8_1_5;       //本帧单体电池总数
-	uint16_t* pF8_1_6;    //单体电池电压
+	RecvDataType8_1_4* pF8_1_4;	//电池电压列表
 } RecvDataType8_1;
 
 typedef struct RecvDataType8
 {
-	uint8_t F8_0;		  //可充电储能子系统个数
+	uint8_t F8_0;		  //可充电储能子系统个数(目前只有1个)
 	RecvDataType8_1* pF8_1;    //可充电储能子系统电压信息列表
 } STRECVDATATYPE8;
 
@@ -125,7 +131,7 @@ typedef struct
 
 typedef struct RecvDataType9
 {
-	uint8_t F9_0;        //可充电储能子系统个数
+	uint8_t F9_0;        //可充电储能子系统个数(目前只有1个)
 	RecvDataType9_1 *pF9_1;  //可充电储能子系统温度信息列表
 } STRECVDATATYPE9;
 /**************************************/
@@ -176,6 +182,12 @@ typedef struct DayVehicle
 	long lVehicleNum;
 	WORD wDayOfWeek;
 } STDAYVEHICLE;
+
+typedef struct DataOneWeek
+{
+	long long lMileageSum;
+	unsigned long iFaultNum;
+} STDATAONEWEEK;
 
 /***********************************************/
 #pragma pack()

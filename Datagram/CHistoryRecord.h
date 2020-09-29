@@ -30,6 +30,8 @@ public:
 
 	void OnMove();
 
+	uint32_t GetLatestMileage(uint8_t pVin[]);
+
 private:
 
 	long FindVinPos(uint8_t pVin[]);
@@ -49,4 +51,5 @@ private:
 	long m_vehicleNumThisWeek;
 
 	//最近数据(今日以外)
+	uint32_t m_iLatestMileage[MAX_VEHICLENUM];
 };

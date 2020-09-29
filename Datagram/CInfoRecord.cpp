@@ -487,7 +487,7 @@ long CInfoRecord::RecordInfoType8(long pos, const char* pRecv, long leftOffset)
 		return 0;
 
 	long offset = 0;
-	uint16_t ushort;
+	uint8_t uchar;
 	uint16_t ushortsw;
 
 	do
@@ -495,102 +495,140 @@ long CInfoRecord::RecordInfoType8(long pos, const char* pRecv, long leftOffset)
 
 	} while (m_bLockFlag);
 
-	if (NULL != m_dataType8[pos].pF8_1)
-	{
-		for (int i = 0; i < m_dataType8[pos].F8_0; i++)
-		{
-			if (NULL != m_dataType8[pos].pF8_1[i].pF8_1_6)
-			{
-				free(m_dataType8[pos].pF8_1[i].pF8_1_6);
-				m_dataType8[pos].pF8_1[i].pF8_1_6 = NULL;
-			}
-		}
-
-		free(m_dataType8[pos].pF8_1);
-		m_dataType8[pos].pF8_1 = NULL;
-	}
-
 	m_dataType8[pos].F8_0 = *pRecv;
-	m_dataType8[pos].pF8_1 = (RecvDataType8_1*)malloc(m_dataType8[pos].F8_0 * sizeof(RecvDataType8_1));
-	if (NULL == m_dataType8[pos].pF8_1)
-	{
-		return 0;
-	}
-
-	memset(m_dataType8[pos].pF8_1, 0, m_dataType8[pos].F8_0 * sizeof(RecvDataType8_1));
-	
 	offset += sizeof(m_dataType8[pos].F8_0);
 
-	for (uint8_t i = 0; i < m_dataType8[pos].F8_0; i++)
+	if (NULL == m_dataType8[pos].pF8_1)
 	{
-		m_dataType8[pos].pF8_1[i].pF8_1_6 = NULL;
-		m_dataType8[pos].pF8_1[i].F8_1_0 = *(pRecv + offset);
-		offset += sizeof(m_dataType8[pos].pF8_1[i].F8_1_0);
-		if (m_dataType8[pos].pF8_1[i].F8_1_0 == 0 || m_dataType8[pos].pF8_1[i].F8_1_0 > 250)
+		m_dataType8[pos].pF8_1 = (RecvDataType8_1*)malloc(sizeof(RecvDataType8_1));
+		if (NULL == m_dataType8[pos].pF8_1)
 		{
-			return offset;
+			return 0;
 		}
+		memset(m_dataType8[pos].pF8_1, 0, sizeof(RecvDataType8_1));
+	}
 
-		ushort = *(pRecv + offset);
-		ushortsw = SWAPWORD(ushort);
-		m_dataType8[pos].pF8_1[i].F8_1_1 = ushortsw;
-		offset += sizeof(m_dataType8[pos].pF8_1[i].F8_1_1);
-		if (m_dataType8[pos].pF8_1[i].F8_1_1 > 10000)
+	m_dataType8[pos].pF8_1->F8_1_0 = *(pRecv + offset);
+	offset += sizeof(m_dataType8[pos].pF8_1->F8_1_0);
+	if (m_dataType8[pos].pF8_1->F8_1_0 == 0 || m_dataType8[pos].pF8_1->F8_1_0 > 250)
+	{
+		return offset;
+	}
+
+	uchar = *(pRecv + offset);
+	ushortsw = uchar * 256;
+	uchar = *(pRecv + offset + 1);
+	ushortsw += uchar;
+	m_dataType8[pos].pF8_1->F8_1_1 = ushortsw;
+	offset += sizeof(m_dataType8[pos].pF8_1->F8_1_1);
+	if (m_dataType8[pos].pF8_1->F8_1_1 > 10000)
+	{
+		printf("invalid\n");
+		//return offset;
+	}
+
+	uchar = *(pRecv + offset);
+	ushortsw = uchar * 256;
+	uchar = *(pRecv + offset + 1);
+	ushortsw += uchar;
+	m_dataType8[pos].pF8_1->F8_1_2 = ushortsw;
+	offset += sizeof(m_dataType8[pos].pF8_1->F8_1_2);
+	if (m_dataType8[pos].pF8_1->F8_1_2 > 20000)
+	{
+		//return offset;
+		printf("invalid\n");
+	}
+
+	uchar = *(pRecv + offset);
+	ushortsw = uchar * 256;
+	uchar = *(pRecv + offset + 1);
+	ushortsw += uchar;
+	m_dataType8[pos].pF8_1->F8_1_3 = ushortsw;
+	offset += sizeof(m_dataType8[pos].pF8_1->F8_1_3);
+
+	uchar = *(pRecv + offset);
+	uint16_t iSequence1st = uchar * 256;
+	uchar = *(pRecv + offset + 1);
+	iSequence1st += uchar;
+
+	offset += sizeof(iSequence1st);
+	uint8_t iCellNum = *(pRecv + offset);
+	offset += sizeof(iCellNum);
+
+	RecvDataType8_1_4* pNode = NULL;
+	if (NULL != m_dataType8[pos].pF8_1->pF8_1_4)
+	{
+		RecvDataType8_1_4* pLast = NULL;
+		pNode = m_dataType8[pos].pF8_1->pF8_1_4;
+
+		while (NULL != pNode)
 		{
-			return offset;
-		}
-
-		ushort = *(pRecv + offset);
-		ushortsw = SWAPWORD(ushort);
-		m_dataType8[pos].pF8_1[i].F8_1_2 = ushortsw;
-		offset += sizeof(m_dataType8[pos].pF8_1[i].F8_1_2);
-		if (m_dataType8[pos].pF8_1[i].F8_1_2 > 20000)
-		{
-			return offset;
-		}
-
-		ushort = *(pRecv + offset);
-		ushortsw = SWAPWORD(ushort);
-		m_dataType8[pos].pF8_1[i].F8_1_3 = ushortsw;
-		offset += sizeof(m_dataType8[pos].pF8_1[i].F8_1_3);
-
-		ushort = *(pRecv + offset);
-		ushortsw = SWAPWORD(ushort);
-		m_dataType8[pos].pF8_1[i].F8_1_4 = ushortsw;
-		offset += sizeof(m_dataType8[pos].pF8_1[i].F8_1_4);
-
-		m_dataType8[pos].pF8_1[i].F8_1_5 = *(pRecv + offset);
-		offset += sizeof(m_dataType8[pos].pF8_1[i].F8_1_5);
-		if (m_dataType8[pos].pF8_1[i].F8_1_5 == 0 || m_dataType8[pos].pF8_1[i].F8_1_5 > 200)
-		{
-			return offset;
-		}
-
-		m_dataType8[pos].pF8_1[i].pF8_1_6 = (uint16_t*)malloc(m_dataType8[pos].pF8_1[i].F8_1_5 * sizeof(uint16_t));
-		if (NULL == m_dataType8[pos].pF8_1[i].pF8_1_6)
-		{
-			free(m_dataType8[pos].pF8_1);
-			m_dataType8[pos].pF8_1 = NULL;
-			return offset;
-		}
-		memset(m_dataType8[pos].pF8_1[i].pF8_1_6, 0, m_dataType8[pos].pF8_1[i].F8_1_5 * sizeof(uint16_t));
-
-		for (int x = 0; x < m_dataType8[pos].pF8_1[i].F8_1_5; x++)	//单体电池电压
-		{
-// 			if (offset > leftOffset)
-// 			{
-// 				break;
-// 			}
-
-			ushort = *(pRecv + offset);
-			ushortsw = SWAPWORD(ushort);
-			m_dataType8[pos].pF8_1[i].pF8_1_6[x] = ushortsw;
-			offset += sizeof(ushortsw);
-			if (m_dataType8[pos].pF8_1[i].pF8_1_6[x] > 60000)
+			if (pNode->pNext == NULL)
 			{
-				return offset;
+				pLast = pNode;
 			}
+
+			if (pNode->F8_1_4_1 == iSequence1st)
+			{
+				//本帧起始电池序号存在，更改电压值
+				
+				if (pNode->F8_1_4_2 != iCellNum)
+				{
+					//电池总数有变，重新分配
+					if (NULL != pNode->pF8_1_4_3)
+					{
+						free(pNode->pF8_1_4_3);
+						pNode->pF8_1_4_3 = NULL;
+					}
+
+					if (iCellNum > 0)
+						pNode->pF8_1_4_3 = (uint16_t*)malloc(iCellNum * sizeof(uint16_t));
+				}
+
+				pNode->F8_1_4_2 = iCellNum;
+				offset += sizeof(pNode->F8_1_4_2);
+				break;
+			}
+
+			pNode = pNode->pNext;
 		}
+
+		if (NULL == pNode)
+		{
+			RecvDataType8_1_4* pNew = (RecvDataType8_1_4*)malloc(sizeof(RecvDataType8_1_4));
+			pNew->pNext = NULL;
+			pNew->F8_1_4_1 = iSequence1st;
+			pNew->F8_1_4_2 = iCellNum;
+			pNew->pF8_1_4_3 = NULL;
+			if (iCellNum > 0)
+				pNew->pF8_1_4_3 = (uint16_t*)malloc(iCellNum * sizeof(uint16_t));
+
+			pLast->pNext = pNew;
+			pNode = pNew;
+		}
+	}
+	else
+	{
+		m_dataType8[pos].pF8_1->pF8_1_4 = (RecvDataType8_1_4*)malloc(sizeof(RecvDataType8_1_4));
+		m_dataType8[pos].pF8_1->pF8_1_4->pNext = NULL;
+		m_dataType8[pos].pF8_1->pF8_1_4->F8_1_4_1 = iSequence1st;
+		m_dataType8[pos].pF8_1->pF8_1_4->F8_1_4_2 = iCellNum;
+		m_dataType8[pos].pF8_1->pF8_1_4->pF8_1_4_3 = NULL;
+		if (iCellNum > 0)
+			m_dataType8[pos].pF8_1->pF8_1_4->pF8_1_4_3 = (uint16_t*)malloc(iCellNum * sizeof(uint16_t));
+
+		pNode = m_dataType8[pos].pF8_1->pF8_1_4;
+	}
+
+	for (uint8_t i=0; i<iCellNum; i++)
+	{
+		uchar = *(pRecv + offset);
+		ushortsw = uchar * 256;
+		uchar = *(pRecv + offset + 1);
+		ushortsw += uchar;
+
+		pNode->pF8_1_4_3[i] = ushortsw;
+		offset += sizeof(ushortsw);
 	}
 
 	return offset;
@@ -611,13 +649,10 @@ long CInfoRecord::RecordInfoType9(long pos, const char* pRecv, long leftOffset)
 
 	if (NULL != m_dataType9[pos].pF9_1)
 	{
-		for (uint8_t i = 0; i < m_dataType9[pos].F9_0; i++)
+		if (NULL != m_dataType9[pos].pF9_1->pF9_1_2)
 		{
-			if (NULL != m_dataType9[pos].pF9_1[i].pF9_1_2)
-			{
-				free(m_dataType9[pos].pF9_1[i].pF9_1_2);
-				m_dataType9[pos].pF9_1[i].pF9_1_2 = NULL;
-			}
+			free(m_dataType9[pos].pF9_1->pF9_1_2);
+			m_dataType9[pos].pF9_1->pF9_1_2 = NULL;
 		}
 
 		free(m_dataType9[pos].pF9_1);
@@ -625,63 +660,64 @@ long CInfoRecord::RecordInfoType9(long pos, const char* pRecv, long leftOffset)
 	}
 
 	long offset = 0;
-	uint16_t ushort;
+	uint8_t uchar;
 	uint16_t ushortsw;
 
 	m_dataType9[pos].F9_0 = *pRecv;
 	offset += sizeof(m_dataType9[pos].F9_0);
 
-	m_dataType9[pos].pF9_1 = (RecvDataType9_1*)malloc(m_dataType9[pos].F9_0 * sizeof(RecvDataType9_1));
+	m_dataType9[pos].pF9_1 = (RecvDataType9_1*)malloc(sizeof(RecvDataType9_1));
 	if (NULL == m_dataType9[pos].pF9_1)
 	{
 		return 0;
 	}
 
-	memset(m_dataType9[pos].pF9_1, 0, m_dataType9[pos].F9_0 * sizeof(RecvDataType9_1));
-	for (uint8_t i = 0; i < m_dataType9[pos].F9_0; i++)
+	memset(m_dataType9[pos].pF9_1, 0, sizeof(RecvDataType9_1));
+	
+	m_dataType9[pos].pF9_1->pF9_1_2 = NULL;
+	m_dataType9[pos].pF9_1->F9_1_0 = *(pRecv + offset);
+	offset += sizeof(m_dataType9[pos].pF9_1->F9_1_0);
+
+	if (m_dataType9[pos].pF9_1->F9_1_0 == 0 || m_dataType9[pos].pF9_1->F9_1_0 > 250)
 	{
-		m_dataType9[pos].pF9_1[i].pF9_1_2 = NULL;
-		m_dataType9[pos].pF9_1[i].F9_1_0 = *(pRecv + offset);
-		offset += sizeof(m_dataType9[pos].pF9_1[i].F9_1_0);
+		return offset;
+	}
 
-		if (m_dataType9[pos].pF9_1[i].F9_1_0 == 0 || m_dataType9[pos].pF9_1[i].F9_1_0 > 250)
+	uchar = *(pRecv + offset);
+	ushortsw = uchar * 256;
+	uchar = *(pRecv + offset + 1);
+	ushortsw += uchar;
+	m_dataType9[pos].pF9_1->F9_1_1 = ushortsw;
+	offset += sizeof(m_dataType9[pos].pF9_1->F9_1_1);
+	if (m_dataType9[pos].pF9_1->F9_1_1 == 0 || m_dataType9[pos].pF9_1->F9_1_1 > 65531)
+	{
+		return offset;
+	}
+
+	m_dataType9[pos].pF9_1->pF9_1_2 = (uint8_t*)malloc(m_dataType9[pos].pF9_1->F9_1_1 * sizeof(uint8_t));
+	if (NULL == m_dataType9[pos].pF9_1->pF9_1_2)
+	{
+		free(m_dataType9[pos].pF9_1);
+		m_dataType9[pos].pF9_1 = NULL;
+		return offset;
+	}
+	memset(m_dataType9[pos].pF9_1->pF9_1_2, 0, m_dataType9[pos].pF9_1->F9_1_1 * sizeof(uint8_t));
+
+	for (uint8_t j = 0; j < m_dataType9[pos].pF9_1->F9_1_1; j++)
+	{
+		if (offset >= leftOffset)
 		{
-			return offset;
+			break;
 		}
 
-		ushort = *(pRecv + offset);
-		ushortsw = SWAPWORD(ushort);
-		m_dataType9[pos].pF9_1[i].F9_1_1 = ushortsw;
-		offset += sizeof(m_dataType9[pos].pF9_1[i].F9_1_1);
-		if (m_dataType9[pos].pF9_1[i].F9_1_1 == 0 || m_dataType9[pos].pF9_1[i].F9_1_1 > 65531)
+		//各温度探针检测到的温度值
+		m_dataType9[pos].pF9_1->pF9_1_2[j] = *(pRecv + offset);
+		offset += sizeof(m_dataType9[pos].pF9_1->pF9_1_2[j]);
+
+		if (m_dataType9[pos].pF9_1->pF9_1_2[j] > 250)
 		{
-			return offset;
-		}
-
-		m_dataType9[pos].pF9_1[i].pF9_1_2 = (uint8_t*)malloc(m_dataType9[pos].pF9_1[i].F9_1_1 * sizeof(uint8_t));
-		if (NULL == m_dataType9[pos].pF9_1[i].pF9_1_2)
-		{
-			free(m_dataType9[pos].pF9_1);
-			m_dataType9[pos].pF9_1 = NULL;
-			return offset;
-		}
-		memset(m_dataType9[pos].pF9_1[i].pF9_1_2, 0, m_dataType9[pos].pF9_1[i].F9_1_1 * sizeof(uint8_t));
-
-		for (uint8_t j = 0; j < m_dataType9[pos].pF9_1[i].F9_1_1; j++)
-		{
-			if (offset > leftOffset)
-			{
-				break;
-			}
-
-			//各温度探针检测到的温度值
-			m_dataType9[pos].pF9_1[i].pF9_1_2[j] = *(pRecv + offset);
-			offset += sizeof(m_dataType9[pos].pF9_1[i].pF9_1_2[j]);
-
-			if (m_dataType9[pos].pF9_1[i].pF9_1_2[j] > 250)
-			{
-				return offset;
-			}
+			printf("invalid\n");
+			//return offset;
 		}
 	}
 
@@ -730,13 +766,16 @@ void CInfoRecord::OnReset()
 
 		if (m_dataType8[i].pF8_1 != NULL)
 		{
-			for (int j = 0; j < m_dataType8[i].F8_0; j++)
+			if (NULL != m_dataType8[i].pF8_1->pF8_1_4)
 			{
-				if (NULL != m_dataType8[i].pF8_1[j].pF8_1_6)
+				RecvDataType8_1_4* pNode = m_dataType8[i].pF8_1->pF8_1_4;
+				while (pNode != NULL)
 				{
-					free(m_dataType8[i].pF8_1[j].pF8_1_6);
-					m_dataType8[i].pF8_1[j].pF8_1_6 = NULL;
+					RecvDataType8_1_4* pCur = pNode;
+					pNode = pNode->pNext;
+					free(pCur);
 				}
+				m_dataType8[i].pF8_1->pF8_1_4 = NULL;
 			}
 
 			free(m_dataType8[i].pF8_1);
@@ -745,13 +784,10 @@ void CInfoRecord::OnReset()
 
 		if (m_dataType9[i].pF9_1 != NULL)
 		{
-			for (uint8_t j = 0; j < m_dataType9[i].F9_0; j++)
+			if (NULL != m_dataType9[i].pF9_1->pF9_1_2)
 			{
-				if (NULL != m_dataType9[i].pF9_1[j].pF9_1_2)
-				{
-					free(m_dataType9[i].pF9_1[j].pF9_1_2);
-					m_dataType9[i].pF9_1[j].pF9_1_2 = NULL;
-				}
+				free(m_dataType9[i].pF9_1->pF9_1_2);
+				m_dataType9[i].pF9_1->pF9_1_2 = NULL;
 			}
 
 			free(m_dataType9[i].pF9_1);
@@ -781,7 +817,7 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 	SYSTEMTIME st;
 	memset(&st, 0, sizeof(st));
 	SYSTEMTIME datePre;
-	memset(&datePre, 0, sizeof(datePre));
+	GetLocalTime(&datePre);
 
 	while (1)
 	{
@@ -796,8 +832,8 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 		GetLocalTime(&st);
 
 		//触发主线程统计历史数据
-		//if (datePre.wDay!=st.wDay || datePre.wMonth != st.wMonth || datePre.wYear!=st.wYear)
-		if (num > 100)
+		if (datePre.wDay!=st.wDay || datePre.wMonth != st.wMonth || datePre.wYear!=st.wYear)
+		//if (num > 100)
 		{
 			SendMessage(hWnd, UM_HISTORY, (WPARAM)&st.wDayOfWeek, NULL);
 		}
@@ -831,6 +867,54 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 
 			uint8_t strVin[VIN_LENGTH + 1] = {};
 			memcpy(strVin, &recvData[latestOffset], VIN_LENGTH);
+// 			long pos = CInfoRecord::GetInstance()->FindVinPos(strVin);
+// 			if (pos < 0)
+// 			{
+// 				pos = CInfoRecord::GetInstance()->InsertVinAndSort(strVin);
+// 				if (pos < 0)
+// 					continue;
+// 			}
+
+			latestOffset += 18;
+
+			//数据单元长度
+			uint8_t uchar = recvData[latestOffset];
+			uint16_t ushortsw = uchar * 256;
+			uchar = recvData[latestOffset + 1];
+			ushortsw += uchar;
+			latestOffset += 2;
+
+			STRECVDATA infoData;
+			memset(&infoData, 0, sizeof(STRECVDATA));
+
+			//数据采集时间(年月日时分秒)
+			memcpy(infoData.F8_0, &recvData[24], sizeof(infoData.F8_0));
+// 			if (infoData.F8_0[0] > (st.wYear % 100)
+// 				|| infoData.F8_0[1] > st.wMonth
+// 				|| infoData.F8_0[2] > st.wDay)
+// 			{
+// 				infoData.F8_0[0] = (uint8_t)(st.wYear % 100);
+// 				infoData.F8_0[1] = (uint8_t)st.wMonth;
+// 				infoData.F8_0[2] = (uint8_t)st.wDay;
+// 				infoData.F8_0[3] = (uint8_t)st.wHour;
+// 				infoData.F8_0[4] = (uint8_t)st.wMinute;
+// 				infoData.F8_0[5] = (uint8_t)st.wSecond;
+// 			}
+			if (infoData.F8_0[0] > (st.wYear % 100) || infoData.F8_0[0]==0
+				|| infoData.F8_0[1] > 12 || infoData.F8_0[1] == 0
+				|| infoData.F8_0[2] > 31 || infoData.F8_0[2] == 0
+				|| infoData.F8_0[3] > 24
+				|| infoData.F8_0[4] > 60
+				|| infoData.F8_0[5] > 60)
+			{
+				continue;
+			}
+
+			if (infoData.F8_0[0] < (st.wYear % 100))
+				printf("");
+
+			latestOffset += 6;
+
 			long pos = CInfoRecord::GetInstance()->FindVinPos(strVin);
 			if (pos < 0)
 			{
@@ -839,46 +923,21 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 					continue;
 			}
 
-			latestOffset += 18;
-
-			//数据单元长度
-			uint16_t ushort = 0;
-			uint16_t ushortsw = 0;
-			memcpy(&ushort, &recvData[latestOffset], sizeof(uint16_t));
-			ushortsw = SWAPWORD(ushort);
-			latestOffset += 2;
-
-			STRECVDATA infoData;
-			memset(&infoData, 0, sizeof(STRECVDATA));
-
-			//数据采集时间(年月日时分秒)
-			memcpy(infoData.F8_0, &recvData[24], sizeof(infoData.F8_0));
-			if (infoData.F8_0[0] > (st.wYear % 100)
-				|| infoData.F8_0[1] > st.wMonth
-				|| infoData.F8_0[2] > st.wDay)
-			{
-				infoData.F8_0[0] = (uint8_t)(st.wYear % 100);
-				infoData.F8_0[1] = (uint8_t)st.wMonth;
-				infoData.F8_0[2] = (uint8_t)st.wDay;
-
-				infoData.F8_0[3] = (uint8_t)st.wHour;
-				infoData.F8_0[4] = (uint8_t)st.wMinute;
-				infoData.F8_0[5] = (uint8_t)st.wSecond;
-			}
-			latestOffset += 6;
 
 			bool bSetFlag[10] = {};
 			long curOffset = latestOffset;
 
 			//信息类型信息体
-			while (latestOffset<(ushortsw-24)+curOffset && latestOffset<recvSize-1)
+			//while (latestOffset<(ushortsw-24)+curOffset && latestOffset<recvSize-1)
+			while (latestOffset < (ushortsw-6) + curOffset && latestOffset < recvSize - 1)
 			{
 				if (memcmp(&recvData[latestOffset], "##", 2) == 0)
 					break;
 
 				uint8_t infoType = recvData[latestOffset];
 				long localOffset = 0;
-				long leftOffset = (ushortsw - 24) + curOffset - latestOffset;
+				//long leftOffset = (ushortsw - 24) + curOffset - latestOffset;
+				long leftOffset = (ushortsw-6) + curOffset - latestOffset;
 
 				if (infoType == 1 || infoType == 2 || infoType == 5 || infoType == 6 || infoType == 7)
 				{

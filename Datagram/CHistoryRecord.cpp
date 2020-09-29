@@ -8,9 +8,11 @@ CHistoryRecord* CHistoryRecord::m_pInstance = NULL;
 static STCIRCLEQUEUE g_circleQue[MAX_VEHICLENUM] = {};
 static uint8_t g_chVin[MAX_VEHICLENUM][VIN_LENGTH + 1];
 
-CHistoryRecord::CHistoryRecord()
+CHistoryRecord::CHistoryRecord() : m_vehicleNumLastWeek(0), m_vehicleNumThisWeek(0)
 {
-
+	memset(m_chVinLastWeek, 0, sizeof(m_chVinLastWeek));
+	memset(m_chVinThisWeek, 0, sizeof(m_chVinThisWeek));
+	memset(m_iLatestMileage, 0, sizeof(m_iLatestMileage));
 }
 
 void CHistoryRecord::OnRecord(WORD wDayOfWeek)
@@ -57,9 +59,22 @@ void CHistoryRecord::YesterdayAppend(long lVehicleNum)
 		pos = FindVinPos(g_chVin[i]);
 		if (pos < 0)
 		{
-			InsertVinAndSort(g_chVin[i]);
+			pos = InsertVinAndSort(g_chVin[i]);
 		}
+
+		long rear = g_circleQue[i].rear;
+
+		m_iLatestMileage[pos] = g_circleQue[i].pElem[rear - 1].F1_4;
 	}
+}
+
+uint32_t CHistoryRecord::GetLatestMileage(uint8_t pVin[])
+{
+	long pos = FindVinPos(pVin);
+	if (pos < 0)
+		return 0L;
+
+	return m_iLatestMileage[pos];
 }
 
 long CHistoryRecord::FindVinPos(uint8_t pVin[])
@@ -132,9 +147,11 @@ long CHistoryRecord::InsertVinAndSort(uint8_t pVin[])
 	for (long i = m_vehicleNumThisWeek; i > insertPos; i--)
 	{
 		memcpy(m_chVinThisWeek[i], m_chVinThisWeek[i - 1], VIN_LENGTH + 1);
+		m_iLatestMileage[i] = m_iLatestMileage[i - 1];
 	}
 
 	memcpy(m_chVinThisWeek[insertPos], (char*)pVin, VIN_LENGTH + 1);
+	m_iLatestMileage[insertPos] = 0;
 
 	m_vehicleNumThisWeek += 1;
 
