@@ -80,6 +80,8 @@ BOOL CVehicleInfoDlg::OnInitDialog()
 	//SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
+	SetWindowText(_T("车辆信息"));
+
 	m_query.Create(IDD_QUERY, &m_tab);
 	m_statistics.Create(IDD_STATISTICS, &m_tab);
 	m_alertData.Create(IDD_ALERTDATA, &m_tab);

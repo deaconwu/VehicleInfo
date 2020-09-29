@@ -5,12 +5,41 @@
 #include "VehicleInfo.h"
 #include "CAlertRank.h"
 #include "afxdialogex.h"
+#include "CAlertCategory.h"
 
 // CAlertRank 对话框
 
 IMPLEMENT_DYNAMIC(CAlertRank, CDialogEx)
 
 static STCIRCLEQUEUE g_circleQue[MAX_VEHICLENUM] = {};
+static uint8_t g_chVin[MAX_VEHICLENUM][VIN_LENGTH + 1];
+static long g_vehicleNum = 0;
+
+static long FindVinPos(uint8_t pVin[])
+{
+	long left = 0;
+	long right = g_vehicleNum - 1;
+	long mid = -1;
+
+	while (left <= right)
+	{
+		mid = (left + right) / 2;
+		if (memcmp((char*)pVin, (char*)g_chVin[mid], VIN_LENGTH) < 0)
+		{
+			right = mid - 1;
+		}
+		else if (memcmp((char*)pVin, (char*)g_chVin[mid], VIN_LENGTH) > 0)
+		{
+			left = mid + 1;
+		}
+		else
+		{
+			return mid;
+		}
+	}
+
+	return -1;
+}
 
 CAlertRank::CAlertRank(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_ALERTRANK, pParent)
@@ -48,7 +77,7 @@ BOOL CAlertRank::OnInitDialog()
 	m_cbRankTypeChoice.InsertString(19, _T("车载储能装置类型过充报警"));
 	m_cbRankTypeChoice.SetCurSel(0);
 
-	m_listRank.SetExtendedStyle(LVS_EX_GRIDLINES);
+	m_listRank.SetExtendedStyle(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT);
 	m_listRank.InsertColumn(1, _T("名次"), LVCFMT_CENTER, 50);
 	m_listRank.InsertColumn(2, _T("Vin码"), LVCFMT_CENTER, 150);
 	m_listRank.InsertColumn(3, _T("报警次数"), LVCFMT_CENTER, 120);
@@ -59,6 +88,7 @@ BOOL CAlertRank::OnInitDialog()
 		csStr.Format(_T("%u"), i);
 		m_listRank.InsertItem(i-1, csStr);
 		m_listRank.SetItemText(i-1, 0, csStr);
+		m_listRank.SetItemState(i, ~LVIS_SELECTED, LVIS_SELECTED);
 	}
 
 	//RankSort(-1);
@@ -76,6 +106,7 @@ void CAlertRank::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CAlertRank, CDialogEx)
 	ON_CBN_SELCHANGE(IDC_COMBO_RANKTYPE, &CAlertRank::OnCbnSelchangeComboRanktype)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST_RANK, &CAlertRank::OnLvnItemchangedListRank)
 END_MESSAGE_MAP()
 
 
@@ -208,9 +239,13 @@ void CAlertRank::RankSort(int iType)
 	SYSTEMTIME st;
 	GetLocalTime(&st);
 
+	memset(g_chVin, 0, sizeof(g_chVin));
+	CInfoRecord::GetInstance()->GetVinInfo(g_chVin);
+
 	//STCIRCLEQUEUE circleQue[MAX_VEHICLENUM] = {};
 	memset(g_circleQue, 0, sizeof(g_circleQue));
 	long vehicleNum = CInfoRecord::GetInstance()->GetQueInfo(g_circleQue);
+	g_vehicleNum = vehicleNum;
 
 	PSTALERTDATALINK pNode = NULL;
 	PSTALERTDATALINK pLast = NULL;
@@ -384,5 +419,103 @@ void CAlertRank::RankSort(int iType)
 		free(pDel);
 
 		iLineNum++;
+	}
+}
+
+void CAlertRank::OnLvnItemchangedListRank(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+
+	CString strVin = L"";
+	for (int i = 0; i < m_listRank.GetItemCount(); i++)
+	{
+		if (m_listRank.GetItemState(i, LVIS_SELECTED) == LVIS_SELECTED)
+		{
+			//str.Format(_T("选中了第%d行"), i);
+			//AfxMessageBox(str);
+			//m_listRank.SetCheck(i, FALSE);
+			m_listRank.SetItemState(i, 0, LVIS_SELECTED | LVIS_FOCUSED);
+			strVin = m_listRank.GetItemText(i, 1);
+			if (strVin.IsEmpty())
+				return;
+
+			char chVin[VIN_LENGTH + 1] = {};
+
+			int iLength = WideCharToMultiByte(CP_ACP, 0, strVin, -1, NULL, 0, NULL, NULL);
+			WideCharToMultiByte(CP_ACP, 0, strVin, -1, chVin, iLength, NULL, NULL);
+
+			long pos = FindVinPos((uint8_t*)&chVin);
+			if (pos < 0)
+				return;
+			
+			OnAlertCategory(pos);
+
+			return;
+		}
+	}
+}
+
+void CAlertRank::OnAlertCategory(long iVinPos)
+{
+	CAlertCategory dlg;
+
+	int iType = -1;	//遍历每种报警类型
+
+	while (iType <= 18)
+	{
+		uint32_t iAlertTimesSelf = 0;
+		uint32_t iRank = 0;
+
+		//统计该车辆各类报警次数
+		long rear = g_circleQue[iVinPos].rear;
+		for (long i = rear - 1; i >= 0; i--)
+		{
+			if (g_circleQue[iVinPos].pElem[i].F7_0 > 0 && iType < 0)
+			{
+				iAlertTimesSelf += 1;
+			}
+			else if (CheckAlertFlag(g_circleQue[iVinPos].pElem[i].F7_0, iType))
+			{
+				iAlertTimesSelf += 1;
+			}
+		}
+
+		if (iAlertTimesSelf == 0)
+		{
+			iType += 1;
+			continue;
+		}
+
+		iRank = 1;
+		//遍历统计每辆车报警次数，得到该车辆所在每类报警的排名
+		for (long i = 0; i < g_vehicleNum; i++)
+		{
+			if (i == iVinPos)
+				continue;
+
+			uint32_t iAlertTimesOther = 0;
+
+			long rear = g_circleQue[i].rear;
+			for (long j = rear - 1; j >= 0; j--)
+			{
+				if (g_circleQue[iVinPos].pElem[i].F7_0 > 0 && iType < 0)
+				{
+					iAlertTimesOther += 1;
+				}
+				else if (CheckAlertFlag(g_circleQue[iVinPos].pElem[i].F7_0, iType))
+				{
+					iAlertTimesOther += 1;
+				}
+			}
+
+			if (iAlertTimesOther > iAlertTimesSelf)
+			{
+				iRank += 1;
+			}
+		}
+
+		iType += 1;
 	}
 }

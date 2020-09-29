@@ -27,5 +27,10 @@ public:
 
 private:
 	bool CheckAlertFlag(uint32_t iData, int iType);
+
+	void OnAlertCategory(long iVinPos);
 	
+public:
+	afx_msg void OnLvnItemchangedListRank(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult);
 };
