@@ -6,6 +6,7 @@
 #include "CQuery.h"
 #include "afxdialogex.h"
 #include "CInfoRecord.h"
+#include "CHistoryRecord.h"
 #include "CAlertData.h"
 
 
@@ -41,6 +42,7 @@ BOOL CQuery::OnInitDialog()
 	((CEdit*)GetDlgItem(IDC_EDIT_RUNMODE))->EnableWindow(false);
 	((CEdit*)GetDlgItem(IDC_EDIT_SPEED))->EnableWindow(false);
 	((CEdit*)GetDlgItem(IDC_EDIT_MILEAGE))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_MILEAGETODAY))->EnableWindow(false);
 
 	//驱动电机
 	((CEdit*)GetDlgItem(IDC_EDIT_MOTORSTATE))->EnableWindow(false);
@@ -200,6 +202,15 @@ void CQuery::OnBnClickedBtnQuery()
 	csStr.Format(_T("%u"), stData.F1_4);
 	((CEdit*)GetDlgItem(IDC_EDIT_MILEAGE))->SetWindowTextW(csStr);
 
+	//今日里程
+	uint32_t iLatestMileage = CHistoryRecord::GetInstance()->GetLatestMileage((uint8_t*)chVin);
+	if (stData.F1_4 >= iLatestMileage)
+	{
+		csStr = _T("");
+		csStr.Format(_T("%u"), stData.F1_4-iLatestMileage);
+		((CEdit*)GetDlgItem(IDC_EDIT_MILEAGETODAY))->SetWindowTextW(csStr);
+	}
+
 	//电机状态
 	if (stData.F2_0 == 1)
 	{
@@ -286,14 +297,8 @@ void CQuery::OnBnClickedBtnQuery()
 	((CButton*)GetDlgItem(IDC_BTN_ALERTDATA))->EnableWindow(true);
 }
 
-
 void CQuery::OnBnClickedBtnAlertdata()
 {
-	// TODO: 在此添加控件通知处理程序代码
-	//CAlertData dlgAlert;
-	//dlgAlert.SetAlert(m_alertData);
-	//dlgAlert.DoModal();
-
 	CString strContent;
 	if (m_alertData == 0)
 	{

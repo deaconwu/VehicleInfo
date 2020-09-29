@@ -207,10 +207,10 @@
   <ItemGroup>
     <ClInclude Include="CAlertData.h" />
     <ClInclude Include="CAlertRank.h" />
-    <ClInclude Include="CHistoryRecord.h" />
     <ClInclude Include="CQuery.h" />
     <ClInclude Include="CRealTimeRecv.h" />
     <ClInclude Include="CStatistics.h" />
+    <ClInclude Include="Datagram\CHistoryRecord.h" />
     <ClInclude Include="Datagram\CInfoRecord.h" />
     <ClInclude Include="Datagram\CInfoSingleton.h" />
     <ClInclude Include="Datagram\CInfoSocket.h" />
@@ -225,10 +225,10 @@
   <ItemGroup>
     <ClCompile Include="CAlertData.cpp" />
     <ClCompile Include="CAlertRank.cpp" />
-    <ClCompile Include="CHistoryRecord.cpp" />
     <ClCompile Include="CQuery.cpp" />
     <ClCompile Include="CRealTimeRecv.cpp" />
     <ClCompile Include="CStatistics.cpp" />
+    <ClCompile Include="Datagram\CHistoryRecord.cpp" />
     <ClCompile Include="Datagram\CInfoRecord.cpp" />
     <ClCompile Include="Datagram\CInfoSocket.cpp" />
     <ClCompile Include="pch.cpp" />

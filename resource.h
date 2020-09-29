@@ -33,8 +33,11 @@
 #define IDC_EDIT_MOTORROTATESPEED       1018
 #define IDC_STATIC_MOTORTORQUE          1019
 #define IDC_EDIT__MOTORTORQUE           1020
+#define IDC_STATIC_MILEAGE2             1020
 #define IDC_STATIC_MOTORTEMP            1021
 #define IDC_EDIT__MOTORTEMP             1022
+#define IDC_EDIT_MILEAGE2               1022
+#define IDC_EDIT_MILEAGETODAY           1022
 #define IDC_STATIC_MAXVOLTNO            1023
 #define IDC_EDIT_MAXVOLTNO              1024
 #define IDC_STATIC_VOLTMAXVALUE         1025
