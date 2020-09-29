@@ -448,7 +448,9 @@ long CInfoRecord::GetQueInfo(STCIRCLEQUEUE circleQue[])
 
 void CInfoRecord::GetVinInfo(uint8_t chVin[][VIN_LENGTH + 1])
 {
+	m_bLockFlag = true;
 	memcpy(chVin, m_chVin, sizeof(m_chVin));
+	m_bLockFlag = false;
 }
 
 void CInfoRecord::RecordInfo(long pos, STRECVDATA stRecv)
@@ -867,13 +869,6 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 
 			uint8_t strVin[VIN_LENGTH + 1] = {};
 			memcpy(strVin, &recvData[latestOffset], VIN_LENGTH);
-// 			long pos = CInfoRecord::GetInstance()->FindVinPos(strVin);
-// 			if (pos < 0)
-// 			{
-// 				pos = CInfoRecord::GetInstance()->InsertVinAndSort(strVin);
-// 				if (pos < 0)
-// 					continue;
-// 			}
 
 			latestOffset += 18;
 
@@ -889,29 +884,14 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 
 			//数据采集时间(年月日时分秒)
 			memcpy(infoData.F8_0, &recvData[24], sizeof(infoData.F8_0));
-// 			if (infoData.F8_0[0] > (st.wYear % 100)
-// 				|| infoData.F8_0[1] > st.wMonth
-// 				|| infoData.F8_0[2] > st.wDay)
-// 			{
-// 				infoData.F8_0[0] = (uint8_t)(st.wYear % 100);
-// 				infoData.F8_0[1] = (uint8_t)st.wMonth;
-// 				infoData.F8_0[2] = (uint8_t)st.wDay;
-// 				infoData.F8_0[3] = (uint8_t)st.wHour;
-// 				infoData.F8_0[4] = (uint8_t)st.wMinute;
-// 				infoData.F8_0[5] = (uint8_t)st.wSecond;
-// 			}
-			if (infoData.F8_0[0] > (st.wYear % 100) || infoData.F8_0[0]==0
-				|| infoData.F8_0[1] > 12 || infoData.F8_0[1] == 0
-				|| infoData.F8_0[2] > 31 || infoData.F8_0[2] == 0
-				|| infoData.F8_0[3] > 24
-				|| infoData.F8_0[4] > 60
-				|| infoData.F8_0[5] > 60)
+			if (infoData.F8_0[0] != (st.wYear % 100)
+				|| infoData.F8_0[1] != (uint8_t)st.wMonth
+				|| infoData.F8_0[2] != (uint8_t)st.wDay)
 			{
+				//不是今天的不处理
+				latestOffset += ushortsw + 1;
 				continue;
 			}
-
-			if (infoData.F8_0[0] < (st.wYear % 100))
-				printf("");
 
 			latestOffset += 6;
 
@@ -923,12 +903,10 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 					continue;
 			}
 
-
 			bool bSetFlag[10] = {};
 			long curOffset = latestOffset;
 
 			//信息类型信息体
-			//while (latestOffset<(ushortsw-24)+curOffset && latestOffset<recvSize-1)
 			while (latestOffset < (ushortsw-6) + curOffset && latestOffset < recvSize - 1)
 			{
 				if (memcmp(&recvData[latestOffset], "##", 2) == 0)
@@ -936,7 +914,6 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 
 				uint8_t infoType = recvData[latestOffset];
 				long localOffset = 0;
-				//long leftOffset = (ushortsw - 24) + curOffset - latestOffset;
 				long leftOffset = (ushortsw-6) + curOffset - latestOffset;
 
 				if (infoType == 1 || infoType == 2 || infoType == 5 || infoType == 6 || infoType == 7)
@@ -955,7 +932,7 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 				}
 				else
 				{
-					//latestOffset += leftOffset;
+					latestOffset += leftOffset + 1;
 					break;
 				}
 
