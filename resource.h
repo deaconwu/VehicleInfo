@@ -122,6 +122,7 @@
 #define IDC_BTN_CONNECT                 1079
 #define IDC_BTN_DISCONNECT              1080
 #define IDC_LIST_CATEGORY               1082
+#define IDC_TITLE                       1083
 
 // Next default values for new objects
 // 
@@ -129,7 +130,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        140
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1083
+#define _APS_NEXT_CONTROL_VALUE         1084
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

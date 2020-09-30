@@ -1,8 +1,8 @@
 ﻿#pragma once
 #include "CInfoRecord.h"
+#include "CAlertCategory.h"
 
 // CAlertRank 对话框
-
 class CAlertRank : public CDialogEx
 {
 	DECLARE_DYNAMIC(CAlertRank)
@@ -16,6 +16,8 @@ public:
 	enum { IDD = IDD_ALERTRANK };
 #endif
 	void RankSort(int iType=-1);
+	void DestroySubDlg();
+
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
 	virtual BOOL OnInitDialog();
@@ -32,5 +34,7 @@ private:
 	
 public:
 	afx_msg void OnLvnItemchangedListRank(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult);
+
+private:
+	CAlertCategory* m_pDlgAlertCategory;
 };

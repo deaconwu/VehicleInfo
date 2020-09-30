@@ -1,5 +1,5 @@
 ﻿#pragma once
-
+#include "InfoType.h"
 
 // CAlertCategory 对话框
 
@@ -11,6 +11,9 @@ public:
 	CAlertCategory(CWnd* pParent = nullptr);   // 标准构造函数
 	virtual ~CAlertCategory();
 
+	void SetTitle(CString csStr);
+	void SetTypeTimesRank(int iType, uint32_t iTimes, uint32_t iRank);
+
 // 对话框数据
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ALERTCATEGORY };
@@ -20,6 +23,6 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
 	virtual BOOL OnInitDialog();
 	DECLARE_MESSAGE_MAP()
-public:
+private:
 	CListCtrl m_listCategory;
 };

@@ -164,12 +164,14 @@ void CVehicleInfoDlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 		m_statistics.ShowWindow(SW_HIDE);
 		m_alertData.ShowWindow(SW_HIDE);
 		m_alertRank.ShowWindow(SW_HIDE);
+		m_alertRank.DestroySubDlg();
 		break;
 	case 1:
 		m_query.ShowWindow(SW_HIDE);
 		m_statistics.ShowWindow(SW_SHOW);
 		m_alertData.ShowWindow(SW_HIDE);
 		m_alertRank.ShowWindow(SW_HIDE);
+		m_alertRank.DestroySubDlg();
 		m_statistics.OnQueryStatis();
 		break;
 	case 2:
@@ -177,6 +179,7 @@ void CVehicleInfoDlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 		m_query.ShowWindow(SW_HIDE);
 		m_alertData.ShowWindow(SW_SHOW);
 		m_alertRank.ShowWindow(SW_HIDE);
+		m_alertRank.DestroySubDlg();
 		break;
 	case 3:
 		m_statistics.ShowWindow(SW_HIDE);

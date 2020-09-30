@@ -5,7 +5,6 @@
 #include "VehicleInfo.h"
 #include "CAlertRank.h"
 #include "afxdialogex.h"
-#include "CAlertCategory.h"
 
 // CAlertRank 对话框
 
@@ -44,7 +43,7 @@ static long FindVinPos(uint8_t pVin[])
 CAlertRank::CAlertRank(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_ALERTRANK, pParent)
 {
-
+	m_pDlgAlertCategory = NULL;
 }
 
 CAlertRank::~CAlertRank()
@@ -116,6 +115,12 @@ END_MESSAGE_MAP()
 void CAlertRank::OnCbnSelchangeComboRanktype()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	if (NULL != m_pDlgAlertCategory)
+	{
+		delete m_pDlgAlertCategory;
+		m_pDlgAlertCategory = NULL;
+	}
+
 	int iIndex = m_cbRankTypeChoice.GetCurSel();
 	RankSort(iIndex - 1);
 }
@@ -240,10 +245,8 @@ void CAlertRank::RankSort(int iType)
 	GetLocalTime(&st);
 
 	memset(g_chVin, 0, sizeof(g_chVin));
-	CInfoRecord::GetInstance()->GetVinInfo(g_chVin);
-
-	//STCIRCLEQUEUE circleQue[MAX_VEHICLENUM] = {};
 	memset(g_circleQue, 0, sizeof(g_circleQue));
+	CInfoRecord::GetInstance()->GetVinInfo(g_chVin);
 	long vehicleNum = CInfoRecord::GetInstance()->GetQueInfo(g_circleQue);
 	g_vehicleNum = vehicleNum;
 
@@ -258,22 +261,13 @@ void CAlertRank::RankSort(int iType)
 		long rear = g_circleQue[i].rear;
 		for (long j = rear - 1; j >= 0; j--)
 		{
-			if ((st.wYear % 100) == g_circleQue[i].pElem[j].F8_0[0]
-				&& st.wMonth == g_circleQue[i].pElem[j].F8_0[1]
-				&& st.wDay == g_circleQue[i].pElem[j].F8_0[2])
+			if (g_circleQue[i].pElem[j].F7_0 > 0 && iType<0)
 			{
-				if (g_circleQue[i].pElem[j].F7_0 > 0 && iType<0)
-				{
-					iAlertTimes += 1;
-				}
-				else if (CheckAlertFlag(g_circleQue[i].pElem[j].F7_0, iType))
-				{
-					iAlertTimes += 1;
-				}
+				iAlertTimes += 1;
 			}
-			else
+			else if (CheckAlertFlag(g_circleQue[i].pElem[j].F7_0, iType))
 			{
-				break;
+				iAlertTimes += 1;
 			}
 		}
 
@@ -291,7 +285,8 @@ void CAlertRank::RankSort(int iType)
 				pLast = pNode;
 
 				pLast->iAlertTimes = iAlertTimes;
-				CInfoRecord::GetInstance()->FetchVinCode(i, pLast->chVin);
+				//CInfoRecord::GetInstance()->FetchVinCode(i, pLast->chVin);
+				memcpy(pLast->chVin, g_chVin[i], (VIN_LENGTH + 1) * sizeof(uint8_t));
 				iRankNum += 1;
 			}
 			else if (iRankNum < ALERTTIMES_REANK_NUM)
@@ -303,7 +298,8 @@ void CAlertRank::RankSort(int iType)
 					{
 						PSTALERTDATALINK pNew = (PSTALERTDATALINK)malloc(sizeof(STALERTDATALINK));
 						pNew->iAlertTimes = iAlertTimes;
-						CInfoRecord::GetInstance()->FetchVinCode(i, pNew->chVin);
+						memcpy(pNew->chVin, g_chVin[i], (VIN_LENGTH + 1) * sizeof(uint8_t));
+						//CInfoRecord::GetInstance()->FetchVinCode(i, pNew->chVin);
 						pNew->pNext = NULL;
 
 						if (pPrev->pNext != NULL)
@@ -332,7 +328,8 @@ void CAlertRank::RankSort(int iType)
 					//排名最大
 					PSTALERTDATALINK pNew = (PSTALERTDATALINK)malloc(sizeof(STALERTDATALINK));
 					pNew->iAlertTimes = iAlertTimes;
-					CInfoRecord::GetInstance()->FetchVinCode(i, pNew->chVin);
+					//CInfoRecord::GetInstance()->FetchVinCode(i, pNew->chVin);
+					memcpy(pNew->chVin, g_chVin[i], (VIN_LENGTH + 1) * sizeof(uint8_t));
 					pNew->pPre = NULL;
 					pNew->pNext = pNode;
 					pNode->pPre = pNew;
@@ -352,7 +349,8 @@ void CAlertRank::RankSort(int iType)
 					{
 						PSTALERTDATALINK pNew = (PSTALERTDATALINK)malloc(sizeof(STALERTDATALINK));
 						pNew->iAlertTimes = iAlertTimes;
-						CInfoRecord::GetInstance()->FetchVinCode(i, pNew->chVin);
+						//CInfoRecord::GetInstance()->FetchVinCode(i, pNew->chVin);
+						memcpy(pNew->chVin, g_chVin[i], (VIN_LENGTH + 1) * sizeof(uint8_t));
 						pNew->pNext = NULL;
 
 						if (pPrev->pNext != NULL)
@@ -384,7 +382,8 @@ void CAlertRank::RankSort(int iType)
 					//排名最大
 					PSTALERTDATALINK pNew = (PSTALERTDATALINK)malloc(sizeof(STALERTDATALINK));
 					pNew->iAlertTimes = iAlertTimes;
-					CInfoRecord::GetInstance()->FetchVinCode(i, pNew->chVin);
+					//CInfoRecord::GetInstance()->FetchVinCode(i, pNew->chVin);
+					memcpy(pNew->chVin, g_chVin[i], (VIN_LENGTH + 1) * sizeof(uint8_t));
 					pNew->pPre = NULL;
 					pNew->pNext = pNode;
 					pNode->pPre = pNew;
@@ -459,7 +458,18 @@ void CAlertRank::OnLvnItemchangedListRank(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CAlertRank::OnAlertCategory(long iVinPos)
 {
-	CAlertCategory dlg;
+	if (NULL != m_pDlgAlertCategory)
+	{
+		delete m_pDlgAlertCategory;
+		m_pDlgAlertCategory = NULL;
+	}
+
+	m_pDlgAlertCategory = new CAlertCategory;
+	m_pDlgAlertCategory->Create(IDD_ALERTCATEGORY, this);
+	m_pDlgAlertCategory->ShowWindow(SW_SHOW);
+
+	CString csStr(g_chVin[iVinPos]);
+	m_pDlgAlertCategory->SetTitle(csStr);
 
 	int iType = -1;	//遍历每种报警类型
 
@@ -489,6 +499,7 @@ void CAlertRank::OnAlertCategory(long iVinPos)
 		}
 
 		iRank = 1;
+
 		//遍历统计每辆车报警次数，得到该车辆所在每类报警的排名
 		for (long i = 0; i < g_vehicleNum; i++)
 		{
@@ -500,11 +511,11 @@ void CAlertRank::OnAlertCategory(long iVinPos)
 			long rear = g_circleQue[i].rear;
 			for (long j = rear - 1; j >= 0; j--)
 			{
-				if (g_circleQue[iVinPos].pElem[i].F7_0 > 0 && iType < 0)
+				if (g_circleQue[i].pElem[j].F7_0 > 0 && iType < 0)
 				{
 					iAlertTimesOther += 1;
 				}
-				else if (CheckAlertFlag(g_circleQue[iVinPos].pElem[i].F7_0, iType))
+				else if (CheckAlertFlag(g_circleQue[i].pElem[j].F7_0, iType))
 				{
 					iAlertTimesOther += 1;
 				}
@@ -516,6 +527,17 @@ void CAlertRank::OnAlertCategory(long iVinPos)
 			}
 		}
 
+		m_pDlgAlertCategory->SetTypeTimesRank(iType, iAlertTimesSelf, iRank);
+
 		iType += 1;
+	}
+}
+
+void CAlertRank::DestroySubDlg()
+{
+	if (NULL != m_pDlgAlertCategory)
+	{
+		delete m_pDlgAlertCategory;
+		m_pDlgAlertCategory = NULL;
 	}
 }
