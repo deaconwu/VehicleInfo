@@ -889,8 +889,14 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 				|| infoData.F8_0[2] != (uint8_t)st.wDay)
 			{
 				//不是今天的不处理
-				latestOffset += ushortsw + 1;
-				continue;
+				//latestOffset += ushortsw + 1;
+				//continue;
+				infoData.F8_0[0] = (st.wYear % 100);
+				infoData.F8_0[1] = (uint8_t)st.wMonth;
+				infoData.F8_0[2] = (uint8_t)st.wDay;
+				infoData.F8_0[3] = (uint8_t)st.wHour;
+				infoData.F8_0[4] = (uint8_t)st.wMinute;
+				infoData.F8_0[5] = (uint8_t)st.wSecond;
 			}
 
 			latestOffset += 6;
