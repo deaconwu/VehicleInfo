@@ -8,6 +8,8 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam);
 
 CInfoRecord* CInfoRecord::m_pInstance = NULL;
 
+STDATAGRAMQUEUE g_queDataGram;
+
 long SetRecvData(const char* pRecv, STRECVDATA& stRecv, long leftOffset)
 {
 	uint8_t infoType = *pRecv;
@@ -284,6 +286,7 @@ CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNum(0), m_hThread(NULL)
 	memset(m_circleQue, 0, sizeof(m_circleQue));
 	memset(m_dataType8, 0, sizeof(m_dataType8));
 	memset(m_dataType9, 0, sizeof(m_dataType9));
+	memset(&g_queDataGram, 0, sizeof(STDATAGRAMQUEUE));
 }
 
 long CInfoRecord::FindVinPos(uint8_t pVin[])

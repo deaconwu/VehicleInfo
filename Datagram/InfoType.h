@@ -189,6 +189,19 @@ typedef struct DataOneWeek
 	unsigned long iFaultNum;
 } STDATAONEWEEK;
 
+typedef struct DataBuffGram
+{
+	char recvData[BUFFER_SIZE];
+	int recvSize;
+	struct DataBuffGram* pNext;
+} STDATABUFFGRAM, *PSTDATABUFFGRAM;
+
+typedef struct DataGramQueue
+{
+	PSTDATABUFFGRAM front;
+	PSTDATABUFFGRAM rear;
+} STDATAGRAMQUEUE;
+
 /***********************************************/
 #pragma pack()
 #endif
