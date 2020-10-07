@@ -6,9 +6,13 @@
 
 DWORD WINAPI OnReceiveThread(LPVOID lparam);
 
+DWORD WINAPI OnParseThread(LPVOID lparam);
+
 CInfoRecord* CInfoRecord::m_pInstance = NULL;
 
 STDATAGRAMQUEUE g_queDataGram;
+
+HANDLE g_hMutex = CreateMutex(NULL, FALSE, _T("InfoRecord"));
 
 long SetRecvData(const char* pRecv, STRECVDATA& stRecv, long leftOffset)
 {
@@ -280,7 +284,7 @@ void CInfoRecord::WriteVin()
 	fclose(fpWrite);
 }
 
-CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNum(0), m_hThread(NULL)
+CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNum(0), m_hThreadRecv(NULL), m_hThreadParse(NULL)
 {
 	memset(m_chVin, 0, sizeof(m_chVin));
 	memset(m_circleQue, 0, sizeof(m_circleQue));
@@ -731,10 +735,16 @@ long CInfoRecord::RecordInfoType9(long pos, const char* pRecv, long leftOffset)
 
 bool CInfoRecord::OnRealTimeRecv(HWND hWnd, sockaddr_in serAddr)
 {
-	if (NULL != m_hThread)
+	if (NULL != m_hThreadRecv)
 	{
-		CloseHandle(m_hThread);
-		m_hThread = NULL;
+		CloseHandle(m_hThreadRecv);
+		m_hThreadRecv = NULL;
+	}
+
+	if (NULL != m_hThreadParse)
+	{
+		CloseHandle(m_hThreadParse);
+		m_hThreadParse = NULL;
 	}
 
 	SOCKET pSocket = CInfoSocket::GetInstance()->OnConnect(serAddr);
@@ -743,10 +753,13 @@ bool CInfoRecord::OnRealTimeRecv(HWND hWnd, sockaddr_in serAddr)
 		return false;
 	}
 
-	DWORD dwThreadId;
-	m_hThread = CreateThread(NULL, NULL, OnReceiveThread, hWnd, 0, &dwThreadId);
+	DWORD dwThreadIdRecv;
+	m_hThreadRecv = CreateThread(NULL, NULL, OnReceiveThread, hWnd, 0, &dwThreadIdRecv);
 
-	if (NULL == m_hThread)
+	DWORD dwThreadIdParse;
+	m_hThreadParse = CreateThread(NULL, NULL, OnParseThread, hWnd, 0, &dwThreadIdParse);
+
+	if (NULL == m_hThreadRecv || NULL == m_hThreadParse)
 		CInfoSocket::GetInstance()->OnClose();
 
 	return true;
@@ -757,6 +770,11 @@ bool CInfoRecord::OnStopRecv()
 	OnClose();
 
 	return true;
+}
+
+void CInfoRecord::OnClearDataGram()
+{
+	memset(&g_queDataGram, 0, sizeof(STDATAGRAMQUEUE));
 }
 
 void CInfoRecord::OnReset()
@@ -817,6 +835,49 @@ void CInfoRecord::OnClose()
 DWORD WINAPI OnReceiveThread(LPVOID lparam)
 {
 	HWND hWnd = (HWND)lparam;
+
+	while (1)
+	{
+		if (CInfoSocket::GetInstance()->CheckClose())
+		{
+			PostMessage(hWnd, UM_STOPRECV, NULL, 0);
+			break;
+		}
+
+		char recvData[BUFFER_SIZE] = {};
+		INT recvSize = CInfoSocket::GetInstance()->OnReceive(recvData);
+		DWORD dwLastErr = GetLastError();
+
+		if (recvSize <= 0)
+		{
+			continue;
+		}
+
+		PSTDATABUFFGRAM pNode = (PSTDATABUFFGRAM)malloc(sizeof(STDATABUFFGRAM));
+		memcpy(pNode->recvData, recvData, recvSize * sizeof(char));
+		pNode->recvSize = recvSize;
+		pNode->pNext = NULL;
+
+		WaitForSingleObject(g_hMutex, INFINITE);
+		if (g_queDataGram.front == NULL)
+		{
+			g_queDataGram.rear = pNode;
+			g_queDataGram.front = g_queDataGram.rear;
+		}
+		else
+		{
+			g_queDataGram.rear->pNext = pNode;
+			g_queDataGram.rear = pNode;
+		}
+		ReleaseMutex(g_hMutex);
+	}
+
+	return 0;
+}
+
+DWORD WINAPI OnParseThread(LPVOID lparam)
+{
+	HWND hWnd = (HWND)lparam;
 	int num = 0;
 
 	SYSTEMTIME st;
@@ -828,17 +889,17 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 	{
 		if (CInfoSocket::GetInstance()->CheckClose())
 		{
-			PostMessage(hWnd, UM_CLOSE, NULL, 0);
+			PostMessage(hWnd, UM_STOPPARSE, NULL, 0);
 			break;
 		}
-		//if (num > 10)
-		//	break;
-		
+
+		if (g_queDataGram.front == NULL)
+			continue;
+
 		GetLocalTime(&st);
 
 		//触发主线程统计历史数据
-		if (datePre.wDay!=st.wDay || datePre.wMonth != st.wMonth || datePre.wYear!=st.wYear)
-		//if (num > 100)
+		if (datePre.wDay != st.wDay || datePre.wMonth != st.wMonth || datePre.wYear != st.wYear)
 		{
 			SendMessage(hWnd, UM_HISTORY, (WPARAM)&st.wDayOfWeek, NULL);
 		}
@@ -847,14 +908,17 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 		datePre.wMonth = st.wMonth;
 		datePre.wDay = st.wDay;
 
-		char recvData[BUFFER_SIZE] = {};
-		INT recvSize = CInfoSocket::GetInstance()->OnReceive(recvData);
-		DWORD dwLastErr = GetLastError();
+		WaitForSingleObject(g_hMutex, INFINITE);
+		PSTDATABUFFGRAM pNode = g_queDataGram.front;
+		g_queDataGram.front = g_queDataGram.front->pNext;
 
-		if (recvSize <= 0)
-		{
-			continue;
-		}
+		char recvData[BUFFER_SIZE] = {};
+		memcpy(recvData, pNode->recvData, pNode->recvSize * sizeof(char));
+		INT recvSize = pNode->recvSize;
+
+		free(pNode);
+		pNode = NULL;
+		ReleaseMutex(g_hMutex);
 
 		long lastOffset = 0;
 		long latestOffset = 0;
@@ -916,14 +980,14 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 			long curOffset = latestOffset;
 
 			//信息类型信息体
-			while (latestOffset < (ushortsw-6) + curOffset && latestOffset < recvSize - 1)
+			while (latestOffset < (ushortsw - 6) + curOffset && latestOffset < recvSize - 1)
 			{
 				if (memcmp(&recvData[latestOffset], "##", 2) == 0)
 					break;
 
 				uint8_t infoType = recvData[latestOffset];
 				long localOffset = 0;
-				long leftOffset = (ushortsw-6) + curOffset - latestOffset;
+				long leftOffset = (ushortsw - 6) + curOffset - latestOffset;
 
 				if (infoType == 1 || infoType == 2 || infoType == 5 || infoType == 6 || infoType == 7)
 				{
@@ -950,23 +1014,15 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 
 			CInfoRecord::GetInstance()->RecordInfo(pos, infoData);
 
-			//if (infoData.F7_0 > 0)
-			//	CInfoRecord::GetInstance()->WriteVin();
-
 			if (infoData.F7_0 > 0)
 			{
 				STALERTDATAPOST alertPost = {};
 				memcpy(alertPost.chVin, strVin, sizeof(strVin));
 				alertPost.F7_0 = infoData.F7_0;
 				PostMessage(hWnd, UM_ALERT, (WPARAM)&alertPost, 0);
-				//num++;
 			}
 		}
-
-		num++;
 	}
-
-	//CInfoSocket::GetInstance()->OnClose();
 
 	return 0;
 }

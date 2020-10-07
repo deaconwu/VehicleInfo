@@ -5,7 +5,8 @@
 
 #define UM_HISTORY WM_USER+1
 #define UM_ALERT WM_USER+2
-#define UM_CLOSE WM_USER+3
+#define UM_STOPRECV WM_USER+3
+#define UM_STOPPARSE WM_USER+4
 
 class CInfoRecord //: public CSingleton<CInfoRecord>
 {
@@ -47,6 +48,7 @@ public:
 	bool OnRealTimeRecv(HWND hWnd, sockaddr_in serAddr);
 	bool OnStopRecv();
 
+	void OnClearDataGram();
 	void OnReset();
 	void OnClose();
 
@@ -82,7 +84,8 @@ private:
 	long m_vehicleNum;
 	bool m_bLockFlag;	//录入新vin码涉及到排序移位，点击查询，需要等待查询完成再继续录入排序
 
-	HANDLE m_hThread;
+	HANDLE m_hThreadRecv;
+	HANDLE m_hThreadParse;
 
 	static CInfoRecord* m_pInstance;
 };

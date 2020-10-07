@@ -200,7 +200,7 @@ typedef struct DataGramQueue
 {
 	PSTDATABUFFGRAM front;
 	PSTDATABUFFGRAM rear;
-} STDATAGRAMQUEUE;
+} STDATAGRAMQUEUE, *PSTDATAGRAMQUEUE;
 
 /***********************************************/
 #pragma pack()
