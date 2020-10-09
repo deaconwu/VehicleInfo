@@ -774,6 +774,15 @@ bool CInfoRecord::OnStopRecv()
 
 void CInfoRecord::OnClearDataGram()
 {
+	while (g_queDataGram.front != NULL)
+	{
+		PSTDATABUFFGRAM pNode = g_queDataGram.front;
+		g_queDataGram.front = g_queDataGram.front->pNext;
+
+		free(pNode);
+		pNode = NULL;
+	}
+
 	memset(&g_queDataGram, 0, sizeof(STDATAGRAMQUEUE));
 }
 
@@ -889,7 +898,7 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 	{
 		if (CInfoSocket::GetInstance()->CheckClose())
 		{
-			PostMessage(hWnd, UM_STOPPARSE, NULL, 0);
+			SendMessage(hWnd, UM_STOPPARSE, NULL, 0);
 			break;
 		}
 
