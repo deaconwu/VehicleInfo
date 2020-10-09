@@ -3,11 +3,6 @@
 #include "InfoType.h"
 #include "CInfoSocket.h"
 
-#define UM_HISTORY WM_USER+1
-#define UM_ALERT WM_USER+2
-#define UM_STOPRECV WM_USER+3
-#define UM_STOPPARSE WM_USER+4
-
 class CInfoRecord //: public CSingleton<CInfoRecord>
 {
 public:
@@ -43,6 +38,11 @@ public:
 	{
 		memset(chVin, 0, (VIN_LENGTH+1) * sizeof(uint8_t));
 		memcpy(chVin, m_chVin[pos], VIN_LENGTH * sizeof(uint8_t));
+	}
+
+	long GetDatagramNum()
+	{
+		return m_datagramNum;
 	}
 
 	bool OnRealTimeRecv(HWND hWnd, sockaddr_in serAddr);
@@ -82,6 +82,7 @@ private:
 	STRECVDATATYPE9 m_dataType9[MAX_VEHICLENUM];	//温度数据
 
 	long m_vehicleNum;
+	long m_datagramNum;
 	bool m_bLockFlag;	//录入新vin码涉及到排序移位，点击查询，需要等待查询完成再继续录入排序
 
 	HANDLE m_hThreadRecv;

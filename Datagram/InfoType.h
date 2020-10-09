@@ -11,6 +11,7 @@ typedef unsigned int uint32_t;
 #define QUEUE_SIZE  10000   //队列长度
 #define CELLNUM_PER_FRAM 200 //本帧最大电池数
 #define ALERTTIMES_REANK_NUM 20
+#define ALERT_CATEGORY_NUM 20
 #define MAX_VEHICLENUM 200000
 
 #pragma pack (1)
@@ -177,10 +178,28 @@ typedef struct AlertDataLink
 	struct AlertDataLink* pNext;
 } STALERTDATALINK, *PSTALERTDATALINK;
 
+typedef struct AlertRankSeq
+{
+	uint8_t chVin[VIN_LENGTH + 1];
+	uint32_t iAlertTimes;
+} STALERTRANKSEQ;
+
+typedef struct MsgAlertRankSeq
+{
+	uint8_t iNum;
+	STALERTRANKSEQ stNode[ALERTTIMES_REANK_NUM];	//变长，最多ALERTTIMES_REANK_NUM
+} STMSGALERTRANKSEQ;
+
+typedef struct MsgAlertCategory
+{
+	uint32_t iAlertTimes[ALERT_CATEGORY_NUM];
+	uint32_t iRank[ALERT_CATEGORY_NUM];
+} STMSGALERTCATEGORY;
+
 typedef struct DayVehicle
 {
 	long lVehicleNum;
-	WORD wDayOfWeek;
+	uint16_t wDayOfWeek;
 } STDAYVEHICLE;
 
 typedef struct DataOneWeek

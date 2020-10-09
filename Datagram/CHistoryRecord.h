@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _C_HISTORY_RECORD_H_
+#define _C_HISTORY_RECORD_H_
 
 #include <windows.h>
 #include "InfoType.h"
@@ -18,13 +19,13 @@ public:
 
 	static CHistoryRecord* GetInstance()
 	{
-		if (NULL == m_pInstance)
+		if (0 == m_pInstance)
 			m_pInstance = new CHistoryRecord;
 
 		return m_pInstance;
 	}
 
-	void OnRecord(WORD wDayOfWeek);
+	void OnRecord(uint16_t wDayOfWeek);
 
 	void YesterdayAppend(long lVehicleNum);
 
@@ -53,3 +54,5 @@ private:
 	//最近数据(今日以外)
 	uint32_t m_iLatestMileage[MAX_VEHICLENUM];
 };
+
+#endif

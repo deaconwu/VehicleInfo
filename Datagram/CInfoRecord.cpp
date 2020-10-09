@@ -1,8 +1,9 @@
 #include <thread>
 #include <stdio.h>
 #include <stdlib.h>
-#include "..\pch.h"
+#include <tchar.h>
 #include "CInfoRecord.h"
+#include "UserMessage.h"
 
 DWORD WINAPI OnReceiveThread(LPVOID lparam);
 
@@ -284,7 +285,7 @@ void CInfoRecord::WriteVin()
 	fclose(fpWrite);
 }
 
-CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNum(0), m_hThreadRecv(NULL), m_hThreadParse(NULL)
+CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNum(0), m_datagramNum(0), m_hThreadRecv(NULL), m_hThreadParse(NULL)
 {
 	memset(m_chVin, 0, sizeof(m_chVin));
 	memset(m_circleQue, 0, sizeof(m_circleQue));
@@ -485,6 +486,8 @@ void CInfoRecord::RecordInfo(long pos, STRECVDATA stRecv)
 	long rear = m_circleQue[pos].rear;
 	memcpy(&m_circleQue[pos].pElem[rear], &stRecv, sizeof(STRECVDATA));
 	m_circleQue[pos].rear = (m_circleQue[pos].rear + 1) % QUEUE_SIZE;
+
+	m_datagramNum += 1;
 }
 
 long CInfoRecord::RecordInfoType8(long pos, const char* pRecv, long leftOffset)
@@ -774,6 +777,7 @@ bool CInfoRecord::OnStopRecv()
 
 void CInfoRecord::OnClearDataGram()
 {
+	WaitForSingleObject(g_hMutex, INFINITE);
 	while (g_queDataGram.front != NULL)
 	{
 		PSTDATABUFFGRAM pNode = g_queDataGram.front;
@@ -784,6 +788,7 @@ void CInfoRecord::OnClearDataGram()
 	}
 
 	memset(&g_queDataGram, 0, sizeof(STDATAGRAMQUEUE));
+	ReleaseMutex(g_hMutex);
 }
 
 void CInfoRecord::OnReset()
@@ -834,6 +839,7 @@ void CInfoRecord::OnReset()
 
 	m_bLockFlag = false;
 	m_vehicleNum = 0;
+	m_datagramNum = 0;
 }
 
 void CInfoRecord::OnClose()
@@ -898,7 +904,7 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 	{
 		if (CInfoSocket::GetInstance()->CheckClose())
 		{
-			SendMessage(hWnd, UM_STOPPARSE, NULL, 0);
+			PostMessage(hWnd, UM_STOPPARSE, NULL, 0);
 			break;
 		}
 
@@ -1025,6 +1031,9 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 
 			if (infoData.F7_0 > 0)
 			{
+				if (CInfoSocket::GetInstance()->CheckClose())
+					break;
+
 				STALERTDATAPOST alertPost = {};
 				memcpy(alertPost.chVin, strVin, sizeof(strVin));
 				alertPost.F7_0 = infoData.F7_0;

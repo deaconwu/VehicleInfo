@@ -15,7 +15,7 @@ CHistoryRecord::CHistoryRecord() : m_vehicleNumLastWeek(0), m_vehicleNumThisWeek
 	memset(m_iLatestMileage, 0, sizeof(m_iLatestMileage));
 }
 
-void CHistoryRecord::OnRecord(WORD wDayOfWeek)
+void CHistoryRecord::OnRecord(uint16_t wDayOfWeek)
 {
 	if (NULL != m_hThread)
 	{
