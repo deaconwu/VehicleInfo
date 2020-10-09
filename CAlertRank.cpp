@@ -241,6 +241,8 @@ void CAlertRank::RankSort(int iType)
 		return;
 	}
 
+	//PostThreadMessage(GetThreadId(th1), WM_DELOK, 0, 0);
+
 	SYSTEMTIME st;
 	GetLocalTime(&st);
 

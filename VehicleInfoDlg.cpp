@@ -33,7 +33,8 @@ BEGIN_MESSAGE_MAP(CVehicleInfoDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1, &CVehicleInfoDlg::OnTcnSelchangeTab1)
 	ON_MESSAGE(UM_ALERT, &CVehicleInfoDlg::OnRealAlert)
-	ON_MESSAGE(UM_CLOSE, &CVehicleInfoDlg::OnRealStop)
+	ON_MESSAGE(UM_STOPRECV, &CVehicleInfoDlg::OnRealStopRecv)
+	ON_MESSAGE(UM_STOPPARSE, &CVehicleInfoDlg::OnRealStopParse)
 	ON_MESSAGE(UM_HISTORY, &CVehicleInfoDlg::OnHistoryRecord)
 	ON_BN_CLICKED(IDC_BTN_CONNECT, &CVehicleInfoDlg::OnBnClickedBtnConnect)
 	ON_BN_CLICKED(IDC_BTN_DISCONNECT, &CVehicleInfoDlg::OnBnClickedBtnDisconnect)
@@ -48,7 +49,14 @@ LRESULT CVehicleInfoDlg::OnRealAlert(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-LRESULT CVehicleInfoDlg::OnRealStop(WPARAM wParam, LPARAM lParam)
+LRESULT CVehicleInfoDlg::OnRealStopRecv(WPARAM wParam, LPARAM lParam)
+{
+	CInfoRecord::GetInstance()->OnClearDataGram();
+
+	return 0;
+}
+
+LRESULT CVehicleInfoDlg::OnRealStopParse(WPARAM wParam, LPARAM lParam)
 {
 	CInfoRecord::GetInstance()->OnReset();
 
