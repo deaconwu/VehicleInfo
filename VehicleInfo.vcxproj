@@ -211,11 +211,13 @@
     <ClInclude Include="CQuery.h" />
     <ClInclude Include="CRealTimeRecv.h" />
     <ClInclude Include="CStatistics.h" />
+    <ClInclude Include="Datagram\CAlertStats.h" />
     <ClInclude Include="Datagram\CHistoryRecord.h" />
     <ClInclude Include="Datagram\CInfoRecord.h" />
     <ClInclude Include="Datagram\CInfoSingleton.h" />
     <ClInclude Include="Datagram\CInfoSocket.h" />
     <ClInclude Include="Datagram\InfoType.h" />
+    <ClInclude Include="Datagram\UserMessage.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
@@ -230,6 +232,7 @@
     <ClCompile Include="CQuery.cpp" />
     <ClCompile Include="CRealTimeRecv.cpp" />
     <ClCompile Include="CStatistics.cpp" />
+    <ClCompile Include="Datagram\CAlertStats.cpp" />
     <ClCompile Include="Datagram\CHistoryRecord.cpp" />
     <ClCompile Include="Datagram\CInfoRecord.cpp" />
     <ClCompile Include="Datagram\CInfoSocket.cpp" />

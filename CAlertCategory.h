@@ -13,6 +13,7 @@ public:
 
 	void SetTitle(CString csStr);
 	void SetTypeTimesRank(int iType, uint32_t iTimes, uint32_t iRank);
+	void OnLauch(char chVin[]);
 
 // 对话框数据
 #ifdef AFX_DESIGN_TIME
@@ -22,6 +23,9 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
 	virtual BOOL OnInitDialog();
+
+	LRESULT OnAlertStatsCategory(WPARAM wParam, LPARAM lParam);
+
 	DECLARE_MESSAGE_MAP()
 private:
 	CListCtrl m_listCategory;

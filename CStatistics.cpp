@@ -32,7 +32,8 @@ void CStatistics::DoDataExchange(CDataExchange* pDX)
 BOOL CStatistics::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
-	
+
+	((CEdit*)GetDlgItem(IDC_EDIT_DATAGRAMSUM))->EnableWindow(false);
 	((CEdit*)GetDlgItem(IDC_EDIT_VEHICLESUM))->EnableWindow(false);
 	((CEdit*)GetDlgItem(IDC_EDIT_VEHICLEONLINE))->EnableWindow(false);
 
@@ -73,6 +74,7 @@ void CStatistics::OnQueryStatis()
 
 	memset(g_circleQue, 0, sizeof(g_circleQue));
 	long vehicleNum = CInfoRecord::GetInstance()->GetQueInfo(g_circleQue);
+	long datagramNum = CInfoRecord::GetInstance()->GetDatagramNum();
 	CString csStr;
 
 	SYSTEMTIME st;
@@ -83,6 +85,11 @@ void CStatistics::OnQueryStatis()
 	int nWeekLast = nWeekCur - 1;
 	if (nWeekCur == 1)
 		nWeekLast = 53;	//上一年的最后一周
+
+	//报文数
+	csStr = _T("");
+	csStr.Format(_T("%lu"), datagramNum);
+	((CEdit*)GetDlgItem(IDC_EDIT_DATAGRAMSUM))->SetWindowTextW(csStr);
 
 	//接入车辆数
 	csStr = _T("");

@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "CInfoRecord.h"
+//#include "CInfoRecord.h"
 #include "CAlertCategory.h"
 
 // CAlertRank 对话框
@@ -15,22 +15,22 @@ public:
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ALERTRANK };
 #endif
-	void RankSort(int iType=-1);
+
+	void RankLaunch();
+
 	void DestroySubDlg();
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
 	virtual BOOL OnInitDialog();
+
+	LRESULT OnAlertStatsRank(WPARAM wParam, LPARAM lParam);
+
 	DECLARE_MESSAGE_MAP()
 public:
 	CComboBox m_cbRankTypeChoice;
 	CListCtrl m_listRank;
-	afx_msg void OnCbnSelchangeComboRanktype();
-
-private:
-	bool CheckAlertFlag(uint32_t iData, int iType);
-
-	void OnAlertCategory(long iVinPos);
+	afx_msg void OnCbnSelchangeComboRanktype();;
 	
 public:
 	afx_msg void OnLvnItemchangedListRank(NMHDR *pNMHDR, LRESULT *pResult);

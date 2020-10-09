@@ -3,6 +3,7 @@
 //
 
 #pragma once
+
 #include "CQuery.h"
 #include "CStatistics.h"
 #include "CAlertData.h"
@@ -20,7 +21,7 @@ public:
 	enum { IDD = IDD_VEHICLEINFO_DIALOG };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
 	LRESULT OnRealAlert(WPARAM wParam, LPARAM lParam);
 	LRESULT OnRealStopRecv(WPARAM wParam, LPARAM lParam);

@@ -4,6 +4,8 @@
 #include "pch.h"
 #include "VehicleInfo.h"
 #include "CAlertCategory.h"
+#include "CAlertStats.h"
+#include "UserMessage.h"
 #include "afxdialogex.h"
 
 // CAlertCategory 对话框
@@ -24,6 +26,7 @@ CAlertCategory::CAlertCategory(CWnd* pParent /*=nullptr*/)
 
 CAlertCategory::~CAlertCategory()
 {
+	CAlertStats::GetInstance()->OnStopAlertCategory();
 }
 
 void CAlertCategory::DoDataExchange(CDataExchange* pDX)
@@ -59,6 +62,11 @@ void CAlertCategory::SetTitle(CString csStr)
 	((CStatic*)GetDlgItem(IDC_TITLE))->SetWindowText(_T("车辆Vin码: ")+csStr);
 }
 
+void CAlertCategory::OnLauch(char chVin[])
+{
+	CAlertStats::GetInstance()->OnLaunchAlertCategory(this->m_hWnd, (uint8_t*)chVin);
+}
+
 void CAlertCategory::SetTypeTimesRank(int iType, uint32_t iTimes, uint32_t iRank)
 {
 	CString csStr;
@@ -69,7 +77,20 @@ void CAlertCategory::SetTypeTimesRank(int iType, uint32_t iTimes, uint32_t iRank
 }
 
 BEGIN_MESSAGE_MAP(CAlertCategory, CDialogEx)
+	ON_MESSAGE(UM_ALERTCATEGORY, &CAlertCategory::OnAlertStatsCategory)
 END_MESSAGE_MAP()
 
-
 // CAlertCategory 消息处理程序
+
+
+LRESULT CAlertCategory::OnAlertStatsCategory(WPARAM wParam, LPARAM lParam)
+{
+	STMSGALERTCATEGORY* pMsg = (STMSGALERTCATEGORY*)wParam;
+
+	for (int i = 0; i < ALERT_CATEGORY_NUM; i++)
+	{
+		SetTypeTimesRank(i-1, pMsg->iAlertTimes[i], pMsg->iRank[i]);
+	}
+
+	return 0;
+}

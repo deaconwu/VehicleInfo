@@ -7,8 +7,10 @@
 #include "VehicleInfo.h"
 #include "VehicleInfoDlg.h"
 #include "afxdialogex.h"
+#include "CAlertStats.h"
 #include "CInfoRecord.h"
 #include "CHistoryRecord.h"
+#include "UserMessage.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -194,7 +196,8 @@ void CVehicleInfoDlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 		m_query.ShowWindow(SW_HIDE);
 		m_alertData.ShowWindow(SW_HIDE);
 		m_alertRank.ShowWindow(SW_SHOW);
-		m_alertRank.RankSort();
+		//m_alertRank.RankSort();
+		m_alertRank.RankLaunch();
 		break;
 	default:
 		break;
@@ -230,5 +233,7 @@ void CVehicleInfoDlg::OnBnClickedBtnConnect()
 
 void CVehicleInfoDlg::OnBnClickedBtnDisconnect()
 {
+	CAlertStats::GetInstance()->OnStopAlertRank();
+	CAlertStats::GetInstance()->OnStopAlertCategory();
 	CInfoRecord::GetInstance()->OnStopRecv();
 }

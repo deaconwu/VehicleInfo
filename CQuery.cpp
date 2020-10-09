@@ -203,13 +203,13 @@ void CQuery::OnBnClickedBtnQuery()
 	((CEdit*)GetDlgItem(IDC_EDIT_MILEAGE))->SetWindowTextW(csStr);
 
 	//今日里程
-	uint32_t iLatestMileage = CHistoryRecord::GetInstance()->GetLatestMileage((uint8_t*)chVin);
-	if (stData.F1_4 >= iLatestMileage)
-	{
-		csStr = _T("");
-		csStr.Format(_T("%u"), stData.F1_4-iLatestMileage);
-		((CEdit*)GetDlgItem(IDC_EDIT_MILEAGETODAY))->SetWindowTextW(csStr);
-	}
+// 	uint32_t iLatestMileage = CHistoryRecord::GetInstance()->GetLatestMileage((uint8_t*)chVin);
+// 	if (stData.F1_4 >= iLatestMileage)
+// 	{
+// 		csStr = _T("");
+// 		csStr.Format(_T("%u"), stData.F1_4-iLatestMileage);
+// 		((CEdit*)GetDlgItem(IDC_EDIT_MILEAGETODAY))->SetWindowTextW(csStr);
+// 	}
 
 	//电机状态
 	if (stData.F2_0 == 1)

@@ -108,6 +108,8 @@
 #define IDC_STATIC15                    1067
 #define IDC_EDIT_VEHICLEOFFLINELASTWEEK 1067
 #define IDC_STATIC16                    1068
+#define IDC_EDIT_VEHICLESUM2            1068
+#define IDC_EDIT_DATAGRAMSUM            1068
 #define IDC_STATIC17                    1069
 #define IDC_STATIC18                    1070
 #define IDC_EDIT_ALERTVIN               1071
