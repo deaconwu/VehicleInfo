@@ -1,3 +1,4 @@
+#include "../pch.h"
 #include "CHistoryRecord.h"
 #include "CInfoRecord.h"
 

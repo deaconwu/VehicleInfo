@@ -1,3 +1,4 @@
+#include "../pch.h"
 #include <thread>
 #include <stdio.h>
 #include <stdlib.h>
@@ -348,10 +349,10 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 	if (pVin[0] != 'L')
 		return -1;
 
-	if (pVin[1] <'A' || (pVin[1] > 'Z' && pVin[1] < 'a') || pVin[1]>'z')
-		return -1;
+// 	if (pVin[1] <'A' || (pVin[1] > 'Z' && pVin[1] < 'a') || pVin[1]>'z')
+// 		return -1;
 
-	for (int i = 2; i < VIN_LENGTH; i++)
+	for (int i = 1; i < VIN_LENGTH; i++)
 	{
 		if (pVin[i] < '0' || (pVin[i] > '9' && pVin[i] < 'A') || (pVin[i] > 'Z' && pVin[i] < 'a') || pVin[i]>'z')
 			return -1;
