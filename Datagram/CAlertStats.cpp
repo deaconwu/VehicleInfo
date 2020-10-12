@@ -1,5 +1,5 @@
 //#include <thread>
-#include "../pch.h"
+#include "pch.h"
 #include "CAlertStats.h"
 #include "UserMessage.h"
 #include "CInfoRecord.h"

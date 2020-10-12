@@ -1,4 +1,4 @@
-#include "../pch.h"
+#include "pch.h"
 #include <thread>
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,6 +13,8 @@ DWORD WINAPI OnParseThread(LPVOID lparam);
 CInfoRecord* CInfoRecord::m_pInstance = NULL;
 
 STDATAGRAMQUEUE g_queDataGram;
+
+long long g_lRecvSizeSum = 0;
 
 HANDLE g_hMutex = CreateMutex(NULL, FALSE, _T("InfoRecord"));
 
@@ -276,14 +278,14 @@ long SetRecvData(const char* pRecv, STRECVDATA& stRecv, long leftOffset)
 
 void CInfoRecord::WriteVin()
 {
-	FILE *fpWrite = fopen("vinsort.txt", "wb+");
-	for (long i = 0; i < m_vehicleNum; i++)
-	{
-		fprintf(fpWrite, "%s", m_chVin[i]);
-		if (i != m_vehicleNum - 1)
-			fprintf(fpWrite, "\n");
-	}
-	fclose(fpWrite);
+// 	FILE *fpWrite = fopen("vinsort.txt", "wb+");
+// 	for (long i = 0; i < m_vehicleNum; i++)
+// 	{
+// 		fprintf(fpWrite, "%s", m_chVin[i]);
+// 		if (i != m_vehicleNum - 1)
+// 			fprintf(fpWrite, "\n");
+// 	}
+// 	fclose(fpWrite);
 }
 
 CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNum(0), m_datagramNum(0), m_hThreadRecv(NULL), m_hThreadParse(NULL)
@@ -358,10 +360,10 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 			return -1;
 	}
 
-	do
+	while (m_bLockFlag)
 	{
-
-	}while (m_bLockFlag);
+		printf("bLock");
+	}
 
 	if (m_vehicleNum == 0)
 	{
@@ -462,16 +464,17 @@ void CInfoRecord::GetVinInfo(uint8_t chVin[][VIN_LENGTH + 1])
 	m_bLockFlag = false;
 }
 
-void CInfoRecord::RecordInfo(long pos, STRECVDATA stRecv)
+void CInfoRecord::RecordInfo(long pos, STRECVDATA& stRecv)
 {
 	if (pos >= m_vehicleNum || pos < 0)
 	{
 		return;
 	}
 
-	do
+	while (m_bLockFlag)
 	{
-	} while (m_bLockFlag);
+		printf("bLock");
+	}
 
 	if (NULL == m_circleQue[pos].pElem)
 		return;
@@ -503,10 +506,10 @@ long CInfoRecord::RecordInfoType8(long pos, const char* pRecv, long leftOffset)
 	uint8_t uchar;
 	uint16_t ushortsw;
 
-	do
+	while (m_bLockFlag)
 	{
-
-	} while (m_bLockFlag);
+		printf("bLock");
+	}
 
 	m_dataType8[pos].F8_0 = *pRecv;
 	offset += sizeof(m_dataType8[pos].F8_0);
@@ -655,10 +658,10 @@ long CInfoRecord::RecordInfoType9(long pos, const char* pRecv, long leftOffset)
 	if (*pRecv == 0)
 		return 0;
 
-	do
+	while (m_bLockFlag)
 	{
-
-	} while (m_bLockFlag);
+		printf("bLock");
+	}
 
 	if (NULL != m_dataType9[pos].pF9_1)
 	{
@@ -841,6 +844,7 @@ void CInfoRecord::OnReset()
 	m_bLockFlag = false;
 	m_vehicleNum = 0;
 	m_datagramNum = 0;
+	g_lRecvSizeSum = 0;
 }
 
 void CInfoRecord::OnClose()
@@ -868,7 +872,7 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 		{
 			continue;
 		}
-
+		g_lRecvSizeSum += recvSize;
 		PSTDATABUFFGRAM pNode = (PSTDATABUFFGRAM)malloc(sizeof(STDATABUFFGRAM));
 		memcpy(pNode->recvData, recvData, recvSize * sizeof(char));
 		pNode->recvSize = recvSize;
@@ -910,7 +914,11 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 		}
 
 		if (g_queDataGram.front == NULL)
+		{
+			char recvData[BUFFER_SIZE] = {};
+			INT recvSize = CInfoSocket::GetInstance()->OnReceive(recvData);
 			continue;
+		}
 
 		GetLocalTime(&st);
 

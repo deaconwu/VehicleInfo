@@ -1,4 +1,4 @@
-#include "../pch.h"
+#include "pch.h"
 #include "CInfoSocket.h"
 
 uint16_t SWAPWORD1(const char* pRecv)

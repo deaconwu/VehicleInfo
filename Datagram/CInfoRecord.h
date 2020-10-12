@@ -63,7 +63,7 @@ public:
 	void GetVinInfo(uint8_t chVin[][VIN_LENGTH + 1]);
 
 	//录入车辆信息，信息类型1~7
-	void RecordInfo(long pos, STRECVDATA stRecv);
+	void RecordInfo(long pos, STRECVDATA& stRecv);
 
 	//录入车辆信息8
 	long RecordInfoType8(long pos, const char* pRecv, long leftOffset);
