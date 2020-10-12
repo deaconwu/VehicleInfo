@@ -57,8 +57,7 @@ BOOL CAlertData::OnInitDialog()
 
 void CAlertData::UpdateAlert(unsigned int iF7_0, CString cstrVin)
 {
-	//CString cstrVin(pVinStr);
-	((CEdit*)GetDlgItem(IDC_EDIT_ALERTVIN))->SetWindowTextW(cstrVin);
+	((CEdit*)GetDlgItem(IDC_EDIT_ALERTVIN))->SetWindowText(cstrVin);
 
 	bool bFlag = iF7_0 % 2 > 0 ? true : false;
 	((CStatic*)GetDlgItem(IDC_STATIC0))->EnableWindow(bFlag);
