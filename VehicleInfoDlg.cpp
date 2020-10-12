@@ -9,7 +9,7 @@
 #include "afxdialogex.h"
 #include "CAlertStats.h"
 #include "CInfoRecord.h"
-#include "CHistoryRecord.h"
+// #include "CHistoryRecord.h"
 #include "UserMessage.h"
 
 #ifdef _DEBUG
@@ -72,8 +72,8 @@ LRESULT CVehicleInfoDlg::OnRealStopParse(WPARAM wParam, LPARAM lParam)
 
 LRESULT CVehicleInfoDlg::OnHistoryRecord(WPARAM wParam, LPARAM lParam)
 {
-	WORD* pDayOfWeek = (WORD*)wParam;
-	CHistoryRecord::GetInstance()->OnRecord(*pDayOfWeek);
+// 	WORD* pDayOfWeek = (WORD*)wParam;
+// 	CHistoryRecord::GetInstance()->OnRecord(*pDayOfWeek);
 
 	return 0;
 }
@@ -92,7 +92,7 @@ BOOL CVehicleInfoDlg::OnInitDialog()
 	// TODO: 在此添加额外的初始化代码
 	SetWindowText(_T("车辆信息"));
 
-	m_query.Create(IDD_QUERY, &m_tab);
+ 	m_query.Create(IDD_QUERY, &m_tab);
 	m_statistics.Create(IDD_STATISTICS, &m_tab);
 	m_alertData.Create(IDD_ALERTDATA, &m_tab);
 	m_alertRank.Create(IDD_ALERTRANK, &m_tab);
@@ -233,7 +233,7 @@ void CVehicleInfoDlg::OnBnClickedBtnConnect()
 
 void CVehicleInfoDlg::OnBnClickedBtnDisconnect()
 {
-	CAlertStats::GetInstance()->OnStopAlertRank();
-	CAlertStats::GetInstance()->OnStopAlertCategory();
-	CInfoRecord::GetInstance()->OnStopRecv();
+ 	CAlertStats::GetInstance()->OnStopAlertRank();
+ 	CAlertStats::GetInstance()->OnStopAlertCategory();
+ 	CInfoRecord::GetInstance()->OnStopRecv();
 }

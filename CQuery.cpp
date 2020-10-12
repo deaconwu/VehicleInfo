@@ -6,7 +6,7 @@
 #include "CQuery.h"
 #include "afxdialogex.h"
 #include "CInfoRecord.h"
-#include "CHistoryRecord.h"
+// #include "CHistoryRecord.h"
 #include "CAlertData.h"
 
 
@@ -33,7 +33,7 @@ BOOL CQuery::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	((CEdit*)GetDlgItem(IDC_EDIT_VINCODE))->SetLimitText(VIN_LENGTH);
+	//((CEdit*)GetDlgItem(IDC_EDIT_VINCODE))->SetLimitText(VIN_LENGTH);
 	((CEdit*)GetDlgItem(IDC_EDIT_GATHERTIME))->EnableWindow(false);
 
 	//整车
@@ -90,8 +90,8 @@ void CQuery::OnBnClickedBtnQuery()
 
 	char chVin[VIN_LENGTH + 1] = {};
 
-	int iLength = WideCharToMultiByte(CP_ACP, 0, tchVin, -1, NULL, 0, NULL, NULL);
-	WideCharToMultiByte(CP_ACP, 0, tchVin, -1, chVin, iLength, NULL, NULL);
+	int iLength = WideCharToMultiByte(CP_ACP, 0, (LPCWCH)&tchVin, -1, NULL, 0, NULL, NULL);
+	WideCharToMultiByte(CP_ACP, 0, (LPCWCH)&tchVin, -1, chVin, iLength, NULL, NULL);
 
 	STRECVDATA stData;
 	memset(&stData, 0, sizeof(stData));
@@ -108,188 +108,188 @@ void CQuery::OnBnClickedBtnQuery()
 
 	//采集时间
 	csStr.Format(_T("%02d-%02d-%02d %02d:%02d:%02d"), stData.F8_0[0], stData.F8_0[1], stData.F8_0[2], stData.F8_0[3], stData.F8_0[4], stData.F8_0[5]);
-	((CEdit*)GetDlgItem(IDC_EDIT_GATHERTIME))->SetWindowTextW(csStr);
+	((CEdit*)GetDlgItem(IDC_EDIT_GATHERTIME))->SetWindowText(csStr);
 
 	//车辆状态
 	if (stData.F1_0 == 1)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_VEHICLESTATE))->SetWindowTextW(_T("启动"));
+		((CEdit*)GetDlgItem(IDC_EDIT_VEHICLESTATE))->SetWindowText(_T("启动"));
 	}
 	else if (stData.F1_0 == 2)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_VEHICLESTATE))->SetWindowTextW(_T("熄火"));
+		((CEdit*)GetDlgItem(IDC_EDIT_VEHICLESTATE))->SetWindowText(_T("熄火"));
 	}
 	else if (stData.F1_0 == 3)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_VEHICLESTATE))->SetWindowTextW(_T("其它"));
+		((CEdit*)GetDlgItem(IDC_EDIT_VEHICLESTATE))->SetWindowText(_T("其它"));
 	}
 	else if (stData.F1_0 == 254)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_VEHICLESTATE))->SetWindowTextW(_T("异常"));
+		((CEdit*)GetDlgItem(IDC_EDIT_VEHICLESTATE))->SetWindowText(_T("异常"));
 	}
 	else if (stData.F1_0 == 255)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_VEHICLESTATE))->SetWindowTextW(_T("无效"));
+		((CEdit*)GetDlgItem(IDC_EDIT_VEHICLESTATE))->SetWindowText(_T("无效"));
 	}
 	else
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_VEHICLESTATE))->SetWindowTextW(_T(""));
+		((CEdit*)GetDlgItem(IDC_EDIT_VEHICLESTATE))->SetWindowText(_T(""));
 	}
 
 	//充电状态
 	if (stData.F1_1 == 1)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_RECHARGESTATE))->SetWindowTextW(_T("停车充电"));
+		((CEdit*)GetDlgItem(IDC_EDIT_RECHARGESTATE))->SetWindowText(_T("停车充电"));
 	}
 	else if (stData.F1_1 == 2)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_RECHARGESTATE))->SetWindowTextW(_T("行驶充电"));
+		((CEdit*)GetDlgItem(IDC_EDIT_RECHARGESTATE))->SetWindowText(_T("行驶充电"));
 	}
 	else if (stData.F1_1 == 3)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_RECHARGESTATE))->SetWindowTextW(_T("未充电"));
+		((CEdit*)GetDlgItem(IDC_EDIT_RECHARGESTATE))->SetWindowText(_T("未充电"));
 	}
 	else if (stData.F1_1 == 4)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_RECHARGESTATE))->SetWindowTextW(_T("充电完成"));
+		((CEdit*)GetDlgItem(IDC_EDIT_RECHARGESTATE))->SetWindowText(_T("充电完成"));
 	}
 	else if (stData.F1_1 == 254)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_RECHARGESTATE))->SetWindowTextW(_T("异常"));
+		((CEdit*)GetDlgItem(IDC_EDIT_RECHARGESTATE))->SetWindowText(_T("异常"));
 	}
 	else if (stData.F1_1 == 255)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_RECHARGESTATE))->SetWindowTextW(_T("无效"));
+		((CEdit*)GetDlgItem(IDC_EDIT_RECHARGESTATE))->SetWindowText(_T("无效"));
 	}
 	else
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_RECHARGESTATE))->SetWindowTextW(_T(""));
+		((CEdit*)GetDlgItem(IDC_EDIT_RECHARGESTATE))->SetWindowText(_T(""));
 	}
 
 	//运行模式
 	if (stData.F1_2 == 1)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_RUNMODE))->SetWindowTextW(_T("纯电"));
+		((CEdit*)GetDlgItem(IDC_EDIT_RUNMODE))->SetWindowText(_T("纯电"));
 	}
 	else if (stData.F1_2 == 2)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_RUNMODE))->SetWindowTextW(_T("混动"));
+		((CEdit*)GetDlgItem(IDC_EDIT_RUNMODE))->SetWindowText(_T("混动"));
 	}
 	else if (stData.F1_2 == 3)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_RUNMODE))->SetWindowTextW(_T("燃油"));
+		((CEdit*)GetDlgItem(IDC_EDIT_RUNMODE))->SetWindowText(_T("燃油"));
 	}
 	else if (stData.F1_2 == 254)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_RUNMODE))->SetWindowTextW(_T("异常"));
+		((CEdit*)GetDlgItem(IDC_EDIT_RUNMODE))->SetWindowText(_T("异常"));
 	}
 	else if (stData.F1_2 == 255)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_RUNMODE))->SetWindowTextW(_T("无效"));
+		((CEdit*)GetDlgItem(IDC_EDIT_RUNMODE))->SetWindowText(_T("无效"));
 	}
 	else
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_RUNMODE))->SetWindowTextW(_T(""));
+		((CEdit*)GetDlgItem(IDC_EDIT_RUNMODE))->SetWindowText(_T(""));
 	}
 
 	//车速
 	csStr = _T("");
 	csStr.Format(_T("%u"), stData.F1_3);
-	((CEdit*)GetDlgItem(IDC_EDIT_SPEED))->SetWindowTextW(csStr);
+	((CEdit*)GetDlgItem(IDC_EDIT_SPEED))->SetWindowText(csStr);
 
 	//累计里程
 	csStr = _T("");
 	csStr.Format(_T("%u"), stData.F1_4);
-	((CEdit*)GetDlgItem(IDC_EDIT_MILEAGE))->SetWindowTextW(csStr);
+	((CEdit*)GetDlgItem(IDC_EDIT_MILEAGE))->SetWindowText(csStr);
 
 	//今日里程
-// 	uint32_t iLatestMileage = CHistoryRecord::GetInstance()->GetLatestMileage((uint8_t*)chVin);
+// 	unsigned int iLatestMileage = CHistoryRecord::GetInstance()->GetLatestMileage((uint8_t*)chVin);
 // 	if (stData.F1_4 >= iLatestMileage)
 // 	{
 // 		csStr = _T("");
 // 		csStr.Format(_T("%u"), stData.F1_4-iLatestMileage);
-// 		((CEdit*)GetDlgItem(IDC_EDIT_MILEAGETODAY))->SetWindowTextW(csStr);
+// 		((CEdit*)GetDlgItem(IDC_EDIT_MILEAGETODAY))->SetWindowText(csStr);
 // 	}
 
 	//电机状态
 	if (stData.F2_0 == 1)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_MOTORSTATE))->SetWindowTextW(_T("耗电"));
+		((CEdit*)GetDlgItem(IDC_EDIT_MOTORSTATE))->SetWindowText(_T("耗电"));
 	}
 	else if (stData.F2_0 == 2)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_MOTORSTATE))->SetWindowTextW(_T("发电"));
+		((CEdit*)GetDlgItem(IDC_EDIT_MOTORSTATE))->SetWindowText(_T("发电"));
 	}
 	else if (stData.F2_0 == 3)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_MOTORSTATE))->SetWindowTextW(_T("关闭"));
+		((CEdit*)GetDlgItem(IDC_EDIT_MOTORSTATE))->SetWindowText(_T("关闭"));
 	}
 	else if (stData.F2_0 == 4)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_MOTORSTATE))->SetWindowTextW(_T("准备"));
+		((CEdit*)GetDlgItem(IDC_EDIT_MOTORSTATE))->SetWindowText(_T("准备"));
 	}
 	else if (stData.F2_0 == 254)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_MOTORSTATE))->SetWindowTextW(_T("异常"));
+		((CEdit*)GetDlgItem(IDC_EDIT_MOTORSTATE))->SetWindowText(_T("异常"));
 	}
 	else if (stData.F2_0 == 255)
 	{
-		((CEdit*)GetDlgItem(IDC_EDIT_MOTORSTATE))->SetWindowTextW(_T("无效"));
+		((CEdit*)GetDlgItem(IDC_EDIT_MOTORSTATE))->SetWindowText(_T("无效"));
 	}
 
 	//电机转速
 	csStr.Format(_T("%u"), stData.F2_2);
-	((CEdit*)GetDlgItem(IDC_EDIT_MOTORROTATESPEED))->SetWindowTextW(csStr);
+	((CEdit*)GetDlgItem(IDC_EDIT_MOTORROTATESPEED))->SetWindowText(csStr);
 
 	//电机转矩
 	csStr.Format(_T("%u"), stData.F2_3);
-	((CEdit*)GetDlgItem(IDC_EDIT_MOTORTORQUE))->SetWindowTextW(csStr);
+	((CEdit*)GetDlgItem(IDC_EDIT_MOTORTORQUE))->SetWindowText(csStr);
 
 	//电机温度
 	csStr.Format(_T("%u"), stData.F2_4);
-	((CEdit*)GetDlgItem(IDC_EDIT_MOTORTEMP))->SetWindowTextW(csStr);
+	((CEdit*)GetDlgItem(IDC_EDIT_MOTORTEMP))->SetWindowText(csStr);
 
 	//经度
 	double dLongitude = (double)stData.F5_0 / 1000000;
 	csStr.Format(_T("%f"), dLongitude);
-	((CEdit*)GetDlgItem(IDC_EDIT_LONGTITUDE))->SetWindowTextW(csStr);
+	((CEdit*)GetDlgItem(IDC_EDIT_LONGTITUDE))->SetWindowText(csStr);
 	
 	//纬度
 	double dLatitude = (double)stData.F5_1 / 1000000;
 	csStr.Format(_T("%f"), dLatitude);
-	((CEdit*)GetDlgItem(IDC_EDIT_LATITUDE))->SetWindowTextW(csStr);
+	((CEdit*)GetDlgItem(IDC_EDIT_LATITUDE))->SetWindowText(csStr);
 
 	//最高电压单体号
 	csStr.Format(_T("%d"), stData.F6_0 / 256);
-	((CEdit*)GetDlgItem(IDC_EDIT_MAXVOLTNO))->SetWindowTextW(csStr);
+	((CEdit*)GetDlgItem(IDC_EDIT_MAXVOLTNO))->SetWindowText(csStr);
 
 	//单体电压最高值
 	csStr.Format(_T("%u"), stData.F6_1);
-	((CEdit*)GetDlgItem(IDC_EDIT_VOLTMAXVALUE))->SetWindowTextW(csStr);
+	((CEdit*)GetDlgItem(IDC_EDIT_VOLTMAXVALUE))->SetWindowText(csStr);
 
 	//最低电压单体号
 	csStr.Format(_T("%u"), stData.F6_2 / 256);
-	((CEdit*)GetDlgItem(IDC_EDIT_MINVOLTNO))->SetWindowTextW(csStr);
+	((CEdit*)GetDlgItem(IDC_EDIT_MINVOLTNO))->SetWindowText(csStr);
 
 	//单体电压最低值
 	csStr.Format(_T("%u"), stData.F6_3);
-	((CEdit*)GetDlgItem(IDC_EDIT_VOLTMINVALUE))->SetWindowTextW(csStr);
+	((CEdit*)GetDlgItem(IDC_EDIT_VOLTMINVALUE))->SetWindowText(csStr);
 
 	//最高温度探针号
 	csStr.Format(_T("%u"), stData.F6_4);
-	((CEdit*)GetDlgItem(IDC_EDIT_MAXTEMPPROPNO))->SetWindowTextW(csStr);
+	((CEdit*)GetDlgItem(IDC_EDIT_MAXTEMPPROPNO))->SetWindowText(csStr);
 
 	//最高温度值
 	csStr.Format(_T("%u"), stData.F6_5);
-	((CEdit*)GetDlgItem(IDC_EDIT_MAXTEMPVALUE))->SetWindowTextW(csStr);
+	((CEdit*)GetDlgItem(IDC_EDIT_MAXTEMPVALUE))->SetWindowText(csStr);
 
 	//最低温度探针号
 	csStr.Format(_T("%u"), stData.F6_6);
-	((CEdit*)GetDlgItem(IDC_EDIT_MINTEMPPROPNO))->SetWindowTextW(csStr);
+	((CEdit*)GetDlgItem(IDC_EDIT_MINTEMPPROPNO))->SetWindowText(csStr);
 
 	//最低温度值
 	csStr.Format(_T("%u"), stData.F6_7);
-	((CEdit*)GetDlgItem(IDC_EDIT_MINTEMPVALUE))->SetWindowTextW(csStr);
+	((CEdit*)GetDlgItem(IDC_EDIT_MINTEMPVALUE))->SetWindowText(csStr);
 
 	//报警数据
 	m_alertData = stData.F7_0;

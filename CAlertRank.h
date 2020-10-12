@@ -1,5 +1,5 @@
 ﻿#pragma once
-//#include "CInfoRecord.h"
+#include "CInfoRecord.h"
 #include "CAlertCategory.h"
 
 // CAlertRank 对话框

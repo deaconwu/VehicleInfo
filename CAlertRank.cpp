@@ -79,6 +79,23 @@ BOOL CAlertRank::OnInitDialog()
 	m_cbRankTypeChoice.InsertString(19, _T("车载储能装置类型过充报警"));
 	m_cbRankTypeChoice.SetCurSel(0);
 
+	CRect cbSize;
+	int Height;
+
+	m_cbRankTypeChoice.GetClientRect(cbSize);
+	Height = m_cbRankTypeChoice.GetItemHeight(-1);
+	Height += m_cbRankTypeChoice.GetItemHeight(0) * 20;
+
+	Height += GetSystemMetrics(SM_CYEDGE) * 2;
+
+	Height += GetSystemMetrics(SM_CYEDGE) * 2;
+
+	m_cbRankTypeChoice.SetWindowPos(NULL,
+		0, 0,
+		cbSize.right, Height,
+		SWP_NOMOVE | SWP_NOZORDER);
+
+
 	m_listRank.SetExtendedStyle(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT);
 	m_listRank.InsertColumn(1, _T("名次"), LVCFMT_CENTER, 50);
 	m_listRank.InsertColumn(2, _T("Vin码"), LVCFMT_CENTER, 150);

@@ -14,7 +14,7 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="Datagram">
-      <UniqueIdentifier>{99ffc722-a9a0-45d0-9343-75eccd92d1ad}</UniqueIdentifier>
+      <UniqueIdentifier>{7b1c76dc-4f2c-4cb4-8b23-edfbadad60b3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -27,52 +27,43 @@
     <ClInclude Include="framework.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
     <ClInclude Include="Resource.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CRealTimeRecv.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CQuery.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Datagram\CInfoRecord.h">
-      <Filter>Datagram</Filter>
-    </ClInclude>
-    <ClInclude Include="Datagram\CInfoSingleton.h">
-      <Filter>Datagram</Filter>
-    </ClInclude>
-    <ClInclude Include="Datagram\CInfoSocket.h">
-      <Filter>Datagram</Filter>
-    </ClInclude>
-    <ClInclude Include="Datagram\InfoType.h">
-      <Filter>Datagram</Filter>
-    </ClInclude>
-    <ClInclude Include="CAlertData.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CStatistics.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="WeekDay.h">
-      <Filter>Datagram</Filter>
+    <ClInclude Include="CAlertCategory.h">
+      <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CAlertRank.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="CAlertCategory.h">
+    <ClInclude Include="CQuery.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CStatistics.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Datagram\InfoType.h">
+      <Filter>Datagram</Filter>
     </ClInclude>
     <ClInclude Include="Datagram\UserMessage.h">
       <Filter>Datagram</Filter>
     </ClInclude>
-    <ClInclude Include="Datagram\CAlertStats.h">
+    <ClInclude Include="Datagram\CInfoRecord.h">
       <Filter>Datagram</Filter>
     </ClInclude>
-    <ClInclude Include="Datagram\CHistoryRecord.h">
+    <ClInclude Include="CAlertData.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Datagram\CInfoSocket.h">
+      <Filter>Datagram</Filter>
+    </ClInclude>
+    <ClInclude Include="Datagram\CAlertStats.h">
       <Filter>Datagram</Filter>
     </ClInclude>
   </ItemGroup>
@@ -83,10 +74,22 @@
     <ClCompile Include="VehicleInfoDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="CRealTimeRecv.cpp">
+    <ClCompile Include="pch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CAlertCategory.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CAlertData.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CAlertRank.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CQuery.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CStatistics.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Datagram\CInfoRecord.cpp">
@@ -95,28 +98,7 @@
     <ClCompile Include="Datagram\CInfoSocket.cpp">
       <Filter>Datagram</Filter>
     </ClCompile>
-    <ClCompile Include="CAlertData.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CStatistics.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="pch.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="WeekDay.cpp">
-      <Filter>Datagram</Filter>
-    </ClCompile>
-    <ClCompile Include="CAlertRank.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CAlertCategory.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Datagram\CAlertStats.cpp">
-      <Filter>Datagram</Filter>
-    </ClCompile>
-    <ClCompile Include="Datagram\CHistoryRecord.cpp">
       <Filter>Datagram</Filter>
     </ClCompile>
   </ItemGroup>

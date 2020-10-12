@@ -20,7 +20,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{E61565A6-7191-4D78-A486-13523AC21699}</ProjectGuid>
+    <ProjectGuid>{2F86271C-F841-47DC-B07B-DECB9B3F8550}</ProjectGuid>
     <Keyword>MFCProj</Keyword>
     <RootNamespace>VehicleInfo</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
@@ -88,24 +88,18 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;HAVE_REMOTE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>Datagram</AdditionalIncludeDirectories>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <HeapCommitSize>
-      </HeapCommitSize>
-      <HeapReserveSize>
-      </HeapReserveSize>
-      <StackReserveSize>
-      </StackReserveSize>
-      <LargeAddressAware>true</LargeAddressAware>
-      <SwapRunFromCD>true</SwapRunFromCD>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -120,24 +114,18 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;HAVE_REMOTE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>Datagram</AdditionalIncludeDirectories>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <HeapCommitSize>
-      </HeapCommitSize>
-      <HeapReserveSize>
-      </HeapReserveSize>
-      <StackReserveSize>
-      </StackReserveSize>
-      <LargeAddressAware>true</LargeAddressAware>
-      <SwapRunFromCD>true</SwapRunFromCD>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -160,6 +148,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>Datagram;D:\VSProject\VehicleInfo</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -187,6 +176,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>Datagram;D:\VSProject\VehicleInfo</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -209,37 +199,36 @@
     <ClInclude Include="CAlertData.h" />
     <ClInclude Include="CAlertRank.h" />
     <ClInclude Include="CQuery.h" />
-    <ClInclude Include="CRealTimeRecv.h" />
     <ClInclude Include="CStatistics.h" />
     <ClInclude Include="Datagram\CAlertStats.h" />
-    <ClInclude Include="Datagram\CHistoryRecord.h" />
     <ClInclude Include="Datagram\CInfoRecord.h" />
-    <ClInclude Include="Datagram\CInfoSingleton.h" />
     <ClInclude Include="Datagram\CInfoSocket.h" />
     <ClInclude Include="Datagram\InfoType.h" />
     <ClInclude Include="Datagram\UserMessage.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="targetver.h" />
     <ClInclude Include="VehicleInfo.h" />
     <ClInclude Include="VehicleInfoDlg.h" />
-    <ClInclude Include="WeekDay.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CAlertCategory.cpp" />
     <ClCompile Include="CAlertData.cpp" />
     <ClCompile Include="CAlertRank.cpp" />
     <ClCompile Include="CQuery.cpp" />
-    <ClCompile Include="CRealTimeRecv.cpp" />
     <ClCompile Include="CStatistics.cpp" />
     <ClCompile Include="Datagram\CAlertStats.cpp" />
-    <ClCompile Include="Datagram\CHistoryRecord.cpp" />
     <ClCompile Include="Datagram\CInfoRecord.cpp" />
     <ClCompile Include="Datagram\CInfoSocket.cpp" />
-    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="VehicleInfo.cpp" />
     <ClCompile Include="VehicleInfoDlg.cpp" />
-    <ClCompile Include="WeekDay.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="VehicleInfo.rc" />
