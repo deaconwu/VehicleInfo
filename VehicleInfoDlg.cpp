@@ -9,7 +9,7 @@
 #include "afxdialogex.h"
 #include "CAlertStats.h"
 #include "CInfoRecord.h"
-// #include "CHistoryRecord.h"
+#include "CHistoryRecord.h"
 #include "UserMessage.h"
 
 #ifdef _DEBUG
@@ -72,8 +72,8 @@ LRESULT CVehicleInfoDlg::OnRealStopParse(WPARAM wParam, LPARAM lParam)
 
 LRESULT CVehicleInfoDlg::OnHistoryRecord(WPARAM wParam, LPARAM lParam)
 {
-// 	WORD* pDayOfWeek = (WORD*)wParam;
-// 	CHistoryRecord::GetInstance()->OnRecord(*pDayOfWeek);
+	WORD* pDayOfWeek = (WORD*)wParam;
+	CHistoryRecord::GetInstance()->OnRecord(*pDayOfWeek);
 
 	return 0;
 }

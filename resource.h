@@ -108,9 +108,10 @@
 #define IDC_STATIC15                    1067
 #define IDC_EDIT_VEHICLEOFFLINELASTWEEK 1067
 #define IDC_STATIC16                    1068
-#define IDC_EDIT_VEHICLESUM2            1068
 #define IDC_EDIT_DATAGRAMSUM            1068
 #define IDC_STATIC17                    1069
+#define IDC_EDIT_DATAGSIZESUM           1069
+#define IDC_EDIT_DATASIZESUM            1069
 #define IDC_STATIC18                    1070
 #define IDC_EDIT_ALERTVIN               1071
 #define IDC_COMBO_RANKTYPE              1072
@@ -125,6 +126,14 @@
 #define IDC_BTN_DISCONNECT              1080
 #define IDC_LIST_CATEGORY               1082
 #define IDC_TITLE                       1083
+#define IDC_STATIC_MEMTOTAL             1084
+#define IDC_STATIC_MEMFREE              1085
+#define IDC_STATIC_VMEMTOTAL            1086
+#define IDC_STATIC_VMEMFREE             1087
+#define IDC_STATIC_B1                   1088
+#define IDC_STATIC_B2                   1089
+#define IDC_STATIC_B3                   1090
+#define IDC_STATIC_B4                   1091
 
 // Next default values for new objects
 // 
@@ -132,7 +141,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        140
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1084
+#define _APS_NEXT_CONTROL_VALUE         1092
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

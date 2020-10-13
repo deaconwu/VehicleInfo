@@ -6,7 +6,7 @@
 #include "CQuery.h"
 #include "afxdialogex.h"
 #include "CInfoRecord.h"
-// #include "CHistoryRecord.h"
+#include "CHistoryRecord.h"
 #include "CAlertData.h"
 
 
@@ -203,13 +203,13 @@ void CQuery::OnBnClickedBtnQuery()
 	((CEdit*)GetDlgItem(IDC_EDIT_MILEAGE))->SetWindowText(csStr);
 
 	//今日里程
-// 	unsigned int iLatestMileage = CHistoryRecord::GetInstance()->GetLatestMileage((uint8_t*)chVin);
-// 	if (stData.F1_4 >= iLatestMileage)
-// 	{
-// 		csStr = _T("");
-// 		csStr.Format(_T("%u"), stData.F1_4-iLatestMileage);
-// 		((CEdit*)GetDlgItem(IDC_EDIT_MILEAGETODAY))->SetWindowText(csStr);
-// 	}
+	unsigned int iLatestMileage = CHistoryRecord::GetInstance()->GetLatestMileage((uint8_t*)chVin);
+	if (stData.F1_4 >= iLatestMileage)
+	{
+		csStr = _T("");
+		csStr.Format(_T("%u"), stData.F1_4-iLatestMileage);
+		((CEdit*)GetDlgItem(IDC_EDIT_MILEAGETODAY))->SetWindowText(csStr);
+	}
 
 	//电机状态
 	if (stData.F2_0 == 1)

@@ -97,6 +97,7 @@
       <AdditionalIncludeDirectories>Datagram</AdditionalIncludeDirectories>
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -123,6 +124,7 @@
       <AdditionalIncludeDirectories>Datagram</AdditionalIncludeDirectories>
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -142,7 +144,7 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -170,7 +172,7 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -201,6 +203,7 @@
     <ClInclude Include="CQuery.h" />
     <ClInclude Include="CStatistics.h" />
     <ClInclude Include="Datagram\CAlertStats.h" />
+    <ClInclude Include="Datagram\CHistoryRecord.h" />
     <ClInclude Include="Datagram\CInfoRecord.h" />
     <ClInclude Include="Datagram\CInfoSocket.h" />
     <ClInclude Include="Datagram\InfoType.h" />
@@ -211,6 +214,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="VehicleInfo.h" />
     <ClInclude Include="VehicleInfoDlg.h" />
+    <ClInclude Include="WeekDay.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CAlertCategory.cpp" />
@@ -219,6 +223,7 @@
     <ClCompile Include="CQuery.cpp" />
     <ClCompile Include="CStatistics.cpp" />
     <ClCompile Include="Datagram\CAlertStats.cpp" />
+    <ClCompile Include="Datagram\CHistoryRecord.cpp" />
     <ClCompile Include="Datagram\CInfoRecord.cpp" />
     <ClCompile Include="Datagram\CInfoSocket.cpp" />
     <ClCompile Include="pch.cpp">
@@ -229,6 +234,7 @@
     </ClCompile>
     <ClCompile Include="VehicleInfo.cpp" />
     <ClCompile Include="VehicleInfoDlg.cpp" />
+    <ClCompile Include="WeekDay.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="VehicleInfo.rc" />

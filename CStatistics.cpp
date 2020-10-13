@@ -62,6 +62,23 @@ BOOL CStatistics::OnInitDialog()
 	((CEdit*)GetDlgItem(IDC_EDIT_MEMFREE))->EnableWindow(false);
 	((CEdit*)GetDlgItem(IDC_EDIT_VMEMTOTAL))->EnableWindow(false);
 	((CEdit*)GetDlgItem(IDC_EDIT_VMEMFREE))->EnableWindow(false);
+
+#ifndef _DEBUG
+	((CEdit*)GetDlgItem(IDC_EDIT_MEMTOTAL))->ShowWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_MEMFREE))->ShowWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_VMEMTOTAL))->ShowWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_VMEMFREE))->ShowWindow(false);
+
+	((CStatic*)GetDlgItem(IDC_STATIC_MEMTOTAL))->ShowWindow(false);
+	((CStatic*)GetDlgItem(IDC_STATIC_MEMFREE))->ShowWindow(false);
+	((CStatic*)GetDlgItem(IDC_STATIC_VMEMTOTAL))->ShowWindow(false);
+	((CStatic*)GetDlgItem(IDC_STATIC_VMEMFREE))->ShowWindow(false);
+
+	((CStatic*)GetDlgItem(IDC_STATIC_B1))->ShowWindow(false);
+	((CStatic*)GetDlgItem(IDC_STATIC_B2))->ShowWindow(false);
+	((CStatic*)GetDlgItem(IDC_STATIC_B3))->ShowWindow(false);
+	((CStatic*)GetDlgItem(IDC_STATIC_B4))->ShowWindow(false);
+#endif
 	
 	return TRUE;
 }
@@ -82,20 +99,14 @@ void CStatistics::OnQueryStatis()
 	SYSTEMTIME st;
 	GetLocalTime(&st);
 
-	//本周是今年的第几周
-// 	int nWeekCur = WeekIndex(st.wYear, st.wMonth, st.wDay);
-// 	int nWeekLast = nWeekCur - 1;
-// 	if (nWeekCur == 1)
-// 		nWeekLast = 53;	//上一年的最后一周
-
-	//报文数
+	//接收报文数
 	csStr = _T("");
 	csStr.Format(_T("%lu"), datagramNum);
 	((CEdit*)GetDlgItem(IDC_EDIT_DATAGRAMSUM))->SetWindowText(csStr);
 
-	//字节数
+	//接收字节数
 	csStr = _T("");
-	csStr.Format(_T("%lu"), g_lRecvSizeSum);
+	csStr.Format(_T("%llu"), g_lRecvSizeSum);
 	((CEdit*)GetDlgItem(IDC_EDIT_DATASIZESUM))->SetWindowText(csStr);
 
 	//接入车辆数
@@ -163,50 +174,6 @@ void CStatistics::OnQueryStatis()
 		}
 
 		mileageSum += g_circleQue[i].pElem[rear - 1].F1_4;
-		/*
-		uint32_t maxValue = 0;
-		bool bOnlineTag = false;
-		bool bOfflineTag = false;
-		bool bRechargeTag = false;
-		bool bfaultTag = false;
-		for (long j = rear - 1; j >= 0; j--)
-		{
-			if (g_circleQue[i].pElem[j].F1_4> maxValue)
-				maxValue = g_circleQue[i].pElem[j].F1_4;
-
-			uint16_t year = g_circleQue[i].pElem[rear - 1].F8_0[0] % 100 + 2000;
-			uint16_t month = g_circleQue[i].pElem[rear - 1].F8_0[1];
-			uint16_t day = g_circleQue[i].pElem[rear - 1].F8_0[2];
-			int nWeek = WeekIndex(st.wYear, st.wMonth, st.wDay);
-
-			if (nWeek == nWeekLast)
-			{
-				if (g_circleQue[i].pElem[j].F1_0 == 1 && !bOnlineTag)
-				{
-					onLineNumLastWeek += 1;
-					bOnlineTag = true;
-				}
-
-				if (g_circleQue[i].pElem[j].F1_0 == 2 && !bOfflineTag)
-				{
-					offLineNumLastWeek += 1;
-					bOfflineTag = true;
-				}
-
-				if ((g_circleQue[i].pElem[j].F1_1 == 1 || g_circleQue[i].pElem[j].F1_1 == 2) && !bRechargeTag)
-				{
-					rechargeNumLastWeek += 1;
-					bRechargeTag = true;
-				}
-
-				if (g_circleQue[i].pElem[rear - 1].F7_0 > 0 && !bfaultTag)
-				{
-					faultNumLastWeek += 1;
-					bfaultTag = true;
-				}
-			}
-		}
-		mileageSum += maxValue;*/
 	}
 
 	//在线车辆数
@@ -217,25 +184,21 @@ void CStatistics::OnQueryStatis()
 	//累计行驶里程
 	csStr = _T("");
 	csStr.Format(_T("%.5f"), (long double)mileageSum / 10 / 10000);
-	//csStr.Append(_T(" 万公里"));
 	((CEdit*)GetDlgItem(IDC_EDIT_MILEAGESUN))->SetWindowText(csStr);
 
 	//累计碳减排
 	csStr = _T("");
 	csStr.Format(_T("%.4f"), (0.0031 / 6) * ((long double)mileageSum / 10 / 10000));
-	//csStr.Append(_T(" 万升"));
 	((CEdit*)GetDlgItem(IDC_EDIT_CARBONEMISSION))->SetWindowText(csStr);
 
 	//累计节油量
 	csStr = _T("");
 	csStr.Format(_T("%.2f"), (1.75 / 6) * ((long double)mileageSum / 10 / 10000));
-	//csStr.Append(_T(" 万升"));
 	((CEdit*)GetDlgItem(IDC_EDIT_FUELTHRIFT))->SetWindowText(csStr);
 
 	//累计耗电量
 	csStr = _T("");
 	csStr.Format(_T("%.2f"), (5.68 / 6) * ((long double)mileageSum / 10 / 10000));
-	//csStr.Append(_T(" 万千瓦时"));
 	((CEdit*)GetDlgItem(IDC_EDIT_POWERCONSUME))->SetWindowText(csStr);
 
 	//今日在线车辆数
@@ -292,6 +255,7 @@ void CStatistics::OnBnClickedBtnRefresh()
 	// TODO: 在此添加控件通知处理程序代码
 	OnQueryStatis();
 
+#ifdef _DEBUG
 	MEMORYSTATUS mem;//定义一个内存状态变量
 	SIZE_T MemTotal, MemFree, VMemTotal, VMemFree;//存储内存状态信息
 
@@ -317,4 +281,5 @@ void CStatistics::OnBnClickedBtnRefresh()
 	csStr = _T("");
 	csStr.Format(_T("%lu"), VMemFree);
 	((CEdit*)GetDlgItem(IDC_EDIT_VMEMFREE))->SetWindowText(csStr);
+#endif
 }
