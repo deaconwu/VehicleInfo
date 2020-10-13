@@ -13,6 +13,7 @@ typedef unsigned int uint32_t;
 #define ALERTTIMES_REANK_NUM 20
 #define ALERT_CATEGORY_NUM 20
 #define MAX_VEHICLENUM 200000
+#define NUM_MSGRECV_PERLOOP 3 //每次循环接收消息数
 
 #pragma pack (1)
 // typedef struct RecData

@@ -1,4 +1,4 @@
-#include "../pch.h"
+#include "pch.h"
 #include "CHistoryRecord.h"
 #include "CInfoRecord.h"
 
@@ -30,14 +30,16 @@ void CHistoryRecord::OnRecord(uint16_t wDayOfWeek)
 	memset(g_chVin, 0, sizeof(g_chVin));
 	CInfoRecord::GetInstance()->GetVinInfo(g_chVin);
 
-	CInfoRecord::GetInstance()->OnReset();
-
 	STDAYVEHICLE stDayVehicle;
 	stDayVehicle.wDayOfWeek = wDayOfWeek;
 	stDayVehicle.lVehicleNum = vehicleNum;
 
 	DWORD dwThreadId;
-	m_hThread = CreateThread(NULL, NULL, OnHisRecThread, (LPVOID)&stDayVehicle, 0, &dwThreadId);
+	m_hThread = CreateThread(NULL, NULL, OnHisRecThread, &stDayVehicle, 0, &dwThreadId);
+
+	DWORD wRet = WaitForSingleObject(m_hThread, INFINITE);
+
+	CInfoRecord::GetInstance()->OnReset();
 }
 
 void CHistoryRecord::OnMove()

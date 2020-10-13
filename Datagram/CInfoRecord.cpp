@@ -365,12 +365,18 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 		printf("bLock");
 	}
 
+	STRECVDATA* pElem = (STRECVDATA*)malloc(sizeof(STRECVDATA) * QUEUE_SIZE);
+	if (NULL == pElem)
+	{
+		return -1;
+	}
+
 	if (m_vehicleNum == 0)
 	{
 		memcpy(m_chVin[m_vehicleNum], pVin, VIN_LENGTH);
 		m_vehicleNum += 1;
 
-		m_circleQue[0].pElem = (STRECVDATA*)malloc(sizeof(STRECVDATA) * QUEUE_SIZE);
+		m_circleQue[0].pElem = pElem;
 		if (NULL == m_circleQue[0].pElem)
 		{
 			return -1;
@@ -380,54 +386,51 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 		return 0;
 	}
 
-	long insertPos = 0;
+	long iLeft = 0;
+	long iRight = m_vehicleNum - 1;
 
-	for (long i = 0; i < m_vehicleNum; i++)
+	while (iLeft <= iRight)
 	{
-		if (memcmp((char*)pVin, (char*)m_chVin[i], VIN_LENGTH) > 0)
+		long iMid = (iLeft + iRight) / 2;
+		if (memcmp((char*)pVin, (char*)m_chVin[iMid], VIN_LENGTH) > 0)
 		{
-			insertPos = i + 1;
+			iLeft = iMid + 1;
 		}
 		else
 		{
-			break;
+			iRight = iMid - 1;
 		}
 	}
 
-	STRECVDATA* pElem = (STRECVDATA*)malloc(sizeof(STRECVDATA) * QUEUE_SIZE);
-	if (NULL == pElem)
+	for (long i = m_vehicleNum - 1; i >= iLeft; i--)
 	{
-		return -1;
+		memcpy(m_chVin[i + 1], m_chVin[i], VIN_LENGTH + 1);
+
+		m_circleQue[i + 1].pElem = m_circleQue[i].pElem;
+		m_circleQue[i + 1].front = m_circleQue[i].front;
+		m_circleQue[i + 1].rear = m_circleQue[i].rear;
+
+		m_dataType8[i + 1] = m_dataType8[i];
+		m_dataType9[i + 1] = m_dataType9[i];
 	}
 
-	for (long i = m_vehicleNum; i > insertPos; i--)
-	{
-		memcpy(m_chVin[i], m_chVin[i - 1], VIN_LENGTH + 1);
+	memset(m_chVin[iLeft], 0, VIN_LENGTH + 1);
+	memcpy(m_chVin[iLeft], (char*)pVin, VIN_LENGTH + 1);
 
-		m_circleQue[i].pElem = m_circleQue[i - 1].pElem;
-		m_circleQue[i].front = m_circleQue[i - 1].front;
-		m_circleQue[i].rear = m_circleQue[i - 1].rear;
+	m_circleQue[iLeft].pElem = pElem;
+	memset(m_circleQue[iLeft].pElem, 0, sizeof(STRECVDATA) * QUEUE_SIZE);
+	m_circleQue[iLeft].front = 0;
+	m_circleQue[iLeft].rear = 0;
 
-		m_dataType8[i] = m_dataType8[i - 1];
-		m_dataType9[i] = m_dataType9[i - 1];
-	}
+	memset(&m_dataType8[iLeft], 0, sizeof(STRECVDATATYPE8));
+	m_dataType8[iLeft].pF8_1 = NULL;
 
-	memcpy(m_chVin[insertPos], (char*)pVin, VIN_LENGTH + 1);
-
-	m_circleQue[insertPos].pElem = pElem;
-	memset(m_circleQue[insertPos].pElem, 0, sizeof(STRECVDATA) * QUEUE_SIZE);
-	m_circleQue[insertPos].front = 0;
-	m_circleQue[insertPos].rear = 0;
-
-	memset(&m_dataType8[insertPos], 0, sizeof(STRECVDATATYPE8));
-	m_dataType8[insertPos].pF8_1 = NULL;
-
-	memset(&m_dataType9[insertPos], 0, sizeof(STRECVDATATYPE9));
-	m_dataType9[insertPos].pF9_1 = NULL;
+	memset(&m_dataType9[iLeft], 0, sizeof(STRECVDATATYPE9));
+	m_dataType9[iLeft].pF9_1 = NULL;
 
 	m_vehicleNum += 1;
 
-	return insertPos;
+	return iLeft;
 }
 
 bool CInfoRecord::QueryLatestInfo(uint8_t pVin[], STRECVDATA &stData)
@@ -864,30 +867,61 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 			break;
 		}
 
-		char recvData[BUFFER_SIZE] = {};
-		INT recvSize = CInfoSocket::GetInstance()->OnReceive(recvData);
-		DWORD dwLastErr = GetLastError();
-
-		if (recvSize <= 0)
+		//一次接多条
+		PSTDATABUFFGRAM pNode[NUM_MSGRECV_PERLOOP] = {};
+		for (uint8_t i = 0; i < NUM_MSGRECV_PERLOOP; i++)
 		{
-			continue;
+			if (CInfoSocket::GetInstance()->CheckClose())
+			{
+				break;
+			}
+
+			char recvData[BUFFER_SIZE] = {};
+			INT recvSize = CInfoSocket::GetInstance()->OnReceive(recvData);
+			DWORD dwLastErr = GetLastError();
+
+			if (recvSize <= 0)
+			{
+				CInfoSocket::GetInstance()->OnReConnect();
+				continue;
+			}
+
+			g_lRecvSizeSum += recvSize;
+			pNode[i] = (PSTDATABUFFGRAM)malloc(sizeof(STDATABUFFGRAM));
+			memcpy(pNode[i]->recvData, recvData, recvSize * sizeof(char));
+			pNode[i]->recvSize = recvSize;
+			pNode[i]->pNext = NULL;
 		}
-		g_lRecvSizeSum += recvSize;
-		PSTDATABUFFGRAM pNode = (PSTDATABUFFGRAM)malloc(sizeof(STDATABUFFGRAM));
-		memcpy(pNode->recvData, recvData, recvSize * sizeof(char));
-		pNode->recvSize = recvSize;
-		pNode->pNext = NULL;
 
 		WaitForSingleObject(g_hMutex, INFINITE);
-		if (g_queDataGram.front == NULL)
+		for (uint8_t i = 0; i < NUM_MSGRECV_PERLOOP; i++)
 		{
-			g_queDataGram.rear = pNode;
-			g_queDataGram.front = g_queDataGram.rear;
-		}
-		else
-		{
-			g_queDataGram.rear->pNext = pNode;
-			g_queDataGram.rear = pNode;
+			if (CInfoSocket::GetInstance()->CheckClose())
+			{
+				if (NULL != pNode[i])
+				{
+					free(pNode[i]);
+					pNode[i] = NULL;
+				}
+
+				continue;
+			}
+
+			if (pNode[i] == NULL)
+			{
+				continue;
+			}
+
+			if (g_queDataGram.front == NULL)
+			{
+				g_queDataGram.rear = pNode[i];
+				g_queDataGram.front = g_queDataGram.rear;
+			}
+			else
+			{
+				g_queDataGram.rear->pNext = pNode[i];
+				g_queDataGram.rear = pNode[i];
+			}
 		}
 		ReleaseMutex(g_hMutex);
 	}
@@ -915,8 +949,8 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 
 		if (g_queDataGram.front == NULL)
 		{
-			char recvData[BUFFER_SIZE] = {};
-			INT recvSize = CInfoSocket::GetInstance()->OnReceive(recvData);
+// 			char recvData[BUFFER_SIZE] = {};
+// 			INT recvSize = CInfoSocket::GetInstance()->OnReceive(recvData);
 			continue;
 		}
 
@@ -1000,7 +1034,6 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 					continue;
 			}
 
-			bool bSetFlag[10] = {};
 			long curOffset = latestOffset;
 
 			//信息类型信息体

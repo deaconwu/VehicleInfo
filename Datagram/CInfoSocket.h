@@ -24,7 +24,11 @@ uint32_t SWAPDWORD1(const char* pRecv);
 class CInfoSocket //: public CSingleton<CInfoSocket>
 {
 public:
-	CInfoSocket() { m_pSocket = INVALID_SOCKET; }
+	CInfoSocket()
+	{
+		memset(&m_serAddr, 0, sizeof(m_serAddr));
+		m_pSocket = INVALID_SOCKET;
+	}
 	~CInfoSocket()
 	{
 		if (NULL != m_pInstance)
@@ -46,12 +50,15 @@ public:
 
 	SOCKET OnConnect(const sockaddr_in serAddr);
 
+	SOCKET OnReConnect();
+
 	INT OnReceive(char recvData[]);
 
-	VOID OnClose();
+	VOID OnClose(bool bEmptyAddr = true);
 
 private:
 	SOCKET m_pSocket;
+	sockaddr_in m_serAddr;
 	static CInfoSocket* m_pInstance;
 };
 

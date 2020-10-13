@@ -45,6 +45,11 @@ public:
 		return m_datagramNum;
 	}
 
+	long GetVehicleNum()
+	{
+		return m_vehicleNum;
+	}
+
 	bool OnRealTimeRecv(HWND hWnd, sockaddr_in serAddr);
 	bool OnStopRecv();
 
