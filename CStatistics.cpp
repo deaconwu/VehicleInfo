@@ -249,7 +249,6 @@ END_MESSAGE_MAP()
 
 // CStatistics 消息处理程序
 
-
 void CStatistics::OnBnClickedBtnRefresh()
 {
 	// TODO: 在此添加控件通知处理程序代码
