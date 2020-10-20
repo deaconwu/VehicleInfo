@@ -11,6 +11,7 @@
 #include "CInfoRecord.h"
 #include "CHistoryRecord.h"
 #include "UserMessage.h"
+#include "CFileParse.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -37,6 +38,7 @@ BEGIN_MESSAGE_MAP(CVehicleInfoDlg, CDialogEx)
 	ON_MESSAGE(UM_ALERT, &CVehicleInfoDlg::OnRealAlert)
 	ON_MESSAGE(UM_STOPRECV, &CVehicleInfoDlg::OnRealStopRecv)
 	ON_MESSAGE(UM_STOPPARSE, &CVehicleInfoDlg::OnRealStopParse)
+	ON_MESSAGE(UM_FILEPARSE, &CVehicleInfoDlg::OnFileParse)
 	ON_MESSAGE(UM_HISTORY, &CVehicleInfoDlg::OnHistoryRecord)
 	ON_BN_CLICKED(IDC_BTN_CONNECT, &CVehicleInfoDlg::OnBnClickedBtnConnect)
 	ON_BN_CLICKED(IDC_BTN_DISCONNECT, &CVehicleInfoDlg::OnBnClickedBtnDisconnect)
@@ -55,6 +57,19 @@ LRESULT CVehicleInfoDlg::OnRealStopRecv(WPARAM wParam, LPARAM lParam)
 {
 	CInfoRecord::GetInstance()->OnClearDataGram();
 
+	return 0;
+}
+
+LRESULT CVehicleInfoDlg::OnFileParse(WPARAM wParam, LPARAM lParam)
+{
+	CInfoRecord::GetInstance()->OnStopRecv();
+	CInfoRecord::GetInstance()->OnClearDataGram();
+	((CIPAddressCtrl*)GetDlgItem(IDC_IPADDRESS))->EnableWindow(true);
+	((CEdit*)GetDlgItem(IDC_EDIT_PORT))->EnableWindow(true);
+	((CButton*)GetDlgItem(IDC_BTN_DISCONNECT))->EnableWindow(false);
+	((CButton*)GetDlgItem(IDC_BTN_CONNECT))->EnableWindow(true);
+
+	CFileParse::GetInstance()->OnLauchParse();
 	return 0;
 }
 
@@ -122,6 +137,8 @@ BOOL CVehicleInfoDlg::OnInitDialog()
 
 	((CButton*)GetDlgItem(IDC_BTN_CONNECT))->EnableWindow(true);
 	((CButton*)GetDlgItem(IDC_BTN_DISCONNECT))->EnableWindow(false);
+
+	CFileParse::GetInstance()->OnLauchParse();
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }

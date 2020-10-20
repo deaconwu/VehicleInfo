@@ -27,7 +27,7 @@ protected:
 	LRESULT OnRealStopRecv(WPARAM wParam, LPARAM lParam);
 	LRESULT OnRealStopParse(WPARAM wParam, LPARAM lParam);
 	LRESULT OnHistoryRecord(WPARAM wParam, LPARAM lParam);
-
+	LRESULT OnFileParse(WPARAM wParam, LPARAM lParam);
 // 实现
 protected:
 	HICON m_hIcon;

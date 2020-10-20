@@ -1,29 +1,6 @@
 #include "pch.h"
 #include "CInfoSocket.h"
 
-uint16_t SWAPWORD1(const char* pRecv)
-{
-	uint8_t uchar = *pRecv;
-	uint16_t sw = uchar;
-	uchar = *(pRecv + 1);
-	sw += uchar * 256;
-	return sw;
-}
-
-uint32_t SWAPDWORD1(const char* pRecv)
-{
-	uint8_t uchar = *pRecv;
-	uint32_t uintsw = uchar;
-	uchar = *(pRecv + 1);
-	uintsw += uchar * 256;
-	uchar = *(pRecv + 2);
-	uintsw += uchar * 65536;
-	uchar = *(pRecv + 3);
-	uintsw += uchar * 16777216;
-
-	return uintsw;
-}
-
 CInfoSocket* CInfoSocket::m_pInstance = NULL;
 
 SOCKET CInfoSocket::OnConnect(const sockaddr_in serAddr)
@@ -120,11 +97,16 @@ INT CInfoSocket::OnReceive(char recvData[])
 		return -1;
 	}
 
-	INT optVal = 0;
-	INT optLen = sizeof(optVal);
-	getsockopt(m_pSocket, SOL_SOCKET, SO_RCVBUF, (char*)&optVal, &optLen);
+	INT iRcvBuf = 0;
+	INT iRcvBufLen = sizeof(iRcvBuf);
 
-	INT recvSize = recv(m_pSocket, recvData, optVal, 0);
+	getsockopt(m_pSocket, SOL_SOCKET, SO_RCVBUF, (char*)&iRcvBuf, &iRcvBufLen);
+
+	//iRcvBuf *= SIZE_MULTIPLE;
+	//setsockopt(m_pSocket, SOL_SOCKET, SO_RCVBUF, (char*)&iRcvBuf, iRcvBufLen);
+	
+
+	INT recvSize = recv(m_pSocket, recvData, iRcvBuf, 0);
 	//DWORD a = GetLastError();
 
 	return recvSize;

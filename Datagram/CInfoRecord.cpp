@@ -23,7 +23,6 @@ long SetRecvData(const char* pRecv, STRECVDATA& stRecv, long leftOffset)
 	uint8_t infoType = *pRecv;
 	long offset = sizeof(infoType);
 	uint8_t uchar;
-	uint16_t ushort;
 	uint16_t ushortsw;
 	uint32_t uintsw;
 
@@ -32,12 +31,24 @@ long SetRecvData(const char* pRecv, STRECVDATA& stRecv, long leftOffset)
 	case 1:
 	{
 		stRecv.F1_0 = *(pRecv + offset);
+		if (stRecv.F1_0 == 0)
+		{
+			printf("");
+		}
 
 		offset += sizeof(stRecv.F1_0);
 		stRecv.F1_1 = *(pRecv + offset);
+		if (stRecv.F1_1 == 0)
+		{
+			printf("");
+		}
 
 		offset += sizeof(stRecv.F1_1);
 		stRecv.F1_2 = *(pRecv + offset);
+		if (stRecv.F1_2 == 0)
+		{
+			printf("");
+		}
 
 		offset += sizeof(stRecv.F1_2);
 		uchar = *(pRecv + offset);
@@ -81,8 +92,10 @@ long SetRecvData(const char* pRecv, STRECVDATA& stRecv, long leftOffset)
 		stRecv.F1_9 = *(pRecv + offset);
 
 		offset += sizeof(stRecv.F1_9);
-		ushort = *(pRecv + offset);
-		ushortsw = SWAPWORD(ushort);
+		uchar = *(pRecv + offset);
+		ushortsw = uchar * 256;
+		uchar = *(pRecv + offset + 1);
+		ushortsw += uchar;
 		stRecv.F1_10 = ushortsw;
 
 		offset += sizeof(stRecv.F1_10);
@@ -722,7 +735,7 @@ long CInfoRecord::RecordInfoType9(long pos, const char* pRecv, long leftOffset)
 	}
 	memset(m_dataType9[pos].pF9_1->pF9_1_2, 0, m_dataType9[pos].pF9_1->F9_1_1 * sizeof(uint8_t));
 
-	for (uint8_t j = 0; j < m_dataType9[pos].pF9_1->F9_1_1; j++)
+	for (uint16_t j = 0; j < m_dataType9[pos].pF9_1->F9_1_1; j++)
 	{
 		if (offset >= leftOffset)
 		{
@@ -766,12 +779,16 @@ bool CInfoRecord::OnRealTimeRecv(HWND hWnd, sockaddr_in serAddr)
 	DWORD dwThreadIdRecv;
 	m_hThreadRecv = CreateThread(NULL, NULL, OnReceiveThread, hWnd, 0, &dwThreadIdRecv);
 
+#ifndef _DEBUG
 	DWORD dwThreadIdParse;
 	m_hThreadParse = CreateThread(NULL, NULL, OnParseThread, hWnd, 0, &dwThreadIdParse);
 
 	if (NULL == m_hThreadRecv || NULL == m_hThreadParse)
 		CInfoSocket::GetInstance()->OnClose();
-
+#else
+	if (NULL == m_hThreadRecv)
+		CInfoSocket::GetInstance()->OnClose();
+#endif
 	return true;
 }
 
@@ -859,14 +876,40 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 {
 	HWND hWnd = (HWND)lparam;
 
+#ifdef _DEBUG
+	ULONGLONG saveSize = 0;
+	FILE *fpWrite = fopen("datagram.dat", "wb+");
+#endif
+
 	while (1)
 	{
 		if (CInfoSocket::GetInstance()->CheckClose())
 		{
+#ifdef _DEBUG
+			fclose(fpWrite);
+#endif
 			PostMessage(hWnd, UM_STOPRECV, NULL, 0);
 			break;
 		}
 
+#ifdef _DEBUG
+		if (saveSize >= (PARSE_FILE_SIZE*1.9))
+		{
+			fclose(fpWrite);
+			PostMessage(hWnd, UM_FILEPARSE, NULL, 0);
+			break;
+		}
+
+		char recvData[BUFFER_SIZE] = {};
+		INT recvSize = CInfoSocket::GetInstance()->OnReceive(recvData);
+		if (recvSize <= 0)
+		{
+			continue;
+		}
+
+		saveSize += recvSize;
+		fwrite(recvData, recvSize, 1, fpWrite);
+#else
 		//一次接多条
 		PSTDATABUFFGRAM pNode[NUM_MSGRECV_PERLOOP] = {};
 		for (uint8_t i = 0; i < NUM_MSGRECV_PERLOOP; i++)
@@ -882,7 +925,7 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 
 			if (recvSize <= 0)
 			{
-				CInfoSocket::GetInstance()->OnReConnect();
+				//CInfoSocket::GetInstance()->OnReConnect();
 				continue;
 			}
 
@@ -924,6 +967,7 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 			}
 		}
 		ReleaseMutex(g_hMutex);
+#endif
 	}
 
 	return 0;
