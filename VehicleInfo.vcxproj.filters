@@ -72,7 +72,7 @@
     <ClInclude Include="WeekDay.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="CFileParse.h">
+    <ClInclude Include="Datagram\CFileParse.h">
       <Filter>Datagram</Filter>
     </ClInclude>
   </ItemGroup>
@@ -116,7 +116,7 @@
     <ClCompile Include="WeekDay.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="CFileParse.cpp">
+    <ClCompile Include="Datagram\CFileParse.cpp">
       <Filter>Datagram</Filter>
     </ClCompile>
   </ItemGroup>

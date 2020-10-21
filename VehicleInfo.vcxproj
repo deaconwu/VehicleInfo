@@ -210,10 +210,10 @@
     <ClInclude Include="CAlertCategory.h" />
     <ClInclude Include="CAlertData.h" />
     <ClInclude Include="CAlertRank.h" />
-    <ClInclude Include="CFileParse.h" />
     <ClInclude Include="CQuery.h" />
     <ClInclude Include="CStatistics.h" />
     <ClInclude Include="Datagram\CAlertStats.h" />
+    <ClInclude Include="Datagram\CFileParse.h" />
     <ClInclude Include="Datagram\CHistoryRecord.h" />
     <ClInclude Include="Datagram\CInfoRecord.h" />
     <ClInclude Include="Datagram\CInfoSocket.h" />
@@ -231,10 +231,10 @@
     <ClCompile Include="CAlertCategory.cpp" />
     <ClCompile Include="CAlertData.cpp" />
     <ClCompile Include="CAlertRank.cpp" />
-    <ClCompile Include="CFileParse.cpp" />
     <ClCompile Include="CQuery.cpp" />
     <ClCompile Include="CStatistics.cpp" />
     <ClCompile Include="Datagram\CAlertStats.cpp" />
+    <ClCompile Include="Datagram\CFileParse.cpp" />
     <ClCompile Include="Datagram\CHistoryRecord.cpp" />
     <ClCompile Include="Datagram\CInfoRecord.cpp" />
     <ClCompile Include="Datagram\CInfoSocket.cpp" />
