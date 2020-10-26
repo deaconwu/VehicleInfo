@@ -52,7 +52,6 @@ public:
 	void OnReset();
 	void OnClose();
 
-	void WriteVin();
 	long FindVinPos(uint8_t pVin[]);
 	long InsertVinAndSort(uint8_t pVin[]);
 
@@ -72,7 +71,7 @@ public:
 	long RecordInfoType9(long pos, const char* pRecv);
 
 private:
-	void SortVin();
+	void ReadVin();
 
 	uint8_t m_chVin[MAX_VEHICLENUM][VIN_LENGTH + 1]; //Ã¿Á¾³µvinÂë
 

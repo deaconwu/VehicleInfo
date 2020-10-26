@@ -33,7 +33,7 @@ public:
 	long InsertVinAndSort(uint8_t pVin[]);
 
 private:
-	
+	void ReadVin();
 
 	HANDLE m_hThreadParse;
 

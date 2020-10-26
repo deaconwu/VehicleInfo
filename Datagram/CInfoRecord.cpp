@@ -18,18 +18,6 @@ long long g_lRecvSizeSum = 0;
 
 HANDLE g_hMutex = NULL;//CreateMutex(NULL, FALSE, _T("InfoRecord"));
 
-void CInfoRecord::WriteVin()
-{
-	FILE *fpWrite = fopen("vinsort.txt", "wb+");
-	for (long i = 0; i < m_vehicleNum; i++)
-	{
-		fprintf(fpWrite, "%s", m_chVin[i]);
-		if (i != m_vehicleNum - 1)
-			fprintf(fpWrite, "\n");
-	}
-	fclose(fpWrite);
-}
-
 CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNum(0), m_datagramNum(0), m_hThreadRecv(NULL), m_hThreadParse(NULL)
 {
 	memset(m_chVin, 0, sizeof(m_chVin));
@@ -37,6 +25,38 @@ CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNum(0), m_datagramNum(0)
 	memset(m_dataType8, 0, sizeof(m_dataType8));
 	memset(m_dataType9, 0, sizeof(m_dataType9));
 	memset(&g_queDataGram, 0, sizeof(STDATAGRAMQUEUE));
+
+	ReadVin();
+}
+
+void CInfoRecord::ReadVin()
+{
+	FILE *fpRead = fopen("vinsort.txt", "r");
+	if (NULL == fpRead)
+	{
+		return;
+	}
+
+	while (!feof(fpRead))
+	{
+		char strVin[VIN_LENGTH + 1] = {};
+		fgets(strVin, VIN_LENGTH, fpRead);
+
+		memcpy(m_chVin[m_vehicleNum], strVin, VIN_LENGTH);
+		m_vehicleNum += 1;
+	}
+
+	for (long i=0; i<m_vehicleNum; i++)
+	{
+		STRECVDATA* pElem = (STRECVDATA*)malloc(sizeof(STRECVDATA) * QUEUE_SIZE);
+		if (NULL != pElem)
+		{
+			m_circleQue[i].pElem = pElem;
+			memset(m_circleQue[i].pElem, 0, sizeof(STRECVDATA) * QUEUE_SIZE);
+		}
+	}
+
+	fclose(fpRead);
 }
 
 long CInfoRecord::FindVinPos(uint8_t pVin[])
@@ -63,24 +83,6 @@ long CInfoRecord::FindVinPos(uint8_t pVin[])
 	}
 
 	return -1;
-}
-
-void CInfoRecord::SortVin()
-{
-	for (long i = 0; i < m_vehicleNum; i++)
-	{
-		for (long j = i + 1; j < m_vehicleNum; j++)
-		{
-			//printf("i:%ld, j:%ld", i, j);
-			if (strcmp((char*)m_chVin[i], (char*)m_chVin[j]) > 0)
-			{
-				uint8_t chTmp[VIN_LENGTH + 1] = { "" };
-				memcpy(chTmp, m_chVin[i], VIN_LENGTH + 1);
-				memcpy(m_chVin[i], m_chVin[j], VIN_LENGTH + 1);
-				memcpy(m_chVin[j], chTmp, VIN_LENGTH + 1);
-			}
-		}
-	}
 }
 
 long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
@@ -112,11 +114,6 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 		memcpy(m_chVin[m_vehicleNum], pVin, VIN_LENGTH);
 		m_vehicleNum += 1;
 
-		m_circleQue[0].pElem = pElem;
-		if (NULL == m_circleQue[0].pElem)
-		{
-			return -1;
-		}
 		memset(m_circleQue[0].pElem, 0, sizeof(STRECVDATA) * QUEUE_SIZE);
 
 		return 0;
@@ -628,10 +625,10 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 			break;
 		}
 #else
-		if (g_queDataGram.iNum > 100000)
-		{
-			Sleep(500);
-		}
+// 		if (g_queDataGram.iNum > 100000)
+// 		{
+// 			Sleep(500);
+// 		}
 #endif
 
 		char recvData[BUFFER_SIZE] = {};
@@ -1570,14 +1567,14 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 			PostMessage(hWnd, UM_ALERT, (WPARAM)&alertPost, 0);
 		}
 
-		if (g_queDataGram.iNum > 10000 && g_queDataGram.iNum<100000)
-		{
-			Sleep(500);
-		}
-		else
-		{
-			printf("");
-		}
+// 		if (g_queDataGram.iNum > 10000 && g_queDataGram.iNum<100000)
+// 		{
+// 			Sleep(500);
+// 		}
+// 		else
+// 		{
+// 			printf("");
+// 		}
 	}
 
 	return 0;
