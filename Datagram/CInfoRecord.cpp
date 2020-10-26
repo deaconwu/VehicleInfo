@@ -20,14 +20,14 @@ HANDLE g_hMutex = NULL;//CreateMutex(NULL, FALSE, _T("InfoRecord"));
 
 void CInfoRecord::WriteVin()
 {
-// 	FILE *fpWrite = fopen("vinsort.txt", "wb+");
-// 	for (long i = 0; i < m_vehicleNum; i++)
-// 	{
-// 		fprintf(fpWrite, "%s", m_chVin[i]);
-// 		if (i != m_vehicleNum - 1)
-// 			fprintf(fpWrite, "\n");
-// 	}
-// 	fclose(fpWrite);
+	FILE *fpWrite = fopen("vinsort.txt", "wb+");
+	for (long i = 0; i < m_vehicleNum; i++)
+	{
+		fprintf(fpWrite, "%s", m_chVin[i]);
+		if (i != m_vehicleNum - 1)
+			fprintf(fpWrite, "\n");
+	}
+	fclose(fpWrite);
 }
 
 CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNum(0), m_datagramNum(0), m_hThreadRecv(NULL), m_hThreadParse(NULL)
@@ -89,12 +89,6 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 	{
 		return -1;
 	}
-
-// 	if (pVin[0] != 'L')
-// 		return -1;
-
-// 	if (pVin[1] <'A' || (pVin[1] > 'Z' && pVin[1] < 'a') || pVin[1]>'z')
-// 		return -1;
 
 	for (int i = 0; i < VIN_LENGTH; i++)
 	{

@@ -26,8 +26,20 @@ public:
 
 	void OnLauchParse();
 
+	void WriteVin();
+
+	long FindVinPos(uint8_t pVin[]);
+
+	long InsertVinAndSort(uint8_t pVin[]);
+
 private:
+	
+
 	HANDLE m_hThreadParse;
+
+	long m_vehicleNum;
+
+	uint8_t m_chVin[MAX_VEHICLENUM][VIN_LENGTH + 1];
 
 	static CFileParse* m_pInstance;
 };

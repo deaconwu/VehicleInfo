@@ -11,9 +11,90 @@ CFileParse* CFileParse::m_pInstance = NULL;
 
 DWORD WINAPI OnDatagramParseThread(LPVOID lparam);
 
-CFileParse::CFileParse() : m_hThreadParse(NULL)
+CFileParse::CFileParse() : m_hThreadParse(NULL), m_vehicleNum(0)
 {
+	memset(m_chVin, 0, sizeof(m_chVin));
+}
 
+void CFileParse::WriteVin()
+{
+	FILE *fpWrite = fopen("vinsort.txt", "wb+");
+	for (long i = 0; i < m_vehicleNum; i++)
+	{
+		fprintf(fpWrite, "%s", m_chVin[i]);
+		if (i != m_vehicleNum - 1)
+			fprintf(fpWrite, "\n");
+	}
+	fclose(fpWrite);
+}
+
+long CFileParse::FindVinPos(uint8_t pVin[])
+{
+	long left = 0;
+	long right = m_vehicleNum - 1;
+	long mid = -1;
+
+	while (left <= right)
+	{
+		mid = (left + right) / 2;
+		if (memcmp((char*)pVin, (char*)m_chVin[mid], VIN_LENGTH) < 0)
+		{
+			right = mid - 1;
+		}
+		else if (memcmp((char*)pVin, (char*)m_chVin[mid], VIN_LENGTH) > 0)
+		{
+			left = mid + 1;
+		}
+		else
+		{
+			return mid;
+		}
+	}
+
+	return -1;
+}
+
+long CFileParse::InsertVinAndSort(uint8_t pVin[])
+{
+	if (m_vehicleNum >= MAX_VEHICLENUM)
+	{
+		return -1;
+	}
+
+	if (m_vehicleNum == 0)
+	{
+		memcpy(m_chVin[m_vehicleNum], pVin, VIN_LENGTH);
+		m_vehicleNum += 1;
+
+		return 0;
+	}
+
+	long iLeft = 0;
+	long iRight = m_vehicleNum - 1;
+
+	while (iLeft <= iRight)
+	{
+		long iMid = (iLeft + iRight) / 2;
+		if (memcmp((char*)pVin, (char*)m_chVin[iMid], VIN_LENGTH) > 0)
+		{
+			iLeft = iMid + 1;
+		}
+		else
+		{
+			iRight = iMid - 1;
+		}
+	}
+
+	for (long i = m_vehicleNum - 1; i >= iLeft; i--)
+	{
+		memcpy(m_chVin[i + 1], m_chVin[i], VIN_LENGTH + 1);
+	}
+
+	memcpy(m_chVin[iLeft], (char*)pVin, VIN_LENGTH + 1);
+
+	m_vehicleNum += 1;
+
+	return iLeft;
 }
 
 void CFileParse::OnLauchParse()
@@ -97,9 +178,15 @@ DWORD WINAPI OnDatagramParseThread(LPVOID lparam)
 		latestOffset += 1;
 
 		//vin码
-		char chVin[VIN_LENGTH + 1] = {};
+		uint8_t chVin[VIN_LENGTH + 1] = {};
 		memcpy(chVin, &strFileData[latestOffset], VIN_LENGTH);
 		latestOffset += 17;
+
+		long pos = CFileParse::GetInstance()->FindVinPos(chVin);
+		if (pos < 0)
+		{
+			pos = CFileParse::GetInstance()->InsertVinAndSort(chVin);
+		}
 
 		//数据单元加密方式
 		latestOffset += 1;
@@ -1655,6 +1742,8 @@ DWORD WINAPI OnDatagramParseThread1(LPVOID lparam)
 
 	fclose(fpWrite);
 	free(strFileData);
+
+	CFileParse::GetInstance()->WriteVin();
 
 	return 0;
 }
