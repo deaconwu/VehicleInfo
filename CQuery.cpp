@@ -260,7 +260,7 @@ void CQuery::OnBnClickedBtnQuery()
 	((CEdit*)GetDlgItem(IDC_EDIT_LATITUDE))->SetWindowText(csStr);
 
 	//最高电压单体号
-	csStr.Format(_T("%d"), stData.F6_0 / 256);
+	csStr.Format(_T("%d"), stData.F6_0);
 	((CEdit*)GetDlgItem(IDC_EDIT_MAXVOLTNO))->SetWindowText(csStr);
 
 	//单体电压最高值
@@ -268,7 +268,7 @@ void CQuery::OnBnClickedBtnQuery()
 	((CEdit*)GetDlgItem(IDC_EDIT_VOLTMAXVALUE))->SetWindowText(csStr);
 
 	//最低电压单体号
-	csStr.Format(_T("%u"), stData.F6_2 / 256);
+	csStr.Format(_T("%u"), stData.F6_2);
 	((CEdit*)GetDlgItem(IDC_EDIT_MINVOLTNO))->SetWindowText(csStr);
 
 	//单体电压最低值

@@ -26,6 +26,7 @@ SOCKET CInfoSocket::OnConnect(const sockaddr_in serAddr)
 
 	if (connect(m_pSocket, (sockaddr *)&serAddr, sizeof(serAddr)) == SOCKET_ERROR)
 	{
+		DWORD dwErr = GetLastError();
 		closesocket(m_pSocket);
 		WSACleanup();
 		m_pSocket = INVALID_SOCKET;
@@ -84,6 +85,7 @@ VOID CInfoSocket::OnClose(bool bEmptyAddr)
 {
 	closesocket(m_pSocket);
 	WSACleanup();
+
 	m_pSocket = INVALID_SOCKET;
 
 	if (bEmptyAddr)
@@ -97,17 +99,11 @@ INT CInfoSocket::OnReceive(char recvData[])
 		return -1;
 	}
 
-	INT iRcvBuf = 0;
-	INT iRcvBufLen = sizeof(iRcvBuf);
+	INT optVal = 0;
+	INT optLen = sizeof(optVal);
+	getsockopt(m_pSocket, SOL_SOCKET, SO_RCVBUF, (char*)&optVal, &optLen);
 
-	getsockopt(m_pSocket, SOL_SOCKET, SO_RCVBUF, (char*)&iRcvBuf, &iRcvBufLen);
-
-	//iRcvBuf *= SIZE_MULTIPLE;
-	//setsockopt(m_pSocket, SOL_SOCKET, SO_RCVBUF, (char*)&iRcvBuf, iRcvBufLen);
-	
-
-	INT recvSize = recv(m_pSocket, recvData, iRcvBuf, 0);
-	//DWORD a = GetLastError();
+	INT recvSize = recv(m_pSocket, recvData, optVal, 0);
 
 	return recvSize;
 }

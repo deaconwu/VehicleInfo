@@ -45,11 +45,6 @@ public:
 		return m_datagramNum;
 	}
 
-	long GetVehicleNum()
-	{
-		return m_vehicleNum;
-	}
-
 	bool OnRealTimeRecv(HWND hWnd, sockaddr_in serAddr);
 	bool OnStopRecv();
 
@@ -71,10 +66,10 @@ public:
 	void RecordInfo(long pos, STRECVDATA& stRecv);
 
 	//录入车辆信息8
-	long RecordInfoType8(long pos, const char* pRecv, long leftOffset);
+	long RecordInfoType8(long pos, const char* pRecv);
 
 	//录入车辆信息9
-	long RecordInfoType9(long pos, const char* pRecv, long leftOffset);
+	long RecordInfoType9(long pos, const char* pRecv);
 
 private:
 	void SortVin();
@@ -86,12 +81,12 @@ private:
 	STRECVDATATYPE8 m_dataType8[MAX_VEHICLENUM];	//电压数据
 	STRECVDATATYPE9 m_dataType9[MAX_VEHICLENUM];	//温度数据
 
-	long m_vehicleNum;
-	long m_datagramNum;
+	long m_vehicleNum;	//今日接入车辆数
+	long m_datagramNum;	//今日接收报文数
 	bool m_bLockFlag;	//录入新vin码涉及到排序移位，点击查询，需要等待查询完成再继续录入排序
 
-	HANDLE m_hThreadRecv;
-	HANDLE m_hThreadParse;
+	HANDLE m_hThreadRecv;	//子线程接收消息，拆分成若干报文
+	HANDLE m_hThreadParse;	//子线程解析报文
 
 	static CInfoRecord* m_pInstance;
 };

@@ -16,278 +16,7 @@ STDATAGRAMQUEUE g_queDataGram;
 
 long long g_lRecvSizeSum = 0;
 
-HANDLE g_hMutex = CreateMutex(NULL, FALSE, _T("InfoRecord"));
-
-long SetRecvData(const char* pRecv, STRECVDATA& stRecv, long leftOffset)
-{
-	uint8_t infoType = *pRecv;
-	long offset = sizeof(infoType);
-	uint8_t uchar;
-	uint16_t ushortsw;
-	uint32_t uintsw;
-
-	switch (infoType)
-	{
-	case 1:
-	{
-		stRecv.F1_0 = *(pRecv + offset);
-		if (stRecv.F1_0 == 0)
-		{
-			printf("");
-		}
-
-		offset += sizeof(stRecv.F1_0);
-		stRecv.F1_1 = *(pRecv + offset);
-		if (stRecv.F1_1 == 0)
-		{
-			printf("");
-		}
-
-		offset += sizeof(stRecv.F1_1);
-		stRecv.F1_2 = *(pRecv + offset);
-		if (stRecv.F1_2 == 0)
-		{
-			printf("");
-		}
-
-		offset += sizeof(stRecv.F1_2);
-		uchar = *(pRecv + offset);
-		ushortsw = uchar * 256;
-		uchar = *(pRecv + offset + 1);
-		ushortsw += uchar;
-		stRecv.F1_3 = ushortsw;
-
-		offset += sizeof(stRecv.F1_3);
-		uchar = *(pRecv + offset);
-		uintsw = uchar * 16777216;
-		uchar = *(pRecv + offset + 1);
-		uintsw += uchar * 65536;
-		uchar = *(pRecv + offset + 2);
-		uintsw += uchar * 256;
-		uchar = *(pRecv + offset + 3);
-		uintsw += uchar;
-		stRecv.F1_4 = uintsw;
-
-		offset += sizeof(stRecv.F1_4);
-		uchar = *(pRecv + offset);
-		ushortsw = uchar * 256;
-		uchar = *(pRecv + offset + 1);
-		ushortsw += uchar;
-		stRecv.F1_5 = ushortsw;
-
-		offset += sizeof(stRecv.F1_5);
-		uchar = *(pRecv + offset);
-		ushortsw = uchar * 256;
-		uchar = *(pRecv + offset + 1);
-		ushortsw += uchar;
-		stRecv.F1_6 = ushortsw;
-
-		offset += sizeof(stRecv.F1_6);
-		stRecv.F1_7 = *(pRecv + offset);
-
-		offset += sizeof(stRecv.F1_7);
-		stRecv.F1_8 = *(pRecv + offset);
-
-		offset += sizeof(stRecv.F1_8);
-		stRecv.F1_9 = *(pRecv + offset);
-
-		offset += sizeof(stRecv.F1_9);
-		uchar = *(pRecv + offset);
-		ushortsw = uchar * 256;
-		uchar = *(pRecv + offset + 1);
-		ushortsw += uchar;
-		stRecv.F1_10 = ushortsw;
-
-		offset += sizeof(stRecv.F1_10);
-		stRecv.F1_11 = *(pRecv + offset);
-
-		offset += sizeof(stRecv.F1_11);
-		stRecv.F1_12 = *(pRecv + offset);
-
-		offset += sizeof(stRecv.F1_12);
-		break;
-	}
-	case 2:
-	{
-		offset += 2;	//跳过驱动电机个数、驱动电机序号
-		stRecv.F2_0 = *(pRecv + offset);
-
-		offset += sizeof(stRecv.F2_0);
-		stRecv.F2_1 = *(pRecv + offset);
-
-		offset += sizeof(stRecv.F2_1);
-		uchar = *(pRecv + offset);
-		ushortsw = uchar * 256;
-		uchar = *(pRecv + offset + 1);
-		ushortsw += uchar;
-		stRecv.F2_2 = ushortsw;
-
-		offset += sizeof(stRecv.F2_2);
-		uchar = *(pRecv + offset);
-		ushortsw = uchar * 256;
-		uchar = *(pRecv + offset + 1);
-		ushortsw += uchar;
-		stRecv.F2_3 = ushortsw;
-
-		offset += sizeof(stRecv.F2_3);
-		stRecv.F2_4 = *(pRecv + offset);
-
-		offset += sizeof(stRecv.F2_4);
-		uchar = *(pRecv + offset);
-		ushortsw = uchar * 256;
-		uchar = *(pRecv + offset + 1);
-		ushortsw += uchar;
-		stRecv.F2_5 = ushortsw;
-
-		offset += sizeof(stRecv.F2_5);
-		uchar = *(pRecv + offset);
-		ushortsw = uchar * 256;
-		uchar = *(pRecv + offset + 1);
-		ushortsw += uchar;
-		stRecv.F2_6 = ushortsw;
-
-		offset += sizeof(stRecv.F2_6);
-
-		break;
-	}
-	case 5:
-	{
-		offset += 1; //跳过定位状态
-
-		uchar = *(pRecv + offset);
-		uintsw = uchar * 16777216;
-		uchar = *(pRecv + offset + 1);
-		uintsw += uchar * 65536;
-		uchar = *(pRecv + offset + 2);
-		uintsw += uchar * 256;
-		uchar = *(pRecv + offset + 3);
-		uintsw += uchar;
-		stRecv.F5_0 = uintsw;
-
-		offset += sizeof(stRecv.F5_0);
-		uchar = *(pRecv + offset);
-		uintsw = uchar * 16777216;
-		uchar = *(pRecv + offset + 1);
-		uintsw += uchar * 65536;
-		uchar = *(pRecv + offset + 2);
-		uintsw += uchar * 256;
-		uchar = *(pRecv + offset + 3);
-		uintsw += uchar;
-		stRecv.F5_1 = uintsw;
-
-		offset += sizeof(stRecv.F5_1);
-		//stRecv.F5_2 = *(pRecv + offset);
-
-		//offset += sizeof(stRecv.F5_2);
-		break;
-	}
-	case 6:
-	{
-		//offset += 1;	//跳过最高电压电池子系统号
-		uchar = *(pRecv + offset);
-		ushortsw = uchar;
-		uchar = *(pRecv + offset + 1);
-		ushortsw += uchar * 256;
-		stRecv.F6_0 = ushortsw;
-
-		offset += sizeof(stRecv.F6_0);
-		uchar = *(pRecv + offset);
-		ushortsw = uchar * 256;
-		uchar = *(pRecv + offset + 1);
-		ushortsw += uchar;
-		stRecv.F6_1 = ushortsw;
-
-		//offset += 1;	//跳过最低电压电池子系统号
-		offset += sizeof(stRecv.F6_1);
-		uchar = *(pRecv + offset);
-		ushortsw = uchar;
-		uchar = *(pRecv + offset + 1);
-		ushortsw += uchar * 256;
-		stRecv.F6_2 = ushortsw;
-
-		offset += sizeof(stRecv.F6_2);
-		uchar = *(pRecv + offset);
-		ushortsw = uchar * 256;
-		uchar = *(pRecv + offset + 1);
-		ushortsw += uchar;
-		stRecv.F6_3 = ushortsw;
-
-		offset += 1;	//跳过最高温度子系统号
-		offset += sizeof(stRecv.F6_3);
-		stRecv.F6_4 = *(pRecv + offset);
-
-		offset += sizeof(stRecv.F6_4);
-		stRecv.F6_5 = *(pRecv + offset);
-
-		offset += 1;	//跳过最低温度子系统号
-		offset += sizeof(stRecv.F6_5);
-		stRecv.F6_6 = *(pRecv + offset);
-
-		offset += sizeof(stRecv.F6_6);
-		stRecv.F6_7 = *(pRecv + offset);
-
-		offset += sizeof(stRecv.F6_7);
-
-		break;
-	}
-	case 7:
-	{
-		offset += 1; //跳过最高报警等级
-		uchar = *(pRecv + offset);
-		uintsw = uchar * 16777216;
-		uchar = *(pRecv + offset + 1);
-		uintsw += uchar * 65536;
-		uchar = *(pRecv + offset + 2);
-		uintsw += uchar * 256;
-		uchar = *(pRecv + offset + 3);
-		uintsw += uchar;
-		stRecv.F7_0 = uintsw;
-		offset += sizeof(stRecv.F7_0);
-
-		uchar = *(pRecv + offset);	//可充电储能装置故障总数
-		offset += 1;
-		if (uchar > 0)
-		{
-			offset += uchar * sizeof(uint32_t);
-			if (offset >= leftOffset)
-				break;
-		}
-
-		uchar = *(pRecv + offset);	//驱动电机故障总数
-		offset += 1;
-		if (uchar > 0)
-		{
-			offset += uchar * sizeof(uint32_t);
-			if (offset >= leftOffset)
-				break;
-		}
-
-		uchar = *(pRecv + offset);	//发动机故障总数
-		offset += 1;
-		if (uchar > 0)
-		{
-			offset += uchar * sizeof(uint32_t);
-			if (offset >= leftOffset)
-				break;
-		}
-
-		uchar = *(pRecv + offset);	//其它故障总数
-		offset += 1;
-		if (uchar > 0)
-		{
-			offset += uchar * sizeof(uint32_t);
-			if (offset >= leftOffset)
-				break;
-		}
-
-		break;
-	}
-	default:
-		break;
-	}
-
-	return offset;
-}
+HANDLE g_hMutex = NULL;//CreateMutex(NULL, FALSE, _T("InfoRecord"));
 
 void CInfoRecord::WriteVin()
 {
@@ -361,13 +90,13 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 		return -1;
 	}
 
-	if (pVin[0] != 'L')
-		return -1;
+// 	if (pVin[0] != 'L')
+// 		return -1;
 
 // 	if (pVin[1] <'A' || (pVin[1] > 'Z' && pVin[1] < 'a') || pVin[1]>'z')
 // 		return -1;
 
-	for (int i = 1; i < VIN_LENGTH; i++)
+	for (int i = 0; i < VIN_LENGTH; i++)
 	{
 		if (pVin[i] < '0' || (pVin[i] > '9' && pVin[i] < 'A') || (pVin[i] > 'Z' && pVin[i] < 'a') || pVin[i]>'z')
 			return -1;
@@ -415,19 +144,18 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 		}
 	}
 
-	for (long i = m_vehicleNum - 1; i >= iLeft; i--)
+	for (long i=m_vehicleNum-1; i>=iLeft; i--)
 	{
-		memcpy(m_chVin[i + 1], m_chVin[i], VIN_LENGTH + 1);
+		memcpy(m_chVin[i+1], m_chVin[i], VIN_LENGTH + 1);
 
-		m_circleQue[i + 1].pElem = m_circleQue[i].pElem;
-		m_circleQue[i + 1].front = m_circleQue[i].front;
-		m_circleQue[i + 1].rear = m_circleQue[i].rear;
+		m_circleQue[i+1].pElem = m_circleQue[i].pElem;
+		m_circleQue[i+1].front = m_circleQue[i].front;
+		m_circleQue[i+1].rear = m_circleQue[i].rear;
 
-		m_dataType8[i + 1] = m_dataType8[i];
-		m_dataType9[i + 1] = m_dataType9[i];
+		m_dataType8[i+1] = m_dataType8[i];
+		m_dataType9[i+1] = m_dataType9[i];
 	}
 
-	memset(m_chVin[iLeft], 0, VIN_LENGTH + 1);
 	memcpy(m_chVin[iLeft], (char*)pVin, VIN_LENGTH + 1);
 
 	m_circleQue[iLeft].pElem = pElem;
@@ -510,7 +238,7 @@ void CInfoRecord::RecordInfo(long pos, STRECVDATA& stRecv)
 	m_datagramNum += 1;
 }
 
-long CInfoRecord::RecordInfoType8(long pos, const char* pRecv, long leftOffset)
+long CInfoRecord::RecordInfoType8(long pos, const char* pRecv)
 {
 	if (pos >= m_vehicleNum || pos < 0)
 		return 0;
@@ -518,17 +246,24 @@ long CInfoRecord::RecordInfoType8(long pos, const char* pRecv, long leftOffset)
 	if (*pRecv == 0 || *pRecv > 250)
 		return 0;
 
-	long offset = 0;
-	uint8_t uchar;
-	uint16_t ushortsw;
-
 	while (m_bLockFlag)
 	{
 		printf("bLock");
 	}
 
+	long offset = 0;
+	uint8_t uchar;
+	uint16_t ushortsw;
+
+	//可充电储能子系统个数(目前只有1个)
+	uchar = *pRecv;
 	m_dataType8[pos].F8_0 = *pRecv;
-	offset += sizeof(m_dataType8[pos].F8_0);
+	offset += 1;
+
+	if (m_dataType8[pos].F8_0 == 0)
+	{
+		return offset;
+	}
 
 	if (NULL == m_dataType8[pos].pF8_1)
 	{
@@ -540,53 +275,46 @@ long CInfoRecord::RecordInfoType8(long pos, const char* pRecv, long leftOffset)
 		memset(m_dataType8[pos].pF8_1, 0, sizeof(RecvDataType8_1));
 	}
 
+	//可充电储能子系统号
 	m_dataType8[pos].pF8_1->F8_1_0 = *(pRecv + offset);
-	offset += sizeof(m_dataType8[pos].pF8_1->F8_1_0);
-	if (m_dataType8[pos].pF8_1->F8_1_0 == 0 || m_dataType8[pos].pF8_1->F8_1_0 > 250)
-	{
-		return offset;
-	}
+	offset += 1;
 
+	//可充电储能装置电压
 	uchar = *(pRecv + offset);
 	ushortsw = uchar * 256;
 	uchar = *(pRecv + offset + 1);
 	ushortsw += uchar;
 	m_dataType8[pos].pF8_1->F8_1_1 = ushortsw;
-	offset += sizeof(m_dataType8[pos].pF8_1->F8_1_1);
-	if (m_dataType8[pos].pF8_1->F8_1_1 > 10000)
-	{
-		printf("invalid\n");
-		//return offset;
-	}
+	offset += 2;
 
+	//可充电储能装置电流
 	uchar = *(pRecv + offset);
 	ushortsw = uchar * 256;
 	uchar = *(pRecv + offset + 1);
 	ushortsw += uchar;
 	m_dataType8[pos].pF8_1->F8_1_2 = ushortsw;
-	offset += sizeof(m_dataType8[pos].pF8_1->F8_1_2);
-	if (m_dataType8[pos].pF8_1->F8_1_2 > 20000)
-	{
-		//return offset;
-		printf("invalid\n");
-	}
+	offset += 2;
 
+	//单体电池总数
 	uchar = *(pRecv + offset);
 	ushortsw = uchar * 256;
 	uchar = *(pRecv + offset + 1);
 	ushortsw += uchar;
 	m_dataType8[pos].pF8_1->F8_1_3 = ushortsw;
-	offset += sizeof(m_dataType8[pos].pF8_1->F8_1_3);
+	offset += 2;
 
+	//本帧起始电池序号
 	uchar = *(pRecv + offset);
 	uint16_t iSequence1st = uchar * 256;
 	uchar = *(pRecv + offset + 1);
 	iSequence1st += uchar;
+	offset += 2;
 
-	offset += sizeof(iSequence1st);
+	//本帧单体电池总数
 	uint8_t iCellNum = *(pRecv + offset);
-	offset += sizeof(iCellNum);
+	offset += 1;
 
+	//单体电池电压列表
 	RecvDataType8_1_4* pNode = NULL;
 	if (NULL != m_dataType8[pos].pF8_1->pF8_1_4)
 	{
@@ -603,7 +331,7 @@ long CInfoRecord::RecordInfoType8(long pos, const char* pRecv, long leftOffset)
 			if (pNode->F8_1_4_1 == iSequence1st)
 			{
 				//本帧起始电池序号存在，更改电压值
-				
+
 				if (pNode->F8_1_4_2 != iCellNum)
 				{
 					//电池总数有变，重新分配
@@ -618,7 +346,6 @@ long CInfoRecord::RecordInfoType8(long pos, const char* pRecv, long leftOffset)
 				}
 
 				pNode->F8_1_4_2 = iCellNum;
-				offset += sizeof(pNode->F8_1_4_2);
 				break;
 			}
 
@@ -652,7 +379,7 @@ long CInfoRecord::RecordInfoType8(long pos, const char* pRecv, long leftOffset)
 		pNode = m_dataType8[pos].pF8_1->pF8_1_4;
 	}
 
-	for (uint8_t i=0; i<iCellNum; i++)
+	for (uint8_t i = 0; i < iCellNum; i++)
 	{
 		uchar = *(pRecv + offset);
 		ushortsw = uchar * 256;
@@ -660,13 +387,13 @@ long CInfoRecord::RecordInfoType8(long pos, const char* pRecv, long leftOffset)
 		ushortsw += uchar;
 
 		pNode->pF8_1_4_3[i] = ushortsw;
-		offset += sizeof(ushortsw);
+		offset += 2;
 	}
 
 	return offset;
 }
 
-long CInfoRecord::RecordInfoType9(long pos, const char* pRecv, long leftOffset)
+long CInfoRecord::RecordInfoType9(long pos, const char* pRecv)
 {
 	if (pos >= m_vehicleNum || pos < 0)
 		return 0;
@@ -693,10 +420,10 @@ long CInfoRecord::RecordInfoType9(long pos, const char* pRecv, long leftOffset)
 
 	long offset = 0;
 	uint8_t uchar;
-	uint16_t ushortsw;
 
+	//可充电储能子系统个数(目前只有1个)
 	m_dataType9[pos].F9_0 = *pRecv;
-	offset += sizeof(m_dataType9[pos].F9_0);
+	offset += 1;
 
 	m_dataType9[pos].pF9_1 = (RecvDataType9_1*)malloc(sizeof(RecvDataType9_1));
 	if (NULL == m_dataType9[pos].pF9_1)
@@ -705,26 +432,20 @@ long CInfoRecord::RecordInfoType9(long pos, const char* pRecv, long leftOffset)
 	}
 
 	memset(m_dataType9[pos].pF9_1, 0, sizeof(RecvDataType9_1));
-	
-	m_dataType9[pos].pF9_1->pF9_1_2 = NULL;
+
+	//可充电储能子系统号
 	m_dataType9[pos].pF9_1->F9_1_0 = *(pRecv + offset);
-	offset += sizeof(m_dataType9[pos].pF9_1->F9_1_0);
+	offset += 1;
 
-	if (m_dataType9[pos].pF9_1->F9_1_0 == 0 || m_dataType9[pos].pF9_1->F9_1_0 > 250)
-	{
-		return offset;
-	}
+	m_dataType9[pos].pF9_1->pF9_1_2 = NULL;
 
+	//可充电储能温度探针个数
 	uchar = *(pRecv + offset);
-	ushortsw = uchar * 256;
+	uint16_t iProbNum = uchar * 256;
 	uchar = *(pRecv + offset + 1);
-	ushortsw += uchar;
-	m_dataType9[pos].pF9_1->F9_1_1 = ushortsw;
-	offset += sizeof(m_dataType9[pos].pF9_1->F9_1_1);
-	if (m_dataType9[pos].pF9_1->F9_1_1 == 0 || m_dataType9[pos].pF9_1->F9_1_1 > 65531)
-	{
-		return offset;
-	}
+	iProbNum += uchar;
+	m_dataType9[pos].pF9_1->F9_1_1 = iProbNum;
+	offset += 2;
 
 	m_dataType9[pos].pF9_1->pF9_1_2 = (uint8_t*)malloc(m_dataType9[pos].pF9_1->F9_1_1 * sizeof(uint8_t));
 	if (NULL == m_dataType9[pos].pF9_1->pF9_1_2)
@@ -735,22 +456,11 @@ long CInfoRecord::RecordInfoType9(long pos, const char* pRecv, long leftOffset)
 	}
 	memset(m_dataType9[pos].pF9_1->pF9_1_2, 0, m_dataType9[pos].pF9_1->F9_1_1 * sizeof(uint8_t));
 
-	for (uint16_t j = 0; j < m_dataType9[pos].pF9_1->F9_1_1; j++)
+	//可充电储能子系统各温度探针检测到的温度值
+	for (uint16_t j = 0; j < iProbNum; j++)
 	{
-		if (offset >= leftOffset)
-		{
-			break;
-		}
-
-		//各温度探针检测到的温度值
 		m_dataType9[pos].pF9_1->pF9_1_2[j] = *(pRecv + offset);
-		offset += sizeof(m_dataType9[pos].pF9_1->pF9_1_2[j]);
-
-		if (m_dataType9[pos].pF9_1->pF9_1_2[j] > 250)
-		{
-			printf("invalid\n");
-			//return offset;
-		}
+		offset += 1;
 	}
 
 	return offset;
@@ -770,11 +480,25 @@ bool CInfoRecord::OnRealTimeRecv(HWND hWnd, sockaddr_in serAddr)
 		m_hThreadParse = NULL;
 	}
 
+	if (NULL != g_hMutex)
+	{
+		CloseHandle(g_hMutex);
+		g_hMutex = NULL;
+	}
+
 	SOCKET pSocket = CInfoSocket::GetInstance()->OnConnect(serAddr);
 	if (pSocket == INVALID_SOCKET)
 	{
 		return false;
 	}
+
+	g_hMutex = CreateMutex(NULL, FALSE, _T("InfoRecord"));
+	if (NULL == g_hMutex)
+	{
+		return false;
+	}
+
+	OpenMutex(MUTEX_ALL_ACCESS, true, NULL);
 
 	DWORD dwThreadIdRecv;
 	m_hThreadRecv = CreateThread(NULL, NULL, OnReceiveThread, hWnd, 0, &dwThreadIdRecv);
@@ -789,6 +513,7 @@ bool CInfoRecord::OnRealTimeRecv(HWND hWnd, sockaddr_in serAddr)
 	if (NULL == m_hThreadRecv)
 		CInfoSocket::GetInstance()->OnClose();
 #endif
+
 	return true;
 }
 
@@ -879,6 +604,8 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 #ifdef _DEBUG
 	ULONGLONG saveSize = 0;
 	FILE *fpWrite = fopen("datagram.dat", "wb+");
+#else
+	PSTDATABUFFGRAM pDataGramPre = NULL;
 #endif
 
 	while (1)
@@ -887,7 +614,14 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 		{
 #ifdef _DEBUG
 			fclose(fpWrite);
+#else
+			if (pDataGramPre != NULL)
+			{
+				free(pDataGramPre);
+				pDataGramPre = NULL;
+			}
 #endif
+
 			PostMessage(hWnd, UM_STOPRECV, NULL, 0);
 			break;
 		}
@@ -899,6 +633,12 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 			PostMessage(hWnd, UM_FILEPARSE, NULL, 0);
 			break;
 		}
+#else
+		if (g_queDataGram.iNum > 100000)
+		{
+			Sleep(500);
+		}
+#endif
 
 		char recvData[BUFFER_SIZE] = {};
 		INT recvSize = CInfoSocket::GetInstance()->OnReceive(recvData);
@@ -907,66 +647,142 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 			continue;
 		}
 
+#ifdef _DEBUG
 		saveSize += recvSize;
 		fwrite(recvData, recvSize, 1, fpWrite);
 #else
-		//一次接多条
-		PSTDATABUFFGRAM pNode[NUM_MSGRECV_PERLOOP] = {};
-		for (uint8_t i = 0; i < NUM_MSGRECV_PERLOOP; i++)
+		g_lRecvSizeSum += recvSize;
+
+		int latestOffset = 0;
+		PSTDATABUFFGRAM pNode = NULL;
+		int iPreSize = 0;
+
+		bool bLastToEnd = false;	//最后一条报文是否达到末尾
+		int iCurOffset = 0;
+		int iStartOffset = 0;
+
+		//拆分出每条报文
+		while (latestOffset < recvSize - 1)
 		{
-			if (CInfoSocket::GetInstance()->CheckClose())
+			bLastToEnd = false;
+			if (latestOffset <= recvSize - 2 && memcmp(&recvData[latestOffset], "##", 2) != 0)
 			{
-				break;
-			}
-
-			char recvData[BUFFER_SIZE] = {};
-			INT recvSize = CInfoSocket::GetInstance()->OnReceive(recvData);
-			DWORD dwLastErr = GetLastError();
-
-			if (recvSize <= 0)
-			{
-				//CInfoSocket::GetInstance()->OnReConnect();
+				iPreSize += 1;
+				latestOffset += 1;
 				continue;
 			}
 
-			g_lRecvSizeSum += recvSize;
-			pNode[i] = (PSTDATABUFFGRAM)malloc(sizeof(STDATABUFFGRAM));
-			memcpy(pNode[i]->recvData, recvData, recvSize * sizeof(char));
-			pNode[i]->recvSize = recvSize;
-			pNode[i]->pNext = NULL;
-		}
-
-		WaitForSingleObject(g_hMutex, INFINITE);
-		for (uint8_t i = 0; i < NUM_MSGRECV_PERLOOP; i++)
-		{
-			if (CInfoSocket::GetInstance()->CheckClose())
+			if (pDataGramPre != NULL)
 			{
-				if (NULL != pNode[i])
+				if (iPreSize > 0)
 				{
-					free(pNode[i]);
-					pNode[i] = NULL;
+					//与前一条消息的最后一条报文衔接
+					int dataSize = pDataGramPre->recvSize;
+					memcpy(&pDataGramPre->recvData[dataSize], &recvData[0], iPreSize);
+					pDataGramPre->recvSize += iPreSize;
 				}
 
-				continue;
+				WaitForSingleObject(g_hMutex, INFINITE);
+				if (g_queDataGram.front == NULL)
+				{
+					g_queDataGram.rear = pDataGramPre;
+					g_queDataGram.front = g_queDataGram.rear;
+				}
+				else
+				{
+					g_queDataGram.rear->pNext = pDataGramPre;
+					g_queDataGram.rear = pDataGramPre;
+				}
+				g_queDataGram.iNum++;
+				ReleaseMutex(g_hMutex);
 			}
 
-			if (pNode[i] == NULL)
-			{
-				continue;
-			}
+			iPreSize = 0;
+			pDataGramPre = NULL;
 
+			iStartOffset = latestOffset;
+			iCurOffset = latestOffset;
+			iCurOffset += 4;
+			//起始符、命令单元
+			if (iCurOffset >= recvSize - 1)
+				break;
+
+			latestOffset += 4;
+
+			//vin码
+			iCurOffset = latestOffset;
+			iCurOffset += 17;
+			if (iCurOffset >= recvSize - 1)
+				break;
+			latestOffset += 17;
+
+			//加密方式
+			iCurOffset = latestOffset;
+			iCurOffset += 1;
+			if (iCurOffset >= recvSize - 1)
+				break;
+			latestOffset += 1;
+
+			//数据单元长度
+			iCurOffset = latestOffset;
+			iCurOffset += 2;
+			if (iCurOffset >= recvSize - 1)
+				break;
+
+			uint8_t uchar = recvData[latestOffset];
+			uint16_t iDataLen = uchar * 256;
+			uchar = recvData[latestOffset + 1];
+			iDataLen += uchar;
+			latestOffset += 2;
+
+			//数据单元
+			iCurOffset = latestOffset;
+			iCurOffset += iDataLen;
+			if (iCurOffset >= recvSize - 1)
+				break;
+
+			latestOffset += iDataLen;
+
+			//校验码
+			iCurOffset = latestOffset;
+			iCurOffset += 1;
+			if (iCurOffset >= recvSize - 1)
+				break;
+
+			latestOffset += 1;
+			bLastToEnd = true;
+
+			int iBuffLen = latestOffset - iStartOffset;
+			pNode = (PSTDATABUFFGRAM)malloc(sizeof(STDATABUFFGRAM));
+			memset(pNode, 0, sizeof(STDATABUFFGRAM));
+			memcpy(pNode->recvData, &recvData[iStartOffset], iBuffLen * sizeof(char));
+			pNode->recvSize = iBuffLen;
+			pNode->pNext = NULL;
+
+			WaitForSingleObject(g_hMutex, INFINITE);
 			if (g_queDataGram.front == NULL)
 			{
-				g_queDataGram.rear = pNode[i];
+				g_queDataGram.rear = pNode;
 				g_queDataGram.front = g_queDataGram.rear;
 			}
 			else
 			{
-				g_queDataGram.rear->pNext = pNode[i];
-				g_queDataGram.rear = pNode[i];
+				g_queDataGram.rear->pNext = pNode;
+				g_queDataGram.rear = pNode;
 			}
+			g_queDataGram.iNum++;
+			ReleaseMutex(g_hMutex);
 		}
-		ReleaseMutex(g_hMutex);
+
+		if (!bLastToEnd)
+		{
+			int iBuffLen = recvSize - iStartOffset;
+			pDataGramPre = (PSTDATABUFFGRAM)malloc(sizeof(STDATABUFFGRAM));
+			memset(pDataGramPre, 0, sizeof(STDATABUFFGRAM));
+			memcpy(pDataGramPre->recvData, &recvData[iStartOffset], iBuffLen * sizeof(char));
+			pDataGramPre->recvSize = iBuffLen;
+			pDataGramPre->pNext = NULL;
+		}
 #endif
 	}
 
@@ -983,6 +799,10 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 	SYSTEMTIME datePre;
 	GetLocalTime(&datePre);
 
+	uint8_t uchar;
+	uint16_t ushortsw;
+	uint32_t uintsw;
+
 	while (1)
 	{
 		if (CInfoSocket::GetInstance()->CheckClose())
@@ -993,8 +813,6 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 
 		if (g_queDataGram.front == NULL)
 		{
-// 			char recvData[BUFFER_SIZE] = {};
-// 			INT recvSize = CInfoSocket::GetInstance()->OnReceive(recvData);
 			continue;
 		}
 
@@ -1010,121 +828,761 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 		datePre.wMonth = st.wMonth;
 		datePre.wDay = st.wDay;
 
-		WaitForSingleObject(g_hMutex, INFINITE);
-		PSTDATABUFFGRAM pNode = g_queDataGram.front;
-		g_queDataGram.front = g_queDataGram.front->pNext;
-
 		char recvData[BUFFER_SIZE] = {};
-		memcpy(recvData, pNode->recvData, pNode->recvSize * sizeof(char));
-		INT recvSize = pNode->recvSize;
+		INT recvSize = 0;
 
+		PSTDATABUFFGRAM pNode = g_queDataGram.front;
+		memcpy(recvData, pNode->recvData, pNode->recvSize * sizeof(char));
+		recvSize = pNode->recvSize;
+
+		//报文结点出队
+		WaitForSingleObject(g_hMutex, INFINITE);
+		g_queDataGram.front = g_queDataGram.front->pNext;
 		free(pNode);
 		pNode = NULL;
+		if (g_queDataGram.front == NULL)
+			g_queDataGram.rear = NULL;
+		g_queDataGram.iNum--;
 		ReleaseMutex(g_hMutex);
 
-		long lastOffset = 0;
-		long latestOffset = 0;
+		INT latestOffset = 0;
+		if (memcmp(&recvData[latestOffset], "###", 3) == 0)
+		{
+			latestOffset += 1;
+		}
 
 		while (latestOffset < recvSize)
 		{
 			if (memcmp(&recvData[latestOffset], "##", 2) != 0)
 			{
 				latestOffset += 1;
-				continue;
 			}
-
-			lastOffset = latestOffset;
-			latestOffset += 4;
-
-			uint8_t strVin[VIN_LENGTH + 1] = {};
-			memcpy(strVin, &recvData[latestOffset], VIN_LENGTH);
-
-			latestOffset += 18;
-
-			//数据单元长度
-			uint8_t uchar = recvData[latestOffset];
-			uint16_t ushortsw = uchar * 256;
-			uchar = recvData[latestOffset + 1];
-			ushortsw += uchar;
-			latestOffset += 2;
-
-			STRECVDATA infoData;
-			memset(&infoData, 0, sizeof(STRECVDATA));
-
-			//数据采集时间(年月日时分秒)
-			memcpy(infoData.F8_0, &recvData[24], sizeof(infoData.F8_0));
-			if (infoData.F8_0[0] != (st.wYear % 100)
-				|| infoData.F8_0[1] != (uint8_t)st.wMonth
-				|| infoData.F8_0[2] != (uint8_t)st.wDay)
+			else
 			{
-				//不是今天的不处理
-				//latestOffset += ushortsw + 1;
-				//continue;
-				infoData.F8_0[0] = (st.wYear % 100);
-				infoData.F8_0[1] = (uint8_t)st.wMonth;
-				infoData.F8_0[2] = (uint8_t)st.wDay;
-				infoData.F8_0[3] = (uint8_t)st.wHour;
-				infoData.F8_0[4] = (uint8_t)st.wMinute;
-				infoData.F8_0[5] = (uint8_t)st.wSecond;
+				break;
 			}
+		}
 
-			latestOffset += 6;
+		//起始符号
+		latestOffset += 2;
 
-			long pos = CInfoRecord::GetInstance()->FindVinPos(strVin);
+		//命令标识
+		uint8_t iCmdFlag = recvData[latestOffset];
+		latestOffset += 1;
+		if (iCmdFlag != 2 && iCmdFlag != 3)
+			continue;
+
+		//应答标识
+		uint8_t iRespFlag = recvData[latestOffset];
+		latestOffset += 1;
+		if (iRespFlag != 254)
+			continue;
+
+		//vin码
+		uint8_t strVin[VIN_LENGTH + 1] = {};
+		memcpy(strVin, &recvData[latestOffset], VIN_LENGTH);
+		latestOffset += 17;
+
+		//数据单元加密方式
+		latestOffset += 1;
+
+		//数据单元长度
+		uchar = recvData[latestOffset];
+		uint16_t iDataLen = uchar * 256;
+		uchar = recvData[latestOffset + 1];
+		iDataLen += uchar;
+		latestOffset += 2;
+
+		STRECVDATA infoData;
+		memset(&infoData, 0, sizeof(infoData));
+
+	/*******数据单元格式 实时信息上报*******/
+
+		//数据采集时间(年月日时分秒)
+		memcpy(infoData.F8_0, &recvData[latestOffset], 6);
+
+		//采集时间无效，丢弃该报文
+// 		if (infoData.F8_0[0] != (st.wYear % 100))
+// 			continue;
+
+		long pos = CInfoRecord::GetInstance()->FindVinPos(strVin);
+		if (pos < 0)
+		{
+			pos = CInfoRecord::GetInstance()->InsertVinAndSort(strVin);
+
+			//vin码无效，丢弃该报文
 			if (pos < 0)
+				continue;
+		}
+
+		latestOffset += 6;
+
+		bool bSetFlag[10] = {};
+		INT curOffset = latestOffset;
+		INT leftOffset = iDataLen - 6;
+
+		while (latestOffset < (iDataLen - 6) + curOffset)
+		{
+			if (leftOffset <= 1)
 			{
-				pos = CInfoRecord::GetInstance()->InsertVinAndSort(strVin);
-				if (pos < 0)
-					continue;
+				break;
 			}
 
-			long curOffset = latestOffset;
+			uint8_t infoType = recvData[latestOffset];
+			leftOffset -= 1;
+			if (leftOffset <= 0)
+				break;
+			latestOffset += 1;
 
-			//信息类型信息体
-			while (latestOffset < (ushortsw - 6) + curOffset && latestOffset < recvSize - 1)
+			if (infoType == 1 && !bSetFlag[1])
 			{
-				if (memcmp(&recvData[latestOffset], "##", 2) == 0)
+				bSetFlag[1] = true;
+
+				// 0__车辆状态
+				uchar = recvData[latestOffset];
+				infoData.F1_0 = uchar;
+				leftOffset -= 1;
+				if (leftOffset <= 0)
 					break;
+				latestOffset += 1;
 
-				uint8_t infoType = recvData[latestOffset];
-				long localOffset = 0;
-				long leftOffset = (ushortsw - 6) + curOffset - latestOffset;
-
-				if (infoType == 1 || infoType == 2 || infoType == 5 || infoType == 6 || infoType == 7)
-				{
-					localOffset = SetRecvData(&recvData[latestOffset], infoData, leftOffset);
-				}
-				else if (infoType == 8)
-				{
-					latestOffset += 1;
-					localOffset = CInfoRecord::GetInstance()->RecordInfoType8(pos, &recvData[latestOffset], leftOffset);
-				}
-				else if (infoType == 9)
-				{
-					latestOffset += 1;
-					localOffset = CInfoRecord::GetInstance()->RecordInfoType9(pos, &recvData[latestOffset], leftOffset);
-				}
-				else
-				{
-					latestOffset += leftOffset + 1;
+				// 1__充电状态
+				uchar = recvData[latestOffset];
+				infoData.F1_1 = uchar;
+				leftOffset -= 1;
+				if (leftOffset <= 0)
 					break;
-				}
+				latestOffset += 1;
 
-				latestOffset += localOffset;
+				// 2__运行模式
+				uchar = recvData[latestOffset];
+				infoData.F1_2 = uchar;
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				// 3__车速
+				uchar = recvData[latestOffset];
+				ushortsw = uchar * 256;
+				uchar = recvData[latestOffset + 1];
+				ushortsw += uchar;
+				infoData.F1_3 = ushortsw;
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				// 5__累计里程
+				uchar = recvData[latestOffset];
+				uintsw = uchar * 16777216;
+				uchar = recvData[latestOffset + 1];
+				uintsw += uchar * 65536;
+				uchar = recvData[latestOffset + 2];
+				uintsw += uchar * 256;
+				uchar = recvData[latestOffset + 3];
+				uintsw += uchar;
+				infoData.F1_4 = uintsw;
+				leftOffset -= 4;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 4;
+
+				// 9__总电压
+				uchar = recvData[latestOffset];
+				ushortsw = uchar * 256;
+				uchar = recvData[latestOffset + 1];
+				ushortsw += uchar;
+				infoData.F1_5 = ushortsw;
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				// 11__总电流
+				uchar = recvData[latestOffset];
+				ushortsw = uchar * 256;
+				uchar = recvData[latestOffset + 1];
+				ushortsw += uchar;
+				infoData.F1_6 = ushortsw;
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				// 13__SOC
+				uchar = recvData[latestOffset];
+				infoData.F1_7 = uchar;
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				// 14__DC/DC状态
+				uchar = recvData[latestOffset];
+				infoData.F1_8 = uchar;
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				// 15__挡位
+				uchar = recvData[latestOffset];
+				infoData.F1_9 = uchar;
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				// 16__绝缘电阻
+				uchar = recvData[latestOffset];
+				ushortsw = uchar * 256;
+				uchar = recvData[latestOffset + 1];
+				ushortsw += uchar;
+				infoData.F1_10 = ushortsw;
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;;
+
+				// 18__加速踏板行程值
+				uchar = recvData[latestOffset];
+				infoData.F1_11 = uchar;
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				// 19__制动踏板状态
+				uchar = recvData[latestOffset];
+				infoData.F1_12 = uchar;
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
 			}
+			else if (infoType == 2 && !bSetFlag[2])
+			{
+				bSetFlag[2] = true;
 
+				//跳过驱动电机个数、驱动电机序号
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				// 0__驱动电机状态
+				uchar = recvData[latestOffset];
+				infoData.F2_0 = uchar;
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				// 1__驱动电机控制器温度
+				uchar = recvData[latestOffset];
+				infoData.F2_1 = uchar;
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				// 2__驱动电机转速
+				uchar = recvData[latestOffset];
+				ushortsw = uchar * 256;
+				uchar = recvData[latestOffset + 1];
+				ushortsw += uchar;
+				infoData.F2_2 = ushortsw;
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				// 4__驱动电机转矩
+				uchar = recvData[latestOffset];
+				ushortsw = uchar * 256;
+				uchar = recvData[latestOffset + 1];
+				ushortsw += uchar;
+				infoData.F2_3 = ushortsw;
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				// 6__驱动电机温度
+				uchar = recvData[latestOffset];
+				infoData.F2_4 = uchar;
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				// 7__电机控制器输入电压
+				uchar = recvData[latestOffset];
+				ushortsw = uchar * 256;
+				uchar = recvData[latestOffset + 1];
+				ushortsw += uchar;
+				infoData.F2_5 = ushortsw;
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				// 9__直流控制器直流母线电流
+				uchar = recvData[latestOffset];
+				ushortsw = uchar * 256;
+				uchar = recvData[latestOffset + 1];
+				ushortsw += uchar;
+				infoData.F2_6 = ushortsw;
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+			}
+			else if (infoType == 3)
+			{
+				//燃料电池电压
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				//燃料电池电流
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				//燃料消耗率
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				//燃料电池温度探针总数
+				uchar = recvData[latestOffset];
+				uint16_t iProbNum = uchar * 256;
+				uchar = recvData[latestOffset + 1];
+				iProbNum += uchar;
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				//探针温度值
+				for (uint16_t i = 0; i < iProbNum; i++)
+				{
+					leftOffset -= 1;
+					if (leftOffset <= 0)
+						break;
+					latestOffset += 1;
+				}
+
+				if (leftOffset <= 0)
+					break;
+
+				//氢系统中最高温度
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				//氢系统中最高温度探针代号
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				//氢气最高浓度
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				//氢气最高浓度传感器代号
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				//氢气最高压力
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				//氢气最高压力传感器代号
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				//高压DC/DC状态
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+			}
+			else if (infoType == 4)
+			{
+				//发动机状态
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				//曲轴转速
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				//燃料消耗率
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+			}
+			else if (infoType == 5)
+			{
+				//跳过定位状态
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				// 0__经度
+				uchar = recvData[latestOffset];
+				uintsw = uchar * 16777216;
+				uchar = recvData[latestOffset + 1];
+				uintsw += uchar * 65536;
+				uchar = recvData[latestOffset + 2];
+				uintsw += uchar * 256;
+				uchar = recvData[latestOffset + 3];
+				uintsw += uchar;
+				infoData.F5_0 = uintsw;
+				leftOffset -= 4;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 4;
+
+				// 4__纬度
+				uchar = recvData[latestOffset];
+				uintsw = uchar * 16777216;
+				uchar = recvData[latestOffset + 1];
+				uintsw += uchar * 65536;
+				uchar = recvData[latestOffset + 2];
+				uintsw += uchar * 256;
+				uchar = recvData[latestOffset + 3];
+				uintsw += uchar;
+				infoData.F5_1 = uintsw;
+				leftOffset -= 4;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 4;
+			}
+			else if (infoType == 6)
+			{
+				//跳过最高电压电池子系统号
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				// 0__最高电压单体号
+				uchar = recvData[latestOffset];
+				infoData.F6_0 = uchar;
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				// 2__电池单体电压最高值
+				uchar = recvData[latestOffset];
+				ushortsw = uchar * 256;
+				uchar = recvData[latestOffset + 1];
+				ushortsw += uchar;
+				infoData.F6_1 = ushortsw;
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				//跳过最低电压电池子系统号
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				// 4__最低电压单体号
+				uchar = recvData[latestOffset];
+				infoData.F6_2 = uchar;
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				// 6__电池单体电压最低值
+				uchar = recvData[latestOffset];
+				ushortsw = uchar * 256;
+				uchar = recvData[latestOffset + 1];
+				ushortsw += uchar;
+				infoData.F6_3 = ushortsw;
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				//跳过最高温度子系统号
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				// 8__最高温度探针号
+				uchar = recvData[latestOffset];
+				infoData.F6_4 = uchar;
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				// 9__最高温度值
+				uchar = recvData[latestOffset];
+				infoData.F6_5 = uchar;;
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				//跳过最低温度子系统号
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				// 10__最低温度探针号
+				uchar = recvData[latestOffset];
+				infoData.F6_6 = uchar;
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				// 11__最低温度值
+				uchar = recvData[latestOffset];
+				infoData.F6_7 = uchar;
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+			}
+			else if (infoType == 7)
+			{
+				//跳过最高报警等级
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				//通用报警标志
+				uchar = recvData[latestOffset];
+				uintsw = uchar * 16777216;
+				uchar = recvData[latestOffset + 1];
+				uintsw += uchar * 65536;
+				uchar = recvData[latestOffset + 2];
+				uintsw += uchar * 256;
+				uchar = recvData[latestOffset + 3];
+				uintsw += uchar;
+				infoData.F7_0 = uintsw;
+				leftOffset -= 4;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 4;
+
+				//可充电储能装置故障总数
+				uchar = recvData[latestOffset];
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+				if (uchar > 0)
+				{
+					leftOffset -= uchar * 4;
+					if (leftOffset <= 0)
+						break;
+					latestOffset += uchar * 4;
+				}
+
+				//驱动电机故障总数
+				uchar = recvData[latestOffset];
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+				if (uchar > 0)
+				{
+					leftOffset -= uchar * 4;
+					if (leftOffset <= 0)
+						break;
+					latestOffset += uchar * 4;
+				}
+
+				//发动机故障总数
+				uchar = recvData[latestOffset];
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+				if (uchar > 0)
+				{
+					leftOffset -= uchar * 4;
+					if (leftOffset <= 0)
+						break;
+					latestOffset += uchar * 4;
+				}
+
+				//其它故障总数
+				uchar = recvData[latestOffset];
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+				if (uchar > 0)
+				{
+					leftOffset -= uchar * 4;
+					if (leftOffset <= 0)
+						break;
+					latestOffset += uchar * 4;
+				}
+			}
+			else if (infoType == 8)
+			{
+				INT iLocalOffset = latestOffset;
+
+				//可充电储能子系统个数(目前只有1个)
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				//可充电储能子系统号
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				//可充电储能装置电压
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				//可充电储能装置电流
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				//单体电池总数
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				//本帧起始电池序号;
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				//本帧单体电池总数
+				uint8_t iCellNum = recvData[latestOffset];
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				//单体电池电压列表
+				for (uint8_t i = 0; i < iCellNum; i++)
+				{
+					leftOffset -= 2;
+					if (leftOffset <= 0)
+						break;
+					latestOffset += 2;
+				}
+
+				CInfoRecord::GetInstance()->RecordInfoType8(pos, &recvData[iLocalOffset]);
+			}
+			else if (infoType == 9)
+			{
+				INT iLocalOffset = latestOffset;
+
+				//可充电储能子系统个数(目前只有1个);
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				//可充电储能子系统号
+				leftOffset -= 1;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 1;
+
+				//可充电储能温度探针个数
+				uchar = recvData[latestOffset];
+				uint16_t iProbNum = uchar * 256;
+				uchar = recvData[latestOffset + 1];
+				iProbNum += uchar;
+				leftOffset -= 2;
+				if (leftOffset <= 0)
+					break;
+				latestOffset += 2;
+
+				//可充电储能子系统各温度探针检测到的温度值
+				for (uint16_t j = 0; j < iProbNum; j++)
+				{
+					if (latestOffset >= recvSize)
+						break;
+
+					leftOffset -= 1;
+					if (leftOffset <= 0)
+						break;
+					latestOffset += 1;
+				}
+
+				CInfoRecord::GetInstance()->RecordInfoType9(pos, &recvData[iLocalOffset]);
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		if (bSetFlag[1] && bSetFlag[2])
+		{
 			CInfoRecord::GetInstance()->RecordInfo(pos, infoData);
+		}
 
-			if (infoData.F7_0 > 0)
-			{
-				if (CInfoSocket::GetInstance()->CheckClose())
-					break;
+		if (infoData.F7_0 > 0)
+		{
+			if (CInfoSocket::GetInstance()->CheckClose())
+				break;
 
-				STALERTDATAPOST alertPost = {};
-				memcpy(alertPost.chVin, strVin, sizeof(strVin));
-				alertPost.F7_0 = infoData.F7_0;
-				PostMessage(hWnd, UM_ALERT, (WPARAM)&alertPost, 0);
-			}
+			STALERTDATAPOST alertPost = {};
+			memcpy(alertPost.chVin, strVin, sizeof(strVin));
+			alertPost.F7_0 = infoData.F7_0;
+			PostMessage(hWnd, UM_ALERT, (WPARAM)&alertPost, 0);
+		}
+
+		if (g_queDataGram.iNum > 10000 && g_queDataGram.iNum<100000)
+		{
+			Sleep(500);
+		}
+		else
+		{
+			printf("");
 		}
 	}
 

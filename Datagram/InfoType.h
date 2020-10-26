@@ -1,4 +1,4 @@
-ï»¿#ifndef __INFOTYPE_H__
+#ifndef __INFOTYPE_H__
 #define __INFOTYPE_H__
 
 typedef signed char int8_t;
@@ -6,145 +6,115 @@ typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int uint32_t;
 
-#define SIZE_MULTIPLE 1
-#define BUFFER_SIZE 65536*SIZE_MULTIPLE+1
+#define BUFFER_SIZE 65537
 #define VIN_LENGTH  17
-#define QUEUE_SIZE  1024   //é˜Ÿåˆ—é•¿åº¦
-#define CELLNUM_PER_FRAM 200 //æœ¬å¸§æœ€å¤§ç”µæ± æ•°
+#define QUEUE_SIZE  10000   //¶ÓÁĞ³¤¶È
+#define CELLNUM_PER_FRAM 200 //±¾Ö¡×î´óµç³ØÊı
 #define ALERTTIMES_REANK_NUM 20
 #define ALERT_CATEGORY_NUM 20
 #define MAX_VEHICLENUM 200000
-#define NUM_MSGRECV_PERLOOP 10 //æ¯æ¬¡å¾ªç¯æ¥æ”¶æ¶ˆæ¯æ•°
+#define NUM_MSGRECV_PERLOOP 3 //Ã¿´ÎÑ­»·½ÓÊÕÏûÏ¢Êı
 #define PARSE_FILE_SIZE 1073741824
 #define MAXLNE_PER_SHEET 1048576
 
 #pragma pack (1)
-// typedef struct RecData
-// {
-//     uint8_t chStarCode[2];  //èµ·å§‹ç¬¦##
-//     uint8_t chCmdFlag;
-//     uint8_t chRspFlag;
-//     uint8_t chVin[VIN_LENGTH];
-//     uint8_t chEncodeWay;
-//     uint16_t chUnitLen;
-// } STRECVDATA;
 
-
-/**********ä¿¡æ¯ç±»å‹1~7***********/
+/**********ĞÅÏ¢ÀàĞÍ1~7***********/
 typedef struct RecvData
 {
-	//æ•´è½¦æ•°æ®
-	uint8_t F1_0;       // 0__è½¦è¾†çŠ¶æ€
-	uint8_t F1_1;       // 1__å……ç”µçŠ¶æ€
-	uint8_t F1_2;       // 2__è¿è¡Œæ¨¡å¼
-	uint16_t F1_3;      // 3__è½¦é€Ÿ
-	uint32_t F1_4;      // 5__ç´¯è®¡é‡Œç¨‹
-	uint16_t F1_5;      // 9__æ€»ç”µå‹
-	uint16_t F1_6;      // 11__æ€»ç”µæµ
+	//Õû³µÊı¾İ
+	uint8_t F1_0;       // 0__³µÁ¾×´Ì¬
+	uint8_t F1_1;       // 1__³äµç×´Ì¬
+	uint8_t F1_2;       // 2__ÔËĞĞÄ£Ê½
+	uint16_t F1_3;      // 3__³µËÙ
+	uint32_t F1_4;      // 5__ÀÛ¼ÆÀï³Ì
+	uint16_t F1_5;      // 9__×ÜµçÑ¹
+	uint16_t F1_6;      // 11__×ÜµçÁ÷
 	uint8_t F1_7;       // 13__SOC
-	uint8_t F1_8;       // 14__DC/DCçŠ¶æ€
-	uint8_t F1_9;       // 15__æŒ¡ä½
-	uint16_t F1_10;     // 16__ç»ç¼˜ç”µé˜»
-	uint8_t F1_11;      // 18__åŠ é€Ÿè¸æ¿è¡Œç¨‹å€¼
-	uint8_t F1_12;      // 19__åˆ¶åŠ¨è¸æ¿çŠ¶æ€
+	uint8_t F1_8;       // 14__DC/DC×´Ì¬
+	uint8_t F1_9;       // 15__µ²Î»
+	uint16_t F1_10;     // 16__¾øÔµµç×è
+	uint8_t F1_11;      // 18__¼ÓËÙÌ¤°åĞĞ³ÌÖµ
+	uint8_t F1_12;      // 19__ÖÆ¶¯Ì¤°å×´Ì¬
 
-	//é©±åŠ¨ç”µæœºæ•°æ®
-	uint8_t F2_0;       // 0__é©±åŠ¨ç”µæœºçŠ¶æ€
-	uint8_t F2_1;       // 1__é©±åŠ¨ç”µæœºæ§åˆ¶å™¨æ¸©åº¦
-	uint16_t F2_2;      // 2__é©±åŠ¨ç”µæœºè½¬é€Ÿ
-	uint16_t F2_3;      // 4__é©±åŠ¨ç”µæœºè½¬çŸ©
-	uint8_t F2_4;       // 6__é©±åŠ¨ç”µæœºæ¸©åº¦
-	uint16_t F2_5;      // 7__ç”µæœºæ§åˆ¶å™¨è¾“å…¥ç”µå‹
-	uint16_t F2_6;      // 9__ç›´æµæ§åˆ¶å™¨ç›´æµæ¯çº¿ç”µæµ
+	//Çı¶¯µç»úÊı¾İ
+	uint8_t F2_0;       // 0__Çı¶¯µç»ú×´Ì¬
+	uint8_t F2_1;       // 1__Çı¶¯µç»ú¿ØÖÆÆ÷ÎÂ¶È
+	uint16_t F2_2;      // 2__Çı¶¯µç»ú×ªËÙ
+	uint16_t F2_3;      // 4__Çı¶¯µç»ú×ª¾Ø
+	uint8_t F2_4;       // 6__Çı¶¯µç»úÎÂ¶È
+	uint16_t F2_5;      // 7__µç»ú¿ØÖÆÆ÷ÊäÈëµçÑ¹
+	uint16_t F2_6;      // 9__Ö±Á÷¿ØÖÆÆ÷Ö±Á÷Ä¸ÏßµçÁ÷
 
-	//ä½ç½®æ•°æ®
-	uint32_t F5_0;      // 0__ç»åº¦
-	uint32_t F5_1;      // 4__çº¬åº¦
-	uint8_t F5_2;       // 8__æ¨ç®—æ–¹å‘
+	//Î»ÖÃÊı¾İ
+	uint32_t F5_0;      // 0__¾­¶È
+	uint32_t F5_1;      // 4__Î³¶È
+	uint8_t F5_2;       // 8__ÍÆËã·½Ïò
 
-	//æå€¼æ•°æ®
-	uint16_t F6_0;      // 0__æœ€é«˜ç”µå‹å•ä½“å·
-	uint16_t F6_1;      // 2__ç”µæ± å•ä½“ç”µå‹æœ€é«˜å€¼
-	uint16_t F6_2;      // 4__æœ€ä½ç”µå‹å•ä½“å·
-	uint16_t F6_3;      // 6__ç”µæ± å•ä½“ç”µå‹æœ€ä½å€¼
-	uint8_t F6_4;       // 8__æœ€é«˜æ¸©åº¦æ¢é’ˆå·
-	uint8_t F6_5;       // 9__æœ€é«˜æ¸©åº¦å€¼
-	uint8_t F6_6;       // 10__æœ€ä½æ¸©åº¦æ¢é’ˆå·
-	uint8_t F6_7;       // 11__æœ€ä½æ¸©åº¦å€¼
+	//¼«ÖµÊı¾İ
+	uint16_t F6_0;      // 0__×î¸ßµçÑ¹µ¥ÌåºÅ
+	uint16_t F6_1;      // 2__µç³Øµ¥ÌåµçÑ¹×î¸ßÖµ
+	uint16_t F6_2;      // 4__×îµÍµçÑ¹µ¥ÌåºÅ
+	uint16_t F6_3;      // 6__µç³Øµ¥ÌåµçÑ¹×îµÍÖµ
+	uint8_t F6_4;       // 8__×î¸ßÎÂ¶ÈÌ½ÕëºÅ
+	uint8_t F6_5;       // 9__×î¸ßÎÂ¶ÈÖµ
+	uint8_t F6_6;       // 10__×îµÍÎÂ¶ÈÌ½ÕëºÅ
+	uint8_t F6_7;       // 11__×îµÍÎÂ¶ÈÖµ
 
-	//æŠ¥è­¦æ•°æ®
+	//±¨¾¯Êı¾İ
 	uint32_t F7_0;
 
-	//æ—¶é—´æ•°æ®
-	uint8_t F8_0[6];    //å¹´æœˆæ—¥æ—¶åˆ†ç§’
+	//Ê±¼äÊı¾İ
+	uint8_t F8_0[6];    //ÄêÔÂÈÕÊ±·ÖÃë
 } STRECVDATA;
 /****************************/
 
 
-/**********ä¿¡æ¯ç±»å‹8ï¼šç”µå‹æ•°æ®***********/
-/*
-typedef struct
-{
-	uint16_t F8_1_4_0;      //æœ¬å¸§èµ·å§‹ç”µæ± åºå·
-	uint8_t F8_1_4_1;       //æœ¬å¸§å•ä½“ç”µæ± æ€»æ•°
-	uint16_t* pF8_1_4_2;    //å•ä½“ç”µæ± ç”µå‹
-} RecvDataType8_1_4;	
-
-typedef struct
-{
-	uint8_t F8_1_0;       //å¯å……ç”µå‚¨èƒ½å­ç³»ç»Ÿå·
-	uint16_t F8_1_1;      //å¯å……ç”µå‚¨èƒ½è£…ç½®ç”µå‹
-	uint16_t F8_1_2;      //å¯å……ç”µå‚¨èƒ½è£…ç½®ç”µæµ
-	uint16_t F8_1_3;      //å•ä½“ç”µæ± æ€»æ•°,1å¸§æœ€å¤š200ä¸ª
-	RecvDataType8_1_4* pF8_1_4;	//æœ¬å¸§ç”µæ± 
-} RecvDataType8_1;
-*/
-
+/**********ĞÅÏ¢ÀàĞÍ8£ºµçÑ¹Êı¾İ***********/
 typedef struct RecvDataType8_1_4
 {
-	uint16_t F8_1_4_1;      //æœ¬å¸§èµ·å§‹ç”µæ± åºå·
-	uint8_t F8_1_4_2;       //æœ¬å¸§å•ä½“ç”µæ± æ€»æ•°
-	uint16_t* pF8_1_4_3;    //å•ä½“ç”µæ± ç”µå‹
+	uint16_t F8_1_4_1;      //±¾Ö¡ÆğÊ¼µç³ØĞòºÅ
+	uint8_t F8_1_4_2;       //±¾Ö¡µ¥Ìåµç³Ø×ÜÊı
+	uint16_t* pF8_1_4_3;    //µ¥Ìåµç³ØµçÑ¹
 	struct RecvDataType8_1_4* pNext;
 } RecvDataType8_1_4;
 
 typedef struct
 {
-	uint8_t F8_1_0;       //å¯å……ç”µå‚¨èƒ½å­ç³»ç»Ÿå·
-	uint16_t F8_1_1;      //å¯å……ç”µå‚¨èƒ½è£…ç½®ç”µå‹
-	uint16_t F8_1_2;      //å¯å……ç”µå‚¨èƒ½è£…ç½®ç”µæµ
-	uint16_t F8_1_3;      //å•ä½“ç”µæ± æ€»æ•°
-	RecvDataType8_1_4* pF8_1_4;	//ç”µæ± ç”µå‹åˆ—è¡¨
+	uint8_t F8_1_0;       //¿É³äµç´¢ÄÜ×ÓÏµÍ³ºÅ
+	uint16_t F8_1_1;      //¿É³äµç´¢ÄÜ×°ÖÃµçÑ¹
+	uint16_t F8_1_2;      //¿É³äµç´¢ÄÜ×°ÖÃµçÁ÷
+	uint16_t F8_1_3;      //µ¥Ìåµç³Ø×ÜÊı
+	RecvDataType8_1_4* pF8_1_4;	//µç³ØµçÑ¹ÁĞ±í
 } RecvDataType8_1;
 
 typedef struct RecvDataType8
 {
-	uint8_t F8_0;		  //å¯å……ç”µå‚¨èƒ½å­ç³»ç»Ÿä¸ªæ•°(ç›®å‰åªæœ‰1ä¸ª)
-	RecvDataType8_1* pF8_1;    //å¯å……ç”µå‚¨èƒ½å­ç³»ç»Ÿç”µå‹ä¿¡æ¯åˆ—è¡¨
+	uint8_t F8_0;		  //¿É³äµç´¢ÄÜ×ÓÏµÍ³¸öÊı(Ä¿Ç°Ö»ÓĞ1¸ö)
+	RecvDataType8_1* pF8_1;    //¿É³äµç´¢ÄÜ×ÓÏµÍ³µçÑ¹ĞÅÏ¢ÁĞ±í
 } STRECVDATATYPE8;
-
 /**************************************/
 
 
-/**********ä¿¡æ¯ç±»å‹9ï¼šæ¸©åº¦æ•°æ®***********/
+/**********ĞÅÏ¢ÀàĞÍ9£ºÎÂ¶ÈÊı¾İ***********/
 typedef struct
 {
-	uint8_t F9_1_0;       //å¯å……ç”µå‚¨èƒ½å­ç³»ç»Ÿå·
-	uint16_t F9_1_1;      //å¯å……ç”µå‚¨èƒ½æ¸©åº¦æ¢é’ˆä¸ªæ•°
-	uint8_t* pF9_1_2;      //å¯å……ç”µå‚¨èƒ½å­ç³»ç»Ÿå„æ¸©åº¦æ¢é’ˆæ£€æµ‹åˆ°çš„æ¸©åº¦å€¼
+	uint8_t F9_1_0;       //¿É³äµç´¢ÄÜ×ÓÏµÍ³ºÅ
+	uint16_t F9_1_1;      //¿É³äµç´¢ÄÜÎÂ¶ÈÌ½Õë¸öÊı
+	uint8_t* pF9_1_2;      //¿É³äµç´¢ÄÜ×ÓÏµÍ³¸÷ÎÂ¶ÈÌ½Õë¼ì²âµ½µÄÎÂ¶ÈÖµ
 } RecvDataType9_1;
 
 typedef struct RecvDataType9
 {
-	uint8_t F9_0;        //å¯å……ç”µå‚¨èƒ½å­ç³»ç»Ÿä¸ªæ•°(ç›®å‰åªæœ‰1ä¸ª)
-	RecvDataType9_1 *pF9_1;  //å¯å……ç”µå‚¨èƒ½å­ç³»ç»Ÿæ¸©åº¦ä¿¡æ¯åˆ—è¡¨
+	uint8_t F9_0;        //¿É³äµç´¢ÄÜ×ÓÏµÍ³¸öÊı(Ä¿Ç°Ö»ÓĞ1¸ö)
+	RecvDataType9_1 *pF9_1;  //¿É³äµç´¢ÄÜ×ÓÏµÍ³ÎÂ¶ÈĞÅÏ¢ÁĞ±í
 } STRECVDATATYPE9;
 /**************************************/
 
 
-/**********å¾ªç¯é˜Ÿåˆ—ï¼Œè®°å½•æŸè¾†è½¦çš„å†å²æ•°æ®**********/
+/**********Ñ­»·¶ÓÁĞ£¬¼ÇÂ¼Ä³Á¾³µµÄÀúÊ·Êı¾İ**********/
 
-//è®°å½•ä¿¡æ¯ç±»å‹1~7
+//¼ÇÂ¼ĞÅÏ¢ÀàĞÍ1~7
 typedef struct CircleQueue
 {
 	STRECVDATA* pElem;
@@ -152,7 +122,7 @@ typedef struct CircleQueue
 	uint32_t rear;
 } STCIRCLEQUEUE;
 
-//è®°å½•ä¿¡æ¯ç±»å‹8
+//¼ÇÂ¼ĞÅÏ¢ÀàĞÍ8
 typedef struct CircleQueueType8
 {
 	STRECVDATATYPE8* pElem;
@@ -160,7 +130,7 @@ typedef struct CircleQueueType8
 	uint32_t rear;
 } STCIRCLEQUEUETYPE8;
 
-//è®°å½•ä¿¡æ¯ç±»å‹9
+//¼ÇÂ¼ĞÅÏ¢ÀàĞÍ9
 typedef struct CircleQueueType9
 {
 	STRECVDATATYPE9* pElem;
@@ -191,7 +161,7 @@ typedef struct AlertRankSeq
 typedef struct MsgAlertRankSeq
 {
 	uint8_t iNum;
-	STALERTRANKSEQ stNode[ALERTTIMES_REANK_NUM];	//å˜é•¿ï¼Œæœ€å¤šALERTTIMES_REANK_NUM
+	STALERTRANKSEQ stNode[ALERTTIMES_REANK_NUM];	//±ä³¤£¬×î¶àALERTTIMES_REANK_NUM
 } STMSGALERTRANKSEQ;
 
 typedef struct MsgAlertCategory
@@ -214,8 +184,8 @@ typedef struct DataOneWeek
 
 typedef struct DataBuffGram
 {
-	char recvData[BUFFER_SIZE];
 	int recvSize;
+	char recvData[BUFFER_SIZE];
 	struct DataBuffGram* pNext;
 } STDATABUFFGRAM, *PSTDATABUFFGRAM;
 
@@ -223,6 +193,7 @@ typedef struct DataGramQueue
 {
 	PSTDATABUFFGRAM front;
 	PSTDATABUFFGRAM rear;
+	uint32_t iNum;
 } STDATAGRAMQUEUE, *PSTDATAGRAMQUEUE;
 
 /***********************************************/

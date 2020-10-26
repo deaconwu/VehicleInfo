@@ -5,7 +5,7 @@
 #include "CInfoSocket.h"
 
 //char strFileData[PARSE_FILE_SIZE + 1] = {};
-char strTitle[] = "Vin码,车辆状态,充电状态,运行模式,车速,累计里程,总电压,总电流,SOC,DC/DC状态,挡位,绝缘电阻,加速踏板行程值,制动踏板状态,驱动电机状态,驱动电机控制器温度,驱动电机转速,驱动电机转矩,驱动电机温度,电机控制器输入电压,直流控制器直流母线电流,经度,纬度,推算方向,最高电压单体号,电池单体电压最高值,最低电压单体号,电池单体电压最低值,最高温度探针号,最高温度值,最低温度探针号,最低温度值,报警数据";
+char strTitle[] = "Vin码,采集时间,车辆状态,充电状态,运行模式,车速,累计里程,总电压,总电流,SOC,DC/DC状态,挡位,绝缘电阻,加速踏板行程值,制动踏板状态,驱动电机状态,驱动电机控制器温度,驱动电机转速,驱动电机转矩,驱动电机温度,电机控制器输入电压,直流控制器直流母线电流,经度,纬度,推算方向,最高电压单体号,电池单体电压最高值,最低电压单体号,电池单体电压最低值,最高温度探针号,最高温度值,最低温度探针号,最低温度值,报警数据";
 
 CFileParse* CFileParse::m_pInstance = NULL;
 
@@ -111,16 +111,17 @@ DWORD WINAPI OnDatagramParseThread(LPVOID lparam)
 		iDataLen += uchar;
 		latestOffset += 2;
 
+		STRECVDATA infoData;
+		memset(&infoData, 0, sizeof(infoData));
+
 		/*******数据单元格式 实时信息上报*******/
 
 		//数据采集时间(年月日时分秒)
+		memcpy(infoData.F8_0, &strFileData[latestOffset], sizeof(infoData.F8_0));
 		latestOffset += 6;
 
 		long curOffset = latestOffset;
 		long leftOffset = iDataLen - 6;
-
-		STRECVDATA infoData;
-		memset(&infoData, 0, sizeof(infoData));
 
 		bool bSetFlag[10] = {};
 
@@ -774,8 +775,9 @@ DWORD WINAPI OnDatagramParseThread(LPVOID lparam)
 				fprintf(fpWrite, "%s\n", strTitle);
 			}
 			
-			fprintf(fpWrite, "%s,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,",
+			fprintf(fpWrite, "%s,%d-%d-%d %d:%d:%d,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,",
 				chVin,
+				infoData.F8_0[0], infoData.F8_0[1], infoData.F8_0[2], infoData.F8_0[3], infoData.F8_0[4], infoData.F8_0[5],
 				infoData.F1_0, infoData.F1_1, infoData.F1_2, infoData.F1_3, infoData.F1_4, infoData.F1_5, infoData.F1_6,
 				infoData.F1_7, infoData.F1_8, infoData.F1_9, infoData.F1_10, infoData.F1_11, infoData.F1_12);
 
