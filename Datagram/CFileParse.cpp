@@ -27,8 +27,8 @@ void CFileParse::ReadVin()
 
 	while (!feof(fpRead))
 	{
-		char strVin[VIN_LENGTH + 1] = {};
-		fgets(strVin, VIN_LENGTH, fpRead);
+		char strVin[1024] = {};
+		fgets(strVin, 1024, fpRead);
 
 		memcpy(m_chVin[m_vehicleNum], strVin, VIN_LENGTH);
 		m_vehicleNum += 1;
@@ -114,10 +114,10 @@ long CFileParse::InsertVinAndSort(uint8_t pVin[])
 
 	for (long i = m_vehicleNum - 1; i >= iLeft; i--)
 	{
-		memcpy(m_chVin[i + 1], m_chVin[i], VIN_LENGTH + 1);
+		memcpy(m_chVin[i + 1], m_chVin[i], VIN_LENGTH);
 	}
 
-	memcpy(m_chVin[iLeft], (char*)pVin, VIN_LENGTH + 1);
+	memcpy(m_chVin[iLeft], (char*)pVin, VIN_LENGTH);
 
 	m_vehicleNum += 1;
 

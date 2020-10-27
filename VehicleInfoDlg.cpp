@@ -39,6 +39,7 @@ BEGIN_MESSAGE_MAP(CVehicleInfoDlg, CDialogEx)
 	ON_MESSAGE(UM_STOPRECV, &CVehicleInfoDlg::OnRealStopRecv)
 	ON_MESSAGE(UM_STOPPARSE, &CVehicleInfoDlg::OnRealStopParse)
 	ON_MESSAGE(UM_FILEPARSE, &CVehicleInfoDlg::OnFileParse)
+	ON_MESSAGE(UM_LOADVINS, &CVehicleInfoDlg::OnLoadVins)
 	ON_MESSAGE(UM_HISTORY, &CVehicleInfoDlg::OnHistoryRecord)
 	ON_BN_CLICKED(IDC_BTN_CONNECT, &CVehicleInfoDlg::OnBnClickedBtnConnect)
 	ON_BN_CLICKED(IDC_BTN_DISCONNECT, &CVehicleInfoDlg::OnBnClickedBtnDisconnect)
@@ -62,7 +63,7 @@ LRESULT CVehicleInfoDlg::OnRealStopRecv(WPARAM wParam, LPARAM lParam)
 
 LRESULT CVehicleInfoDlg::OnRealStopParse(WPARAM wParam, LPARAM lParam)
 {
-	CInfoRecord::GetInstance()->OnReset();
+	//CInfoRecord::GetInstance()->OnReset();
 
 	((CIPAddressCtrl*)GetDlgItem(IDC_IPADDRESS))->EnableWindow(true);
 	((CEdit*)GetDlgItem(IDC_EDIT_PORT))->EnableWindow(true);
@@ -82,6 +83,24 @@ LRESULT CVehicleInfoDlg::OnFileParse(WPARAM wParam, LPARAM lParam)
 	((CButton*)GetDlgItem(IDC_BTN_CONNECT))->EnableWindow(true);
 
 	CFileParse::GetInstance()->OnLauchParse();
+	return 0;
+}
+
+LRESULT CVehicleInfoDlg::OnLoadVins(WPARAM wParam, LPARAM lParam)
+{
+	//MessageBox("Vin码加载中", MB_ABORTRETRYIGNORE);
+	WORD* pProgress = (WORD*)wParam;
+	if (*pProgress > 100)
+	{
+		((CStatic*)GetDlgItem(IDC_VINLOAD))->ShowWindow(SW_HIDE);
+		((CProgressCtrl*)GetDlgItem(IDC_PROGRESS))->ShowWindow(SW_HIDE);
+		return 0;
+	}
+
+	((CStatic*)GetDlgItem(IDC_VINLOAD))->ShowWindow(SW_SHOW);
+	((CProgressCtrl*)GetDlgItem(IDC_PROGRESS))->ShowWindow(SW_SHOW);
+	((CProgressCtrl*)GetDlgItem(IDC_PROGRESS))->SetPos(*pProgress);
+
 	return 0;
 }
 
@@ -137,6 +156,11 @@ BOOL CVehicleInfoDlg::OnInitDialog()
 
 	((CButton*)GetDlgItem(IDC_BTN_CONNECT))->EnableWindow(true);
 	((CButton*)GetDlgItem(IDC_BTN_DISCONNECT))->EnableWindow(false);
+
+	((CProgressCtrl*)GetDlgItem(IDC_PROGRESS))->SetRange(0, 100);
+	((CProgressCtrl*)GetDlgItem(IDC_PROGRESS))->SetPos(0);
+	((CProgressCtrl*)GetDlgItem(IDC_PROGRESS))->ShowWindow(SW_HIDE);
+	((CStatic*)GetDlgItem(IDC_VINLOAD))->ShowWindow(SW_HIDE);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }

@@ -8,3 +8,4 @@
 #define UM_ALERTCATEGORY WM_USER + 6	//某辆车各类报警
 #define UM_ALERTSTOP_THREAD WM_USER + 7
 #define UM_FILEPARSE WM_USER + 8
+#define UM_LOADVINS WM_USER + 9

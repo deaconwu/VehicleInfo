@@ -39,6 +39,7 @@ BOOL CStatistics::OnInitDialog()
 	((CEdit*)GetDlgItem(IDC_EDIT_DATASIZESUM))->EnableWindow(false);
 	((CEdit*)GetDlgItem(IDC_EDIT_VEHICLESUM))->EnableWindow(false);
 	((CEdit*)GetDlgItem(IDC_EDIT_VEHICLEONLINE))->EnableWindow(false);
+	((CEdit*)GetDlgItem(IDC_EDIT_VEHICLEAPPEND))->EnableWindow(false);
 
 	//节能减排
 	((CEdit*)GetDlgItem(IDC_EDIT_MILEAGESUN))->EnableWindow(false);
@@ -92,8 +93,10 @@ void CStatistics::OnQueryStatis()
 	}
 
 	memset(g_circleQue, 0, sizeof(g_circleQue));
+	long todayJoinCount = CInfoRecord::GetInstance()->GetTodayJoinCount();
 	long vehicleNum = CInfoRecord::GetInstance()->GetQueInfo(g_circleQue);
 	long datagramNum = CInfoRecord::GetInstance()->GetDatagramNum();
+	long appendNum = CInfoRecord::GetInstance()->GetAppendNum();
 	CString csStr;
 
 	SYSTEMTIME st;
@@ -115,10 +118,15 @@ void CStatistics::OnQueryStatis()
 	csStr.Format(_T("%lu"), g_lRecvSizeSum);
 	((CEdit*)GetDlgItem(IDC_EDIT_DATASIZESUM))->SetWindowText(csStr);
 
-	//接入车辆数
+	//今日接入车辆数
 	csStr = _T("");
-	csStr.Format(_T("%lu"), vehicleNum);
+	csStr.Format(_T("%lu"), todayJoinCount);
 	((CEdit*)GetDlgItem(IDC_EDIT_VEHICLESUM))->SetWindowText(csStr);
+
+	//新增车辆数
+	csStr = _T("");
+	csStr.Format(_T("%lu"), appendNum);
+	((CEdit*)GetDlgItem(IDC_EDIT_VEHICLEAPPEND))->SetWindowText(csStr);
 
 	//总计
 	unsigned long onLineNum = 0;

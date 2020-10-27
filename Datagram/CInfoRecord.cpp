@@ -18,15 +18,14 @@ long long g_lRecvSizeSum = 0;
 
 HANDLE g_hMutex = NULL;//CreateMutex(NULL, FALSE, _T("InfoRecord"));
 
-CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNum(0), m_datagramNum(0), m_hThreadRecv(NULL), m_hThreadParse(NULL)
+CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNumSum(0), m_vehicleNumAppend(0), m_datagramNum(0), m_hThreadRecv(NULL), m_hThreadParse(NULL)
 {
 	memset(m_chVin, 0, sizeof(m_chVin));
 	memset(m_circleQue, 0, sizeof(m_circleQue));
 	memset(m_dataType8, 0, sizeof(m_dataType8));
 	memset(m_dataType9, 0, sizeof(m_dataType9));
 	memset(&g_queDataGram, 0, sizeof(STDATAGRAMQUEUE));
-
-	ReadVin();
+	memset(&m_bTodayJoin, 0, sizeof(m_bTodayJoin));
 }
 
 void CInfoRecord::ReadVin()
@@ -37,16 +36,22 @@ void CInfoRecord::ReadVin()
 		return;
 	}
 
+	DWORD dwProgress = 1;
+	PostMessage(m_hWnd, UM_LOADVINS, (WPARAM)&dwProgress, NULL);
+
 	while (!feof(fpRead))
 	{
-		char strVin[VIN_LENGTH + 1] = {};
-		fgets(strVin, VIN_LENGTH, fpRead);
+		char strVin[1024] = {};
+		fgets(strVin, 1024, fpRead);
 
-		memcpy(m_chVin[m_vehicleNum], strVin, VIN_LENGTH);
-		m_vehicleNum += 1;
+		memcpy(m_chVin[m_vehicleNumSum], strVin, VIN_LENGTH);
+		m_vehicleNumSum += 1;
 	}
 
-	for (long i=0; i<m_vehicleNum; i++)
+	dwProgress = 10;
+	PostMessage(m_hWnd, UM_LOADVINS, (WPARAM)&dwProgress, NULL);
+
+	for (long i=0; i< m_vehicleNumSum; i++)
 	{
 		STRECVDATA* pElem = (STRECVDATA*)malloc(sizeof(STRECVDATA) * QUEUE_SIZE);
 		if (NULL != pElem)
@@ -54,15 +59,77 @@ void CInfoRecord::ReadVin()
 			m_circleQue[i].pElem = pElem;
 			memset(m_circleQue[i].pElem, 0, sizeof(STRECVDATA) * QUEUE_SIZE);
 		}
+
+		if (i == m_vehicleNumSum-1)
+		{
+			dwProgress = 100;
+			PostMessage(m_hWnd, UM_LOADVINS, (WPARAM)&dwProgress, NULL);
+		}
+		else if (i == m_vehicleNumSum*90/100)
+		{
+			dwProgress = 90;
+			PostMessage(m_hWnd, UM_LOADVINS, (WPARAM)&dwProgress, NULL);
+		}
+		else if (i == m_vehicleNumSum * 80 / 100)
+		{
+			dwProgress = 80;
+			PostMessage(m_hWnd, UM_LOADVINS, (WPARAM)&dwProgress, NULL);
+		}
+		else if (i == m_vehicleNumSum * 70 / 100)
+		{
+			dwProgress = 70;
+			PostMessage(m_hWnd, UM_LOADVINS, (WPARAM)&dwProgress, NULL);
+		}
+		else if (i == m_vehicleNumSum * 60 / 100)
+		{
+			dwProgress = 60;
+			PostMessage(m_hWnd, UM_LOADVINS, (WPARAM)&dwProgress, NULL);
+		}
+		else if (i == m_vehicleNumSum * 50 / 100)
+		{
+			dwProgress = 50;
+			PostMessage(m_hWnd, UM_LOADVINS, (WPARAM)&dwProgress, NULL);
+		}
+		else if (i == m_vehicleNumSum * 40 / 100)
+		{
+			dwProgress = 40;
+			PostMessage(m_hWnd, UM_LOADVINS, (WPARAM)&dwProgress, NULL);
+		}
+		else if (i == m_vehicleNumSum * 30 / 100)
+		{
+			dwProgress = 30;
+			PostMessage(m_hWnd, UM_LOADVINS, (WPARAM)&dwProgress, NULL);
+		}
+		else if (i == m_vehicleNumSum * 15 / 100)
+		{
+			dwProgress = 15;
+			PostMessage(m_hWnd, UM_LOADVINS, (WPARAM)&dwProgress, NULL);
+		}
 	}
 
 	fclose(fpRead);
+
+	Sleep(500);
+	dwProgress = 101;
+	PostMessage(m_hWnd, UM_LOADVINS, (WPARAM)&dwProgress, NULL);
+}
+
+void CInfoRecord::WriteVin()
+{
+	FILE *fpWrite = fopen("vinsort.txt", "wb+");
+	for (long i = 0; i < m_vehicleNumSum; i++)
+	{
+		fprintf(fpWrite, "%s", m_chVin[i]);
+		if (i != m_vehicleNumSum - 1)
+			fprintf(fpWrite, "\n");
+	}
+	fclose(fpWrite);
 }
 
 long CInfoRecord::FindVinPos(uint8_t pVin[])
 {
 	long left = 0;
-	long right = m_vehicleNum - 1;
+	long right = m_vehicleNumSum - 1;
 	long mid = -1;
 
 	while (left <= right)
@@ -87,7 +154,7 @@ long CInfoRecord::FindVinPos(uint8_t pVin[])
 
 long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 {
-	if (m_vehicleNum >= MAX_VEHICLENUM)
+	if (m_vehicleNumSum >= MAX_VEHICLENUM)
 	{
 		return -1;
 	}
@@ -109,10 +176,12 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 		return -1;
 	}
 
-	if (m_vehicleNum == 0)
+	if (m_vehicleNumSum == 0)
 	{
-		memcpy(m_chVin[m_vehicleNum], pVin, VIN_LENGTH);
-		m_vehicleNum += 1;
+		memcpy(m_chVin[0], pVin, VIN_LENGTH);
+		m_vehicleNumSum += 1;
+		m_vehicleNumAppend += 1;
+		m_bTodayJoin[0] = true;
 
 		memset(m_circleQue[0].pElem, 0, sizeof(STRECVDATA) * QUEUE_SIZE);
 
@@ -120,7 +189,7 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 	}
 
 	long iLeft = 0;
-	long iRight = m_vehicleNum - 1;
+	long iRight = m_vehicleNumSum - 1;
 
 	while (iLeft <= iRight)
 	{
@@ -135,7 +204,7 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 		}
 	}
 
-	for (long i=m_vehicleNum-1; i>=iLeft; i--)
+	for (long i= m_vehicleNumSum-1; i>=iLeft; i--)
 	{
 		memcpy(m_chVin[i+1], m_chVin[i], VIN_LENGTH + 1);
 
@@ -145,6 +214,8 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 
 		m_dataType8[i+1] = m_dataType8[i];
 		m_dataType9[i+1] = m_dataType9[i];
+
+		m_bTodayJoin[i+1] = m_bTodayJoin[i];
 	}
 
 	memcpy(m_chVin[iLeft], (char*)pVin, VIN_LENGTH + 1);
@@ -160,9 +231,24 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 	memset(&m_dataType9[iLeft], 0, sizeof(STRECVDATATYPE9));
 	m_dataType9[iLeft].pF9_1 = NULL;
 
-	m_vehicleNum += 1;
+	m_bTodayJoin[iLeft] = true;
+
+	m_vehicleNumSum += 1;
+	m_vehicleNumAppend += 1;
 
 	return iLeft;
+}
+
+long CInfoRecord::GetTodayJoinCount()
+{
+	long iJoinCount = 0;
+	for (long i=0; i<m_vehicleNumSum; i++)
+	{
+		if (m_bTodayJoin[i])
+			iJoinCount += 1;
+	}
+
+	return iJoinCount;
 }
 
 bool CInfoRecord::QueryLatestInfo(uint8_t pVin[], STRECVDATA &stData)
@@ -189,7 +275,7 @@ long CInfoRecord::GetQueInfo(STCIRCLEQUEUE circleQue[])
 	memcpy(circleQue, m_circleQue, sizeof(m_circleQue));
 	m_bLockFlag = false;
 
-	return m_vehicleNum;
+	return m_vehicleNumSum;
 }
 
 void CInfoRecord::GetVinInfo(uint8_t chVin[][VIN_LENGTH + 1])
@@ -201,7 +287,7 @@ void CInfoRecord::GetVinInfo(uint8_t chVin[][VIN_LENGTH + 1])
 
 void CInfoRecord::RecordInfo(long pos, STRECVDATA& stRecv)
 {
-	if (pos >= m_vehicleNum || pos < 0)
+	if (pos >= m_vehicleNumSum || pos < 0)
 	{
 		return;
 	}
@@ -227,11 +313,12 @@ void CInfoRecord::RecordInfo(long pos, STRECVDATA& stRecv)
 	m_circleQue[pos].rear = (m_circleQue[pos].rear + 1) % QUEUE_SIZE;
 
 	m_datagramNum += 1;
+	m_bTodayJoin[pos] = 1;
 }
 
 long CInfoRecord::RecordInfoType8(long pos, const char* pRecv)
 {
-	if (pos >= m_vehicleNum || pos < 0)
+	if (pos >= m_vehicleNumSum || pos < 0)
 		return 0;
 
 	if (*pRecv == 0 || *pRecv > 250)
@@ -386,7 +473,7 @@ long CInfoRecord::RecordInfoType8(long pos, const char* pRecv)
 
 long CInfoRecord::RecordInfoType9(long pos, const char* pRecv)
 {
-	if (pos >= m_vehicleNum || pos < 0)
+	if (pos >= m_vehicleNumSum || pos < 0)
 		return 0;
 
 	if (*pRecv == 0)
@@ -477,6 +564,8 @@ bool CInfoRecord::OnRealTimeRecv(HWND hWnd, sockaddr_in serAddr)
 		g_hMutex = NULL;
 	}
 
+	m_hWnd = hWnd;
+
 	SOCKET pSocket = CInfoSocket::GetInstance()->OnConnect(serAddr);
 	if (pSocket == INVALID_SOCKET)
 	{
@@ -533,12 +622,15 @@ void CInfoRecord::OnClearDataGram()
 
 void CInfoRecord::OnReset()
 {
-	for (long i = 0; i < m_vehicleNum; i++)
+	for (long i = 0; i < m_vehicleNumSum; i++)
 	{
 		if (m_circleQue[i].pElem != NULL)
 		{
-			free(m_circleQue[i].pElem);
-			m_circleQue[i].pElem = NULL;
+// 			free(m_circleQue[i].pElem);
+// 			m_circleQue[i].pElem = NULL;
+			memset(m_circleQue[i].pElem, 0, sizeof(STRECVDATA) * QUEUE_SIZE);
+			m_circleQue[i].front = 0;
+			m_circleQue[i].rear = 0;
 		}
 
 		if (m_dataType8[i].pF8_1 != NULL)
@@ -572,15 +664,16 @@ void CInfoRecord::OnReset()
 		}
 	}
 
-	memset(m_chVin, 0, sizeof(m_chVin));
-	memset(m_circleQue, 0, sizeof(m_circleQue));
+	//memset(m_circleQue, 0, sizeof(m_circleQue));
 	memset(m_dataType8, 0, sizeof(m_dataType8));
 	memset(m_dataType9, 0, sizeof(m_dataType9));
 
+	memset(m_bTodayJoin, 0, sizeof(m_bTodayJoin));
+
 	m_bLockFlag = false;
-	m_vehicleNum = 0;
 	m_datagramNum = 0;
 	g_lRecvSizeSum = 0;
+	m_vehicleNumAppend = 0;
 }
 
 void CInfoRecord::OnClose()
@@ -596,6 +689,15 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 	ULONGLONG saveSize = 0;
 	FILE *fpWrite = fopen("datagram.dat", "wb+");
 #else
+	if (CInfoRecord::GetInstance()->GetVehicleNumSum() == 0)
+	{
+		//PostMessage(hWnd, UM_LOADVINS, NULL, 0);
+		CInfoRecord::GetInstance()->ReadVin();
+	}
+
+// 	HANDLE hWnd = ::FindWindowEx(NULL, NULL, NULL, "MyTestBox");
+// 	::SendMessage((HWND)hWnd, WM_CLOSE, NULL, NULL);
+
 	PSTDATABUFFGRAM pDataGramPre = NULL;
 #endif
 
@@ -798,6 +900,14 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 	{
 		if (CInfoSocket::GetInstance()->CheckClose())
 		{
+			CInfoRecord::GetInstance()->WriteVin();
+			PostMessage(hWnd, UM_STOPPARSE, NULL, 0);
+			break;
+		}
+
+		if (CInfoRecord::GetInstance()->GetVehicleNumSum() >= MAX_VEHICLENUM)
+		{
+			CInfoRecord::GetInstance()->WriteVin();
 			PostMessage(hWnd, UM_STOPPARSE, NULL, 0);
 			break;
 		}
@@ -810,14 +920,14 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 		GetLocalTime(&st);
 
 		//触发主线程统计历史数据
-		if (datePre.wDay != st.wDay || datePre.wMonth != st.wMonth || datePre.wYear != st.wYear)
-		{
-			SendMessage(hWnd, UM_HISTORY, (WPARAM)&st.wDayOfWeek, NULL);
-		}
-
-		datePre.wYear = st.wYear;
-		datePre.wMonth = st.wMonth;
-		datePre.wDay = st.wDay;
+// 		if (datePre.wDay != st.wDay || datePre.wMonth != st.wMonth || datePre.wYear != st.wYear)
+// 		{
+// 			SendMessage(hWnd, UM_HISTORY, (WPARAM)&st.wDayOfWeek, NULL);
+// 		}
+// 
+// 		datePre.wYear = st.wYear;
+// 		datePre.wMonth = st.wMonth;
+// 		datePre.wDay = st.wDay;
 
 		char recvData[BUFFER_SIZE] = {};
 		INT recvSize = 0;
@@ -905,6 +1015,8 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 			if (pos < 0)
 				continue;
 		}
+
+		//continue;
 
 		latestOffset += 6;
 

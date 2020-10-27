@@ -28,6 +28,7 @@ protected:
 	LRESULT OnRealStopParse(WPARAM wParam, LPARAM lParam);
 	LRESULT OnHistoryRecord(WPARAM wParam, LPARAM lParam);
 	LRESULT OnFileParse(WPARAM wParam, LPARAM lParam);
+	LRESULT OnLoadVins(WPARAM wParam, LPARAM lParam);
 
 // 实现
 protected:

@@ -70,22 +70,34 @@ public:
 	//录入车辆信息9
 	long RecordInfoType9(long pos, const char* pRecv);
 
-private:
 	void ReadVin();
 
+	void WriteVin();
+
+	long GetTodayJoinCount();
+
+	long GetAppendNum() { return m_vehicleNumAppend; }
+
+	long GetVehicleNumSum() { return m_vehicleNumSum; }
+
+private:
 	uint8_t m_chVin[MAX_VEHICLENUM][VIN_LENGTH + 1]; //每辆车vin码
+	uint8_t m_bTodayJoin[MAX_VEHICLENUM];	//今日接入的车
 
 	//每辆车历史记录
 	STCIRCLEQUEUE m_circleQue[MAX_VEHICLENUM];	//队列形式存放，整车数据、驱动电机数据、车辆位置、极值数据、报警数据、时间数据
 	STRECVDATATYPE8 m_dataType8[MAX_VEHICLENUM];	//电压数据
 	STRECVDATATYPE9 m_dataType9[MAX_VEHICLENUM];	//温度数据
 
-	long m_vehicleNum;	//今日接入车辆数
+	long m_vehicleNumSum;	//总计车辆数
+	long m_vehicleNumAppend;	//新增车辆数
 	long m_datagramNum;	//今日接收报文数
 	bool m_bLockFlag;	//录入新vin码涉及到排序移位，点击查询，需要等待查询完成再继续录入排序
 
 	HANDLE m_hThreadRecv;	//子线程接收消息，拆分成若干报文
 	HANDLE m_hThreadParse;	//子线程解析报文
+
+	HWND m_hWnd;
 
 	static CInfoRecord* m_pInstance;
 };
