@@ -7,7 +7,6 @@
 #define IDD_VEHICLEINFO_DIALOG          102
 #define IDP_SOCKETS_INIT_FAILED         103
 #define IDR_MAINFRAME                   128
-#define IDD_REALTIMERECV                130
 #define IDD_QUERY                       131
 #define IDD_ALERTDATA                   132
 #define IDD_STATISTICS                  134
@@ -33,10 +32,8 @@
 #define IDC_STATIC_MOTORROTATESPEED     1017
 #define IDC_EDIT_MOTORROTATESPEED       1018
 #define IDC_STATIC_MOTORTORQUE          1019
-#define IDC_EDIT__MOTORTORQUE           1020
 #define IDC_STATIC_MILEAGE2             1020
 #define IDC_STATIC_MOTORTEMP            1021
-#define IDC_EDIT__MOTORTEMP             1022
 #define IDC_EDIT_MILEAGETODAY           1022
 #define IDC_STATIC_MAXVOLTNO            1023
 #define IDC_EDIT_MAXVOLTNO              1024
@@ -54,31 +51,20 @@
 #define IDC_EDIT_MINTEMPPROPNO          1036
 #define IDC_STATIC_MINTEMPVALUE         1037
 #define IDC_EDIT_MINTEMPVALUE           1038
-#define IDC_STATIC_LOCATIONSTATE        1039
-#define IDC_EDIT_LOCATIONSTATE          1040
 #define IDC_STATIC_LONGTITUDE           1041
 #define IDC_EDIT_LONGTITUDE             1042
 #define IDC_STATIC_LATITUDE             1043
-#define IDC_EDIT__LATITUDE              1044
 #define IDC_EDIT_MOTORTORQUE            1045
 #define IDC_EDIT_MOTORTEMP              1046
-#define IDC_STATIC_MOTORSTATE2          1047
 #define IDC_EDIT_LATITUDE               1047
-#define IDC_EDIT_MOTORSTATE2            1048
 #define IDC_BTN_QUERY                   1048
-#define IDC_STATIC_MOTORROTATESPEED2    1049
 #define IDC_BTN_MAPLOCATION             1049
-#define IDC_EDIT_MOTORROTATESPEED2      1050
 #define IDC_BTN_ALERTDATA               1050
-#define IDC_STATIC_MOTORTORQUE2         1051
 #define IDC_BUTTON2                     1051
 #define IDC_BTN_DIAGNOSIS               1051
-#define IDC_EDIT__MOTORTORQUE2          1052
 #define IDC_STATIC9                     1052
-#define IDC_STATIC_MOTORTEMP2           1053
 #define IDC_STATIC10                    1053
 #define IDC_BTN_REFRESH                 1053
-#define IDC_EDIT__MOTORTEMP2            1054
 #define IDC_STATIC0                     1054
 #define IDC_EDIT_VEHICLESUM             1054
 #define IDC_STATIC1                     1055
@@ -113,6 +99,7 @@
 #define IDC_EDIT_DATAGSIZESUM           1069
 #define IDC_EDIT_DATASIZESUM            1069
 #define IDC_STATIC18                    1070
+#define IDC_EDIT_VEHICLEAPPEND          1070
 #define IDC_EDIT_ALERTVIN               1071
 #define IDC_COMBO_RANKTYPE              1072
 #define IDC_LIST_RANK                   1074
@@ -126,6 +113,17 @@
 #define IDC_BTN_DISCONNECT              1080
 #define IDC_LIST_CATEGORY               1082
 #define IDC_TITLE                       1083
+#define IDC_STATIC_MEMTOTAL             1084
+#define IDC_STATIC_MEMFREE              1085
+#define IDC_STATIC_VMEMTOTAL            1086
+#define IDC_STATIC_VMEMFREE             1087
+#define IDC_STATIC_B1                   1088
+#define IDC_STATIC_B2                   1089
+#define IDC_STATIC_B3                   1090
+#define IDC_STATIC_B4                   1091
+#define IDC_PROGRESS                    1092
+#define IDC_VINLOAD                     1093
+#define IDC_NETADDRESS1                 1094
 
 // Next default values for new objects
 // 
@@ -133,7 +131,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        140
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1084
+#define _APS_NEXT_CONTROL_VALUE         1095
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
