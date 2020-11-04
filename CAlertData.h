@@ -25,4 +25,6 @@ protected:
 
 private:
 	int m_alertData;
+public:
+	afx_msg void OnEnChangeNetaddress1();
 };

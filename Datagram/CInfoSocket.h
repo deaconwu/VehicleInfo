@@ -8,19 +8,6 @@
 
 #pragma comment(lib,"ws2_32.lib") 
 
-#define SWAPWORD(x) (uint16_t) (((x & 0x00FF) << 8) | ((x & 0xFF00) >> 8))
-
-#define SWAPDWORD(x) (uint32_t) (((x & 0x000000FF) << 24) | ((x & 0x0000FF00) << 8) | ((x & 0x00FF0000) >> 8) | ((x & 0xFF000000) >> 24))
-
-#define SWAPWORD2(pRecv) (*pRecv) + (*(pRecv+1)) * 256
-
-#define SWAPDWORD2(pRecv) (*pRecv) + (*(pRecv+1)) * 256 + (*(pRecv+2)) * 65536 + (*(pRecv+3)) * 16777216
-
-uint16_t SWAPWORD1(const char* pRecv);
-
-uint32_t SWAPDWORD1(const char* pRecv);
-
-
 class CInfoSocket //: public CSingleton<CInfoSocket>
 {
 public:
@@ -28,6 +15,7 @@ public:
 	{
 		memset(&m_serAddr, 0, sizeof(m_serAddr));
 		m_pSocket = INVALID_SOCKET;
+		m_hWnd = NULL;
 	}
 
 	~CInfoSocket()
@@ -49,7 +37,7 @@ public:
 
 	bool CheckClose() { return m_pSocket == INVALID_SOCKET; }
 
-	SOCKET OnConnect(const sockaddr_in serAddr);
+	SOCKET OnConnect(const sockaddr_in serAddr, HWND hWnd);
 
 	SOCKET OnReConnect();
 
@@ -60,6 +48,9 @@ public:
 private:
 	SOCKET m_pSocket;
 	sockaddr_in m_serAddr;
+
+	HWND m_hWnd;
+
 	static CInfoSocket* m_pInstance;
 };
 

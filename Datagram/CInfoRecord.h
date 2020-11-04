@@ -53,6 +53,7 @@ public:
 	void OnClose();
 
 	long FindVinPos(uint8_t pVin[]);
+
 	long InsertVinAndSort(uint8_t pVin[]);
 
 	bool QueryLatestInfo(uint8_t pVin[], STRECVDATA &stData);
@@ -80,6 +81,8 @@ public:
 
 	long GetVehicleNumSum() { return m_vehicleNumSum; }
 
+	void OnMsgParse(char recvData[], int recvSize);
+
 private:
 	uint8_t m_chVin[MAX_VEHICLENUM][VIN_LENGTH + 1]; //每辆车vin码
 	uint8_t m_bTodayJoin[MAX_VEHICLENUM];	//今日接入的车
@@ -98,6 +101,9 @@ private:
 	HANDLE m_hThreadParse;	//子线程解析报文
 
 	HWND m_hWnd;
+
+	PSTDATABUFFGRAM m_pDataGramPre;
+	int m_iPreSize;
 
 	static CInfoRecord* m_pInstance;
 };

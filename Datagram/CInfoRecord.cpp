@@ -14,11 +14,12 @@ CInfoRecord* CInfoRecord::m_pInstance = NULL;
 
 STDATAGRAMQUEUE g_queDataGram;
 
-long long g_lRecvSizeSum = 0;
+ULONGLONG g_lRecvSizeSum = 0;
 
-HANDLE g_hMutex = NULL;//CreateMutex(NULL, FALSE, _T("InfoRecord"));
+HANDLE g_hMutex = NULL;
 
-CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNumSum(0), m_vehicleNumAppend(0), m_datagramNum(0), m_hThreadRecv(NULL), m_hThreadParse(NULL)
+CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNumSum(0), m_vehicleNumAppend(0), m_datagramNum(0), m_hThreadRecv(NULL), m_hThreadParse(NULL),
+							m_pDataGramPre(NULL), m_iPreSize(0)
 {
 	memset(m_chVin, 0, sizeof(m_chVin));
 	memset(m_circleQue, 0, sizeof(m_circleQue));
@@ -30,13 +31,23 @@ CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNumSum(0), m_vehicleNumA
 
 void CInfoRecord::ReadVin()
 {
-	FILE *fpRead = fopen("vinsort.txt", "r");
+	TCHAR tchPath[1024] = {};
+	GetCurrentDirectory(1024, tchPath);
+
+	char chPath[1024] = {};
+	int iLength = WideCharToMultiByte(CP_ACP, 0, tchPath, -1, NULL, 0, NULL, NULL);
+	WideCharToMultiByte(CP_ACP, 0, tchPath, -1, chPath, iLength, NULL, NULL);
+	memcpy(&chPath[iLength-1], "\\vinsort.txt", sizeof("\\vinsort.txt"));
+
+	DWORD dwProgress = 1;
+	FILE *fpRead = fopen(chPath, "r");
 	if (NULL == fpRead)
 	{
+		dwProgress = 101;
+		PostMessage(m_hWnd, UM_LOADVINS, (WPARAM)&dwProgress, NULL);
 		return;
 	}
 
-	DWORD dwProgress = 1;
 	PostMessage(m_hWnd, UM_LOADVINS, (WPARAM)&dwProgress, NULL);
 
 	while (!feof(fpRead))
@@ -116,7 +127,14 @@ void CInfoRecord::ReadVin()
 
 void CInfoRecord::WriteVin()
 {
-	FILE *fpWrite = fopen("vinsort.txt", "wb+");
+	TCHAR tchPath[1024] = {};
+	GetCurrentDirectory(1024, tchPath);
+	char chPath[1024] = {};
+	int iLength = WideCharToMultiByte(CP_ACP, 0, tchPath, -1, NULL, 0, NULL, NULL);
+	WideCharToMultiByte(CP_ACP, 0, tchPath, -1, chPath, iLength, NULL, NULL);
+	memcpy(&chPath[iLength - 1], "\\vinsort.txt", sizeof("\\vinsort.txt"));
+
+	FILE *fpWrite = fopen(chPath, "wb+");
 	for (long i = 0; i < m_vehicleNumSum; i++)
 	{
 		fprintf(fpWrite, "%s", m_chVin[i]);
@@ -183,6 +201,7 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 		m_vehicleNumAppend += 1;
 		m_bTodayJoin[0] = true;
 
+		m_circleQue[0].pElem = pElem;
 		memset(m_circleQue[0].pElem, 0, sizeof(STRECVDATA) * QUEUE_SIZE);
 
 		return 0;
@@ -231,7 +250,7 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 	memset(&m_dataType9[iLeft], 0, sizeof(STRECVDATATYPE9));
 	m_dataType9[iLeft].pF9_1 = NULL;
 
-	m_bTodayJoin[iLeft] = true;
+	m_bTodayJoin[iLeft] = 1;
 
 	m_vehicleNumSum += 1;
 	m_vehicleNumAppend += 1;
@@ -241,6 +260,14 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 
 long CInfoRecord::GetTodayJoinCount()
 {
+// 	DWORD exitCode;
+// 	BOOL ret = ::GetExitCodeThread(m_hThreadRecv, &exitCode);
+// 	if (exitCode != STILL_ACTIVE)
+// 	{
+// 		RestartThread();
+// 		return 0;
+// 	}
+
 	long iJoinCount = 0;
 	for (long i=0; i<m_vehicleNumSum; i++)
 	{
@@ -312,7 +339,6 @@ void CInfoRecord::RecordInfo(long pos, STRECVDATA& stRecv)
 	memcpy(&m_circleQue[pos].pElem[rear], &stRecv, sizeof(STRECVDATA));
 	m_circleQue[pos].rear = (m_circleQue[pos].rear + 1) % QUEUE_SIZE;
 
-	m_datagramNum += 1;
 	m_bTodayJoin[pos] = 1;
 }
 
@@ -544,6 +570,150 @@ long CInfoRecord::RecordInfoType9(long pos, const char* pRecv)
 	return offset;
 }
 
+void CInfoRecord::OnMsgParse(char recvData[], int recvSize)
+{
+	int iLatestOffset = 0;
+	PSTDATABUFFGRAM pNode = NULL;
+
+	bool bLastToEnd = false;	//最后一条报文是否达到末尾
+	int iCurOffset = 0;
+	int iStartOffset = 0;
+
+	//拆分出每条报文
+	while (iLatestOffset < recvSize - 1)
+	{
+		bLastToEnd = false;
+		if (iLatestOffset <= recvSize - 2 && memcmp(&recvData[iLatestOffset], "##", 2) != 0)
+		{
+			m_iPreSize += 1;
+			iLatestOffset += 1;
+			continue;
+		}
+
+		if (m_pDataGramPre != NULL)
+		{
+			if (m_iPreSize > 0)
+			{
+				//与前一条消息的最后一条报文衔接
+				int dataSize = m_pDataGramPre->recvSize;
+				memcpy(&m_pDataGramPre->recvData[dataSize], &recvData[0], m_iPreSize);
+				m_pDataGramPre->recvSize += m_iPreSize;
+				if (m_pDataGramPre->recvSize > 20000 || m_pDataGramPre->recvSize < 0)
+				{
+					printf("");
+				}
+			}
+
+			WaitForSingleObject(g_hMutex, INFINITE);
+			if (g_queDataGram.front == NULL)
+			{
+				g_queDataGram.rear = m_pDataGramPre;
+				g_queDataGram.front = g_queDataGram.rear;
+			}
+			else
+			{
+				g_queDataGram.rear->pNext = m_pDataGramPre;
+				g_queDataGram.rear = m_pDataGramPre;
+			}
+			ReleaseMutex(g_hMutex);
+
+			m_datagramNum += 1;
+		}
+
+		m_iPreSize = 0;
+		m_pDataGramPre = NULL;
+
+		iStartOffset = iLatestOffset;
+		iCurOffset = iLatestOffset;
+		iCurOffset += 4;
+		//起始符、命令单元
+		if (iCurOffset >= recvSize - 1)
+			break;
+		iLatestOffset += 4;
+
+		//vin码
+		iCurOffset = iLatestOffset;
+		iCurOffset += 17;
+		if (iCurOffset >= recvSize - 1)
+			break;
+		iLatestOffset += 17;
+
+		//加密方式
+		iCurOffset = iLatestOffset;
+		iCurOffset += 1;
+		if (iCurOffset >= recvSize - 1)
+			break;
+		iLatestOffset += 1;
+
+		//数据单元长度
+		iCurOffset = iLatestOffset;
+		iCurOffset += 2;
+		if (iCurOffset >= recvSize - 1)
+			break;
+
+		UCHAR uchar = recvData[iLatestOffset];
+		USHORT iDataLen = uchar * 256;
+		uchar = recvData[iLatestOffset + 1];
+		iDataLen += uchar;
+		iLatestOffset += 2;
+
+		//数据单元
+		iCurOffset = iLatestOffset;
+		iCurOffset += iDataLen;
+		if (iCurOffset >= recvSize - 1)
+			break;
+
+		iLatestOffset += iDataLen;
+
+		//校验码
+		iCurOffset = iLatestOffset;
+		iCurOffset += 1;
+		if (iCurOffset >= recvSize - 1)
+			break;
+
+		iLatestOffset += 1;
+		bLastToEnd = true;
+
+		int iBuffLen = iLatestOffset - iStartOffset;
+		pNode = (PSTDATABUFFGRAM)malloc(sizeof(STDATABUFFGRAM));
+		memset(pNode, 0, sizeof(STDATABUFFGRAM));
+		memcpy(pNode->recvData, &recvData[iStartOffset], iBuffLen * sizeof(char));
+		pNode->recvSize = iBuffLen;
+		pNode->pNext = NULL;
+		if (iBuffLen > 20000 || iBuffLen<0)
+		{
+			printf("");
+		}
+
+		WaitForSingleObject(g_hMutex, INFINITE);
+		if (g_queDataGram.front == NULL)
+		{
+			g_queDataGram.rear = pNode;
+			g_queDataGram.front = g_queDataGram.rear;
+		}
+		else
+		{
+			g_queDataGram.rear->pNext = pNode;
+			g_queDataGram.rear = pNode;
+		}
+		ReleaseMutex(g_hMutex);
+
+		m_datagramNum += 1;
+	}
+
+	if (!bLastToEnd)
+	{
+		int iBuffLen = recvSize - iStartOffset;
+		m_pDataGramPre = (PSTDATABUFFGRAM)malloc(sizeof(STDATABUFFGRAM));
+		memset(m_pDataGramPre, 0, sizeof(STDATABUFFGRAM));
+		memcpy(m_pDataGramPre->recvData, &recvData[iStartOffset], iBuffLen * sizeof(char));
+		m_pDataGramPre->recvSize = iBuffLen;
+		m_pDataGramPre->pNext = NULL;
+	}
+
+	g_lRecvSizeSum += recvSize;
+}
+
 bool CInfoRecord::OnRealTimeRecv(HWND hWnd, sockaddr_in serAddr)
 {
 	if (NULL != m_hThreadRecv)
@@ -566,7 +736,7 @@ bool CInfoRecord::OnRealTimeRecv(HWND hWnd, sockaddr_in serAddr)
 
 	m_hWnd = hWnd;
 
-	SOCKET pSocket = CInfoSocket::GetInstance()->OnConnect(serAddr);
+	SOCKET pSocket = CInfoSocket::GetInstance()->OnConnect(serAddr, hWnd);
 	if (pSocket == INVALID_SOCKET)
 	{
 		return false;
@@ -580,16 +750,18 @@ bool CInfoRecord::OnRealTimeRecv(HWND hWnd, sockaddr_in serAddr)
 
 	OpenMutex(MUTEX_ALL_ACCESS, true, NULL);
 
-	DWORD dwThreadIdRecv;
-	m_hThreadRecv = CreateThread(NULL, NULL, OnReceiveThread, hWnd, 0, &dwThreadIdRecv);
-
 #ifndef _DEBUG
-	DWORD dwThreadIdParse;
-	m_hThreadParse = CreateThread(NULL, NULL, OnParseThread, hWnd, 0, &dwThreadIdParse);
+	//异步套接字实时接收，创建线程实时解析
+ 	DWORD dwThreadIdParse;
+ 	m_hThreadParse = CreateThread(NULL, NULL, OnParseThread, hWnd, 0, &dwThreadIdParse);
 
-	if (NULL == m_hThreadRecv || NULL == m_hThreadParse)
+	if (NULL == m_hThreadParse)
 		CInfoSocket::GetInstance()->OnClose();
 #else
+	//异步套接字定量接收存放文件，再调用CFileParse离线解析
+	DWORD dwThreadIdRecv;
+ 	m_hThreadRecv = CreateThread(NULL, NULL, OnReceiveThread, hWnd, 0, &dwThreadIdRecv);
+
 	if (NULL == m_hThreadRecv)
 		CInfoSocket::GetInstance()->OnClose();
 #endif
@@ -685,198 +857,35 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 {
 	HWND hWnd = (HWND)lparam;
 
-#ifdef _DEBUG
 	ULONGLONG saveSize = 0;
 	FILE *fpWrite = fopen("datagram.dat", "wb+");
-#else
-	if (CInfoRecord::GetInstance()->GetVehicleNumSum() == 0)
-	{
-		//PostMessage(hWnd, UM_LOADVINS, NULL, 0);
-		CInfoRecord::GetInstance()->ReadVin();
-	}
-
-// 	HANDLE hWnd = ::FindWindowEx(NULL, NULL, NULL, "MyTestBox");
-// 	::SendMessage((HWND)hWnd, WM_CLOSE, NULL, NULL);
-
-	PSTDATABUFFGRAM pDataGramPre = NULL;
-#endif
 
 	while (1)
 	{
 		if (CInfoSocket::GetInstance()->CheckClose())
 		{
-#ifdef _DEBUG
 			fclose(fpWrite);
-#else
-			if (pDataGramPre != NULL)
-			{
-				free(pDataGramPre);
-				pDataGramPre = NULL;
-			}
-#endif
-
 			PostMessage(hWnd, UM_STOPRECV, NULL, 0);
 			break;
 		}
 
-#ifdef _DEBUG
 		if (saveSize >= (PARSE_FILE_SIZE*1.9))
 		{
 			fclose(fpWrite);
 			PostMessage(hWnd, UM_FILEPARSE, NULL, 0);
 			break;
 		}
-#else
-// 		if (g_queDataGram.iNum > 100000)
-// 		{
-// 			Sleep(500);
-// 		}
-#endif
 
 		char recvData[BUFFER_SIZE] = {};
 		INT recvSize = CInfoSocket::GetInstance()->OnReceive(recvData);
 		if (recvSize <= 0)
 		{
+			SOCKET pSocket = CInfoSocket::GetInstance()->OnReConnect();
 			continue;
 		}
 
-#ifdef _DEBUG
 		saveSize += recvSize;
 		fwrite(recvData, recvSize, 1, fpWrite);
-#else
-		g_lRecvSizeSum += recvSize;
-
-		int latestOffset = 0;
-		PSTDATABUFFGRAM pNode = NULL;
-		int iPreSize = 0;
-
-		bool bLastToEnd = false;	//最后一条报文是否达到末尾
-		int iCurOffset = 0;
-		int iStartOffset = 0;
-
-		//拆分出每条报文
-		while (latestOffset < recvSize - 1)
-		{
-			bLastToEnd = false;
-			if (latestOffset <= recvSize - 2 && memcmp(&recvData[latestOffset], "##", 2) != 0)
-			{
-				iPreSize += 1;
-				latestOffset += 1;
-				continue;
-			}
-
-			if (pDataGramPre != NULL)
-			{
-				if (iPreSize > 0)
-				{
-					//与前一条消息的最后一条报文衔接
-					int dataSize = pDataGramPre->recvSize;
-					memcpy(&pDataGramPre->recvData[dataSize], &recvData[0], iPreSize);
-					pDataGramPre->recvSize += iPreSize;
-				}
-
-				WaitForSingleObject(g_hMutex, INFINITE);
-				if (g_queDataGram.front == NULL)
-				{
-					g_queDataGram.rear = pDataGramPre;
-					g_queDataGram.front = g_queDataGram.rear;
-				}
-				else
-				{
-					g_queDataGram.rear->pNext = pDataGramPre;
-					g_queDataGram.rear = pDataGramPre;
-				}
-				g_queDataGram.iNum++;
-				ReleaseMutex(g_hMutex);
-			}
-
-			iPreSize = 0;
-			pDataGramPre = NULL;
-
-			iStartOffset = latestOffset;
-			iCurOffset = latestOffset;
-			iCurOffset += 4;
-			//起始符、命令单元
-			if (iCurOffset >= recvSize - 1)
-				break;
-
-			latestOffset += 4;
-
-			//vin码
-			iCurOffset = latestOffset;
-			iCurOffset += 17;
-			if (iCurOffset >= recvSize - 1)
-				break;
-			latestOffset += 17;
-
-			//加密方式
-			iCurOffset = latestOffset;
-			iCurOffset += 1;
-			if (iCurOffset >= recvSize - 1)
-				break;
-			latestOffset += 1;
-
-			//数据单元长度
-			iCurOffset = latestOffset;
-			iCurOffset += 2;
-			if (iCurOffset >= recvSize - 1)
-				break;
-
-			uint8_t uchar = recvData[latestOffset];
-			uint16_t iDataLen = uchar * 256;
-			uchar = recvData[latestOffset + 1];
-			iDataLen += uchar;
-			latestOffset += 2;
-
-			//数据单元
-			iCurOffset = latestOffset;
-			iCurOffset += iDataLen;
-			if (iCurOffset >= recvSize - 1)
-				break;
-
-			latestOffset += iDataLen;
-
-			//校验码
-			iCurOffset = latestOffset;
-			iCurOffset += 1;
-			if (iCurOffset >= recvSize - 1)
-				break;
-
-			latestOffset += 1;
-			bLastToEnd = true;
-
-			int iBuffLen = latestOffset - iStartOffset;
-			pNode = (PSTDATABUFFGRAM)malloc(sizeof(STDATABUFFGRAM));
-			memset(pNode, 0, sizeof(STDATABUFFGRAM));
-			memcpy(pNode->recvData, &recvData[iStartOffset], iBuffLen * sizeof(char));
-			pNode->recvSize = iBuffLen;
-			pNode->pNext = NULL;
-
-			WaitForSingleObject(g_hMutex, INFINITE);
-			if (g_queDataGram.front == NULL)
-			{
-				g_queDataGram.rear = pNode;
-				g_queDataGram.front = g_queDataGram.rear;
-			}
-			else
-			{
-				g_queDataGram.rear->pNext = pNode;
-				g_queDataGram.rear = pNode;
-			}
-			g_queDataGram.iNum++;
-			ReleaseMutex(g_hMutex);
-		}
-
-		if (!bLastToEnd)
-		{
-			int iBuffLen = recvSize - iStartOffset;
-			pDataGramPre = (PSTDATABUFFGRAM)malloc(sizeof(STDATABUFFGRAM));
-			memset(pDataGramPre, 0, sizeof(STDATABUFFGRAM));
-			memcpy(pDataGramPre->recvData, &recvData[iStartOffset], iBuffLen * sizeof(char));
-			pDataGramPre->recvSize = iBuffLen;
-			pDataGramPre->pNext = NULL;
-		}
-#endif
 	}
 
 	return 0;
@@ -884,6 +893,11 @@ DWORD WINAPI OnReceiveThread(LPVOID lparam)
 
 DWORD WINAPI OnParseThread(LPVOID lparam)
 {
+	if (CInfoRecord::GetInstance()->GetVehicleNumSum() == 0)
+	{
+		CInfoRecord::GetInstance()->ReadVin();
+	}
+
 	HWND hWnd = (HWND)lparam;
 	int num = 0;
 
@@ -932,18 +946,17 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 		char recvData[BUFFER_SIZE] = {};
 		INT recvSize = 0;
 
+		WaitForSingleObject(g_hMutex, INFINITE);
 		PSTDATABUFFGRAM pNode = g_queDataGram.front;
 		memcpy(recvData, pNode->recvData, pNode->recvSize * sizeof(char));
 		recvSize = pNode->recvSize;
 
 		//报文结点出队
-		WaitForSingleObject(g_hMutex, INFINITE);
 		g_queDataGram.front = g_queDataGram.front->pNext;
 		free(pNode);
 		pNode = NULL;
 		if (g_queDataGram.front == NULL)
 			g_queDataGram.rear = NULL;
-		g_queDataGram.iNum--;
 		ReleaseMutex(g_hMutex);
 
 		INT latestOffset = 0;
@@ -1002,10 +1015,6 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 		//数据采集时间(年月日时分秒)
 		memcpy(infoData.F8_0, &recvData[latestOffset], 6);
 
-		//采集时间无效，丢弃该报文
-// 		if (infoData.F8_0[0] != (st.wYear % 100))
-// 			continue;
-
 		long pos = CInfoRecord::GetInstance()->FindVinPos(strVin);
 		if (pos < 0)
 		{
@@ -1015,8 +1024,6 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 			if (pos < 0)
 				continue;
 		}
-
-		//continue;
 
 		latestOffset += 6;
 
@@ -1615,6 +1622,9 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 					latestOffset += 2;
 				}
 
+				if (leftOffset <= 0)
+					break;
+
 				CInfoRecord::GetInstance()->RecordInfoType8(pos, &recvData[iLocalOffset]);
 			}
 			else if (infoType == 9)
@@ -1655,6 +1665,9 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 					latestOffset += 1;
 				}
 
+				if (leftOffset <= 0)
+					break;
+
 				CInfoRecord::GetInstance()->RecordInfoType9(pos, &recvData[iLocalOffset]);
 			}
 			else
@@ -1678,15 +1691,6 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 			alertPost.F7_0 = infoData.F7_0;
 			PostMessage(hWnd, UM_ALERT, (WPARAM)&alertPost, 0);
 		}
-
-// 		if (g_queDataGram.iNum > 10000 && g_queDataGram.iNum<100000)
-// 		{
-// 			Sleep(500);
-// 		}
-// 		else
-// 		{
-// 			printf("");
-// 		}
 	}
 
 	return 0;

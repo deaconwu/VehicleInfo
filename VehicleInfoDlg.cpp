@@ -41,6 +41,7 @@ BEGIN_MESSAGE_MAP(CVehicleInfoDlg, CDialogEx)
 	ON_MESSAGE(UM_FILEPARSE, &CVehicleInfoDlg::OnFileParse)
 	ON_MESSAGE(UM_LOADVINS, &CVehicleInfoDlg::OnLoadVins)
 	ON_MESSAGE(UM_HISTORY, &CVehicleInfoDlg::OnHistoryRecord)
+	ON_MESSAGE(NETWORK_EVENT, &CVehicleInfoDlg::OnNetEvent)
 	ON_BN_CLICKED(IDC_BTN_CONNECT, &CVehicleInfoDlg::OnBnClickedBtnConnect)
 	ON_BN_CLICKED(IDC_BTN_DISCONNECT, &CVehicleInfoDlg::OnBnClickedBtnDisconnect)
 END_MESSAGE_MAP()
@@ -88,7 +89,6 @@ LRESULT CVehicleInfoDlg::OnFileParse(WPARAM wParam, LPARAM lParam)
 
 LRESULT CVehicleInfoDlg::OnLoadVins(WPARAM wParam, LPARAM lParam)
 {
-	//MessageBox("Vin码加载中", MB_ABORTRETRYIGNORE);
 	WORD* pProgress = (WORD*)wParam;
 	if (*pProgress > 100)
 	{
@@ -110,6 +110,34 @@ LRESULT CVehicleInfoDlg::OnHistoryRecord(WPARAM wParam, LPARAM lParam)
 	CHistoryRecord::GetInstance()->OnRecord(*pDayOfWeek);
 
 	return 0;
+}
+
+LRESULT CVehicleInfoDlg::OnNetEvent(WPARAM wParam, LPARAM lParam)
+{
+	SOCKET sock = (SOCKET)wParam;
+	int iEvent = WSAGETSELECTEVENT(lParam);
+
+	char buf[BUFFER_SIZE] = {};
+	int size = 0;
+	INT optVal = 0;
+	INT optLen = sizeof(optVal);
+
+	switch (iEvent)
+	{
+	case FD_READ:
+	{
+		char recvData[BUFFER_SIZE] = {};
+		INT recvSize = CInfoSocket::GetInstance()->OnReceive(recvData);
+		if (recvSize > 0)
+		{
+			CInfoRecord::GetInstance()->OnMsgParse(recvData, recvSize);
+		}
+
+		break;
+	}
+	}
+
+	return 1;
 }
 
 // CVehicleInfoDlg 消息处理程序

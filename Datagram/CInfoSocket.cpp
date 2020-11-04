@@ -1,9 +1,10 @@
 #include "pch.h"
 #include "CInfoSocket.h"
+#include "UserMessage.h"
 
 CInfoSocket* CInfoSocket::m_pInstance = NULL;
 
-SOCKET CInfoSocket::OnConnect(const sockaddr_in serAddr)
+SOCKET CInfoSocket::OnConnect(const sockaddr_in serAddr, HWND hWnd)
 {
 	if (m_pSocket != INVALID_SOCKET)
 		OnClose();
@@ -33,7 +34,17 @@ SOCKET CInfoSocket::OnConnect(const sockaddr_in serAddr)
 		return INVALID_SOCKET;
 	}
 
+	if (WSAAsyncSelect(m_pSocket, hWnd, NETWORK_EVENT, FD_READ))
+	{
+		DWORD dwErr = GetLastError();
+		closesocket(m_pSocket);
+		WSACleanup();
+		m_pSocket = INVALID_SOCKET;
+		return INVALID_SOCKET;
+	}
+
 	memcpy(&m_serAddr, &serAddr, sizeof(m_serAddr));
+	m_hWnd = hWnd;
 
 	return m_pSocket;
 }
@@ -89,7 +100,10 @@ VOID CInfoSocket::OnClose(bool bEmptyAddr)
 	m_pSocket = INVALID_SOCKET;
 
 	if (bEmptyAddr)
+	{
+		m_pSocket = INVALID_SOCKET;
 		memset(&m_serAddr, 0, sizeof(m_serAddr));
+	}
 }
 
 INT CInfoSocket::OnReceive(char recvData[])
@@ -104,6 +118,7 @@ INT CInfoSocket::OnReceive(char recvData[])
 	getsockopt(m_pSocket, SOL_SOCKET, SO_RCVBUF, (char*)&optVal, &optLen);
 
 	INT recvSize = recv(m_pSocket, recvData, optVal, 0);
+	DWORD dwErr = GetLastError();
 
 	return recvSize;
 }

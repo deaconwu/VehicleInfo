@@ -14,7 +14,7 @@ IMPLEMENT_DYNAMIC(CStatistics, CDialogEx)
 
 static STCIRCLEQUEUE g_circleQue[MAX_VEHICLENUM] = {};
 
-extern long long g_lRecvSizeSum;
+extern ULONGLONG g_lRecvSizeSum;
 
 CStatistics::CStatistics(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_STATISTICS, pParent)
@@ -93,10 +93,11 @@ void CStatistics::OnQueryStatis()
 	}
 
 	memset(g_circleQue, 0, sizeof(g_circleQue));
-	long todayJoinCount = CInfoRecord::GetInstance()->GetTodayJoinCount();
+
 	long vehicleNum = CInfoRecord::GetInstance()->GetQueInfo(g_circleQue);
-	long datagramNum = CInfoRecord::GetInstance()->GetDatagramNum();
+	ULONGLONG datagramNum = CInfoRecord::GetInstance()->GetDatagramNum();
 	long appendNum = CInfoRecord::GetInstance()->GetAppendNum();
+	long todayJoinCount = CInfoRecord::GetInstance()->GetTodayJoinCount();
 	CString csStr;
 
 	SYSTEMTIME st;
@@ -110,12 +111,13 @@ void CStatistics::OnQueryStatis()
 
 	//报文数
 	csStr = _T("");
-	csStr.Format(_T("%lu"), datagramNum);
+	csStr.Format(_T("%llu"), datagramNum);
 	((CEdit*)GetDlgItem(IDC_EDIT_DATAGRAMSUM))->SetWindowText(csStr);
 
 	//字节数
 	csStr = _T("");
-	csStr.Format(_T("%lu"), g_lRecvSizeSum);
+	//g_lRecvSizeSum = 21000000000;
+	csStr.Format(_T("%I64u"), g_lRecvSizeSum);
 	((CEdit*)GetDlgItem(IDC_EDIT_DATASIZESUM))->SetWindowText(csStr);
 
 	//今日接入车辆数
@@ -242,25 +244,25 @@ void CStatistics::OnQueryStatis()
 	//累计行驶里程
 	csStr = _T("");
 	csStr.Format(_T("%.5f"), (long double)mileageSum / 10 / 10000);
-	//csStr.Append(_T(" 万公里"));
+
 	((CEdit*)GetDlgItem(IDC_EDIT_MILEAGESUN))->SetWindowText(csStr);
 
 	//累计碳减排
 	csStr = _T("");
 	csStr.Format(_T("%.4f"), (0.0031 / 6) * ((long double)mileageSum / 10 / 10000));
-	//csStr.Append(_T(" 万升"));
+
 	((CEdit*)GetDlgItem(IDC_EDIT_CARBONEMISSION))->SetWindowText(csStr);
 
 	//累计节油量
 	csStr = _T("");
 	csStr.Format(_T("%.2f"), (1.75 / 6) * ((long double)mileageSum / 10 / 10000));
-	//csStr.Append(_T(" 万升"));
+
 	((CEdit*)GetDlgItem(IDC_EDIT_FUELTHRIFT))->SetWindowText(csStr);
 
 	//累计耗电量
 	csStr = _T("");
 	csStr.Format(_T("%.2f"), (5.68 / 6) * ((long double)mileageSum / 10 / 10000));
-	//csStr.Append(_T(" 万千瓦时"));
+
 	((CEdit*)GetDlgItem(IDC_EDIT_POWERCONSUME))->SetWindowText(csStr);
 
 	//今日在线车辆数

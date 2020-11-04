@@ -19,7 +19,15 @@ CFileParse::CFileParse() : m_hThreadParse(NULL), m_vehicleNum(0)
 
 void CFileParse::ReadVin()
 {
-	FILE *fpRead = fopen("vinsort.txt", "r");
+	TCHAR tchPath[1024] = {};
+	GetCurrentDirectory(1024, tchPath);
+
+	char chPath[1024] = {};
+	int iLength = WideCharToMultiByte(CP_ACP, 0, tchPath, -1, NULL, 0, NULL, NULL);
+	WideCharToMultiByte(CP_ACP, 0, tchPath, -1, chPath, iLength, NULL, NULL);
+	memcpy(&chPath[iLength - 1], "\\vinsort.txt", sizeof("\\vinsort.txt"));
+
+	FILE *fpRead = fopen(chPath, "r");
 	if (NULL == fpRead)
 	{
 		return;
@@ -39,7 +47,14 @@ void CFileParse::ReadVin()
 
 void CFileParse::WriteVin()
 {
-	FILE *fpWrite = fopen("vinsort.txt", "wb+");
+	TCHAR tchPath[1024] = {};
+	GetCurrentDirectory(1024, tchPath);
+	char chPath[1024] = {};
+	int iLength = WideCharToMultiByte(CP_ACP, 0, tchPath, -1, NULL, 0, NULL, NULL);
+	WideCharToMultiByte(CP_ACP, 0, tchPath, -1, chPath, iLength, NULL, NULL);
+	memcpy(&chPath[iLength - 1], "\\vinsort.txt", sizeof("\\vinsort.txt"));
+
+	FILE *fpWrite = fopen(chPath, "wb+");
 	for (long i = 0; i < m_vehicleNum; i++)
 	{
 		fprintf(fpWrite, "%s", m_chVin[i]);

@@ -185,7 +185,7 @@ typedef struct DataOneWeek
 typedef struct DataBuffGram
 {
 	int recvSize;
-	char recvData[BUFFER_SIZE];
+	char recvData[20000];
 	struct DataBuffGram* pNext;
 } STDATABUFFGRAM, *PSTDATABUFFGRAM;
 
@@ -193,7 +193,6 @@ typedef struct DataGramQueue
 {
 	PSTDATABUFFGRAM front;
 	PSTDATABUFFGRAM rear;
-	uint32_t iNum;
 } STDATAGRAMQUEUE, *PSTDATAGRAMQUEUE;
 
 /***********************************************/

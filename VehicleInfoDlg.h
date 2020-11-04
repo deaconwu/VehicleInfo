@@ -23,12 +23,13 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
-	LRESULT OnRealAlert(WPARAM wParam, LPARAM lParam);
-	LRESULT OnRealStopRecv(WPARAM wParam, LPARAM lParam);
-	LRESULT OnRealStopParse(WPARAM wParam, LPARAM lParam);
-	LRESULT OnHistoryRecord(WPARAM wParam, LPARAM lParam);
-	LRESULT OnFileParse(WPARAM wParam, LPARAM lParam);
-	LRESULT OnLoadVins(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnRealAlert(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnRealStopRecv(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnRealStopParse(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnHistoryRecord(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnNetEvent(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnFileParse(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnLoadVins(WPARAM wParam, LPARAM lParam);
 
 // 实现
 protected:
