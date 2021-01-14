@@ -20,7 +20,7 @@ typedef unsigned int uint32_t;
 #pragma pack (1)
 
 /**********信息类型1~7***********/
-typedef struct RecvData
+typedef struct RecvDataType1To7
 {
 	//整车数据
 	uint8_t F1_0;       // 0__车辆状态
@@ -66,7 +66,7 @@ typedef struct RecvData
 
 	//时间数据
 	uint8_t F8_0[6];    //年月日时分秒
-} STRECVDATA;
+} STRECVDATATYPE1TO7;
 /****************************/
 
 
@@ -117,7 +117,7 @@ typedef struct RecvDataType9
 //记录信息类型1~7
 typedef struct CircleQueue
 {
-	STRECVDATA* pElem;
+	STRECVDATATYPE1TO7* pElem;
 	uint32_t front;
 	uint32_t rear;
 } STCIRCLEQUEUE;
