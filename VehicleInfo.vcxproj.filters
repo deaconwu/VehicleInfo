@@ -75,6 +75,9 @@
     <ClInclude Include="Datagram\WeekDay.h">
       <Filter>Datagram</Filter>
     </ClInclude>
+    <ClInclude Include="Datagram\CShareMem.h">
+      <Filter>Datagram</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="VehicleInfo.cpp">
@@ -117,6 +120,9 @@
       <Filter>Datagram</Filter>
     </ClCompile>
     <ClCompile Include="Datagram\WeekDay.cpp">
+      <Filter>Datagram</Filter>
+    </ClCompile>
+    <ClCompile Include="Datagram\CShareMem.cpp">
       <Filter>Datagram</Filter>
     </ClCompile>
   </ItemGroup>
