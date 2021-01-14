@@ -240,7 +240,7 @@ DWORD WINAPI OnDatagramParseThread(LPVOID lparam)
 		iDataLen += uchar;
 		latestOffset += 2;
 
-		STRECVDATA infoData;
+		STRECVDATATYPE1TO7 infoData;
 		memset(&infoData, 0, sizeof(infoData));
 
 		/*******数据单元格式 实时信息上报*******/

@@ -6,23 +6,16 @@
 class CInfoRecord //: public CSingleton<CInfoRecord>
 {
 public:
-	CInfoRecord();
 	~CInfoRecord()
 	{
-		if (NULL != m_pInstance)
-		{
-			delete m_pInstance;
-			m_pInstance = NULL;
-		}
+// 		if (NULL != m_pInstance)
+// 		{
+// 			delete m_pInstance;
+// 			m_pInstance = NULL;
+// 		}
 	}
 
-	static CInfoRecord* GetInstance()
-	{
-		if (NULL == m_pInstance)
-			m_pInstance = new CInfoRecord;
-
-		return m_pInstance;
-	}
+	static CInfoRecord* GetInstance();
 
 	bool GetLockFlag()
 	{
@@ -56,14 +49,14 @@ public:
 
 	long InsertVinAndSort(uint8_t pVin[]);
 
-	bool QueryLatestInfo(uint8_t pVin[], STRECVDATA &stData);
+	bool QueryLatestInfo(uint8_t pVin[], STRECVDATATYPE1TO7 &stData);
 
 	long GetQueInfo(STCIRCLEQUEUE circleQue[]);
 
 	void GetVinInfo(uint8_t chVin[][VIN_LENGTH + 1]);
 
 	//录入车辆信息，信息类型1~7
-	void RecordInfo(long pos, STRECVDATA& stRecv);
+	void RecordInfo(long pos, STRECVDATATYPE1TO7& stRecv);
 
 	//录入车辆信息8
 	long RecordInfoType8(long pos, const char* pRecv);
@@ -84,6 +77,8 @@ public:
 	void OnMsgParse(char recvData[], int recvSize);
 
 private:
+	CInfoRecord();
+
 	uint8_t m_chVin[MAX_VEHICLENUM][VIN_LENGTH + 1]; //每辆车vin码
 	uint8_t m_bTodayJoin[MAX_VEHICLENUM];	//今日接入的车
 
@@ -104,6 +99,10 @@ private:
 
 	PSTDATABUFFGRAM m_pDataGramPre;
 	int m_iPreSize;
+
+	uint8_t* m_pVinArr;
+	STRECVDATATYPE1TO7* m_pInfoTypeElem;
+	long* m_pVehicleNum;
 
 	static CInfoRecord* m_pInstance;
 };

@@ -418,11 +418,11 @@ CAlertStats::CAlertStats() : m_hThreadAlertRank(NULL), m_hThreadAlertCategory(NU
 
 CAlertStats::~CAlertStats()
 {
-	if (NULL != m_pInstance)
-	{
-		delete m_pInstance;
-		m_pInstance = NULL;
-	}
+// 	if (NULL != m_pInstance)
+// 	{
+// 		delete m_pInstance;
+// 		m_pInstance = NULL;
+// 	}
 }
 
 void CAlertStats::NotifyVim(uint8_t pVin[])

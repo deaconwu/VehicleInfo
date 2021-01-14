@@ -11,20 +11,14 @@
 class CInfoSocket //: public CSingleton<CInfoSocket>
 {
 public:
-	CInfoSocket()
-	{
-		memset(&m_serAddr, 0, sizeof(m_serAddr));
-		m_pSocket = INVALID_SOCKET;
-		m_hWnd = NULL;
-	}
 
 	~CInfoSocket()
 	{
-		if (NULL != m_pInstance)
-		{
-			delete m_pInstance;
-			m_pInstance = NULL;
-		}
+// 		if (NULL != m_pInstance)
+// 		{
+// 			delete m_pInstance;
+// 			m_pInstance = NULL;
+// 		}
 	}
 
 	static CInfoSocket* GetInstance()
@@ -46,6 +40,14 @@ public:
 	VOID OnClose(bool bEmptyAddr=true);
 
 private:
+
+	CInfoSocket()
+	{
+		memset(&m_serAddr, 0, sizeof(m_serAddr));
+		m_pSocket = INVALID_SOCKET;
+		m_hWnd = NULL;
+	}
+
 	SOCKET m_pSocket;
 	sockaddr_in m_serAddr;
 

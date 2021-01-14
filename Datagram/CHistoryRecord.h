@@ -7,14 +7,13 @@
 class CHistoryRecord
 {
 public:
-	CHistoryRecord();
 	~CHistoryRecord()
 	{
-		if (NULL != m_pInstance)
-		{
-			delete m_pInstance;
-			m_pInstance = NULL;
-		}
+// 		if (NULL != m_pInstance)
+// 		{
+// 			delete m_pInstance;
+// 			m_pInstance = NULL;
+// 		}
 	}
 
 	static CHistoryRecord* GetInstance()
@@ -34,6 +33,7 @@ public:
 	uint32_t GetLatestMileage(uint8_t pVin[]);
 
 private:
+	CHistoryRecord();
 
 	long FindVinPos(uint8_t pVin[]);
 

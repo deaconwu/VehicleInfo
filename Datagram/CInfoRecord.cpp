@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <tchar.h>
 #include "CInfoRecord.h"
+#include "CShareMem.h"
 #include "UserMessage.h"
 
 DWORD WINAPI OnReceiveThread(LPVOID lparam);
@@ -19,7 +20,7 @@ ULONGLONG g_lRecvSizeSum = 0;
 HANDLE g_hMutex = NULL;
 
 CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNumSum(0), m_vehicleNumAppend(0), m_datagramNum(0), m_hThreadRecv(NULL), m_hThreadParse(NULL),
-							m_pDataGramPre(NULL), m_iPreSize(0)
+							m_pDataGramPre(NULL), m_iPreSize(0), m_pVinArr(NULL), m_pInfoTypeElem(NULL), m_pVehicleNum(NULL)
 {
 	memset(m_chVin, 0, sizeof(m_chVin));
 	memset(m_circleQue, 0, sizeof(m_circleQue));
@@ -27,6 +28,23 @@ CInfoRecord::CInfoRecord():m_bLockFlag(false), m_vehicleNumSum(0), m_vehicleNumA
 	memset(m_dataType9, 0, sizeof(m_dataType9));
 	memset(&g_queDataGram, 0, sizeof(STDATAGRAMQUEUE));
 	memset(&m_bTodayJoin, 0, sizeof(m_bTodayJoin));
+}
+
+CInfoRecord* CInfoRecord::GetInstance()
+{
+	//懒汉式单例模式
+	if (NULL == m_pInstance)	//每次上锁存在性能问题，导致线程阻塞；已有实例，直接返回
+	{
+		//保证线程安全，避免都判断实例不存在，都会进行实例化
+		WaitForSingleObject(g_hMutex, INFINITE);
+		if (NULL == m_pInstance)
+		{
+			m_pInstance = new CInfoRecord;
+		}
+		ReleaseMutex(g_hMutex);
+	}
+
+	return m_pInstance;
 }
 
 void CInfoRecord::ReadVin()
@@ -56,6 +74,13 @@ void CInfoRecord::ReadVin()
 		fgets(strVin, 1024, fpRead);
 
 		memcpy(m_chVin[m_vehicleNumSum], strVin, VIN_LENGTH);
+		
+		CShareMem::GetInstance()->LockShareVins();
+		//写入共享内存
+		memcpy(m_pVinArr + m_vehicleNumSum * VIN_LENGTH, strVin, VIN_LENGTH);
+		*m_pVehicleNum += 1;
+		CShareMem::GetInstance()->UnlockShareVins();
+
 		m_vehicleNumSum += 1;
 	}
 
@@ -64,11 +89,11 @@ void CInfoRecord::ReadVin()
 
 	for (long i=0; i< m_vehicleNumSum; i++)
 	{
-		STRECVDATA* pElem = (STRECVDATA*)malloc(sizeof(STRECVDATA) * QUEUE_SIZE);
+		STRECVDATATYPE1TO7* pElem = (STRECVDATATYPE1TO7*)malloc(sizeof(STRECVDATATYPE1TO7) * QUEUE_SIZE);
 		if (NULL != pElem)
 		{
 			m_circleQue[i].pElem = pElem;
-			memset(m_circleQue[i].pElem, 0, sizeof(STRECVDATA) * QUEUE_SIZE);
+			memset(m_circleQue[i].pElem, 0, sizeof(STRECVDATATYPE1TO7) * QUEUE_SIZE);
 		}
 
 		if (i == m_vehicleNumSum-1)
@@ -188,21 +213,25 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 		printf("bLock");
 	}
 
-	STRECVDATA* pElem = (STRECVDATA*)malloc(sizeof(STRECVDATA) * QUEUE_SIZE);
-	if (NULL == pElem)
-	{
-		return -1;
-	}
-
 	if (m_vehicleNumSum == 0)
 	{
 		memcpy(m_chVin[0], pVin, VIN_LENGTH);
+
+		CShareMem::GetInstance()->LockShareVins();
+		//写入共享内存
+		memcpy(m_pVinArr, pVin, VIN_LENGTH);
+		*m_pVehicleNum += 1;
+		CShareMem::GetInstance()->UnlockShareVins();
+
 		m_vehicleNumSum += 1;
 		m_vehicleNumAppend += 1;
 		m_bTodayJoin[0] = true;
 
-		m_circleQue[0].pElem = pElem;
-		memset(m_circleQue[0].pElem, 0, sizeof(STRECVDATA) * QUEUE_SIZE);
+		//指向共享内存首地址
+		CShareMem::GetInstance()->LockShareInfoType();
+		m_circleQue[0].pElem = m_pInfoTypeElem;
+		memset(m_circleQue[0].pElem, 0, sizeof(STRECVDATATYPE1TO7) * QUEUE_SIZE);
+		CShareMem::GetInstance()->UnlockShareInfoType();
 
 		return 0;
 	}
@@ -227,6 +256,11 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 	{
 		memcpy(m_chVin[i+1], m_chVin[i], VIN_LENGTH + 1);
 
+		//修改共享内存
+		CShareMem::GetInstance()->LockShareVins();
+		memcpy(m_pVinArr+(i+1)*VIN_LENGTH, m_pVinArr+i*VIN_LENGTH, VIN_LENGTH);
+		CShareMem::GetInstance()->UnlockShareVins();
+
 		m_circleQue[i+1].pElem = m_circleQue[i].pElem;
 		m_circleQue[i+1].front = m_circleQue[i].front;
 		m_circleQue[i+1].rear = m_circleQue[i].rear;
@@ -239,8 +273,17 @@ long CInfoRecord::InsertVinAndSort(uint8_t pVin[])
 
 	memcpy(m_chVin[iLeft], (char*)pVin, VIN_LENGTH + 1);
 
-	m_circleQue[iLeft].pElem = pElem;
-	memset(m_circleQue[iLeft].pElem, 0, sizeof(STRECVDATA) * QUEUE_SIZE);
+	//写入共享内存
+	CShareMem::GetInstance()->LockShareVins();
+	memcpy(m_pVinArr+iLeft*VIN_LENGTH, (char*)pVin, VIN_LENGTH);
+	*m_pVehicleNum += 1;
+	CShareMem::GetInstance()->UnlockShareVins();
+
+	CShareMem::GetInstance()->LockShareInfoType();
+	m_circleQue[iLeft].pElem = m_pInfoTypeElem + iLeft*QUEUE_SIZE;
+	memset(m_circleQue[iLeft].pElem, 0, sizeof(STRECVDATATYPE1TO7) * QUEUE_SIZE);
+	CShareMem::GetInstance()->UnlockShareInfoType();
+
 	m_circleQue[iLeft].front = 0;
 	m_circleQue[iLeft].rear = 0;
 
@@ -278,7 +321,7 @@ long CInfoRecord::GetTodayJoinCount()
 	return iJoinCount;
 }
 
-bool CInfoRecord::QueryLatestInfo(uint8_t pVin[], STRECVDATA &stData)
+bool CInfoRecord::QueryLatestInfo(uint8_t pVin[], STRECVDATATYPE1TO7 &stData)
 {
 	m_bLockFlag = true;
 	long pos = FindVinPos(pVin);
@@ -289,7 +332,7 @@ bool CInfoRecord::QueryLatestInfo(uint8_t pVin[], STRECVDATA &stData)
 	}
 
 	long rear = m_circleQue[pos].rear;
-	memcpy(&stData, &m_circleQue[pos].pElem[rear-1], sizeof(STRECVDATA));
+	memcpy(&stData, &m_circleQue[pos].pElem[rear-1], sizeof(STRECVDATATYPE1TO7));
 
 	m_bLockFlag = false;
 
@@ -312,7 +355,7 @@ void CInfoRecord::GetVinInfo(uint8_t chVin[][VIN_LENGTH + 1])
 	m_bLockFlag = false;
 }
 
-void CInfoRecord::RecordInfo(long pos, STRECVDATA& stRecv)
+void CInfoRecord::RecordInfo(long pos, STRECVDATATYPE1TO7& stRecv)
 {
 	if (pos >= m_vehicleNumSum || pos < 0)
 	{
@@ -327,6 +370,7 @@ void CInfoRecord::RecordInfo(long pos, STRECVDATA& stRecv)
 	if (NULL == m_circleQue[pos].pElem)
 		return;
 
+	CShareMem::GetInstance()->LockShareInfoType();
 	if ((m_circleQue[pos].rear + 1) % QUEUE_SIZE == m_circleQue[pos].front)
 	{
 		//队列满，队头元素出队
@@ -336,8 +380,9 @@ void CInfoRecord::RecordInfo(long pos, STRECVDATA& stRecv)
 	}
 
 	long rear = m_circleQue[pos].rear;
-	memcpy(&m_circleQue[pos].pElem[rear], &stRecv, sizeof(STRECVDATA));
+	memcpy(&m_circleQue[pos].pElem[rear], &stRecv, sizeof(STRECVDATATYPE1TO7));
 	m_circleQue[pos].rear = (m_circleQue[pos].rear + 1) % QUEUE_SIZE;
+	CShareMem::GetInstance()->UnlockShareInfoType();
 
 	m_bTodayJoin[pos] = 1;
 }
@@ -751,14 +796,30 @@ bool CInfoRecord::OnRealTimeRecv(HWND hWnd, sockaddr_in serAddr)
 	OpenMutex(MUTEX_ALL_ACCESS, true, NULL);
 
 #ifndef _DEBUG
+	//共享内存
+	CShareMem::GetInstance()->CreateFileMap(m_pVehicleNum, m_pVinArr, m_pInfoTypeElem);
+	if (NULL == m_pVinArr || NULL== m_pInfoTypeElem || m_pVehicleNum==NULL)
+	{
+		CShareMem::GetInstance()->UnMapView();
+		m_pVinArr = NULL;
+		m_pInfoTypeElem = NULL;
+		m_pVehicleNum = NULL;
+		return false;
+	}
+
 	//异步套接字实时接收，创建线程实时解析
  	DWORD dwThreadIdParse;
  	m_hThreadParse = CreateThread(NULL, NULL, OnParseThread, hWnd, 0, &dwThreadIdParse);
 
 	if (NULL == m_hThreadParse)
+	{
 		CInfoSocket::GetInstance()->OnClose();
+		CShareMem::GetInstance()->UnMapView();
+	}
+
 #else
-	//异步套接字定量接收存放文件，再调用CFileParse离线解析
+
+	//同步套接字定量接收存放到文件，再调用CFileParse离线解析
 	DWORD dwThreadIdRecv;
  	m_hThreadRecv = CreateThread(NULL, NULL, OnReceiveThread, hWnd, 0, &dwThreadIdRecv);
 
@@ -800,7 +861,7 @@ void CInfoRecord::OnReset()
 		{
 // 			free(m_circleQue[i].pElem);
 // 			m_circleQue[i].pElem = NULL;
-			memset(m_circleQue[i].pElem, 0, sizeof(STRECVDATA) * QUEUE_SIZE);
+			memset(m_circleQue[i].pElem, 0, sizeof(STRECVDATATYPE1TO7) * QUEUE_SIZE);
 			m_circleQue[i].front = 0;
 			m_circleQue[i].rear = 0;
 		}
@@ -1007,7 +1068,7 @@ DWORD WINAPI OnParseThread(LPVOID lparam)
 		iDataLen += uchar;
 		latestOffset += 2;
 
-		STRECVDATA infoData;
+		STRECVDATATYPE1TO7 infoData;
 		memset(&infoData, 0, sizeof(infoData));
 
 	/*******数据单元格式 实时信息上报*******/

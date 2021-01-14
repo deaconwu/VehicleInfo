@@ -6,14 +6,13 @@
 class CFileParse
 {
 public:
-	CFileParse();
 	~CFileParse()
 	{
-		if (NULL != m_pInstance)
-		{
-			delete m_pInstance;
-			m_pInstance = NULL;
-		}
+// 		if (NULL != m_pInstance)
+// 		{
+// 			delete m_pInstance;
+// 			m_pInstance = NULL;
+// 		}
 	}
 
 	static CFileParse* GetInstance()
@@ -33,6 +32,8 @@ public:
 	long InsertVinAndSort(uint8_t pVin[]);
 
 private:
+	CFileParse();
+
 	void ReadVin();
 
 	HANDLE m_hThreadParse;

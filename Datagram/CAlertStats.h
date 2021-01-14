@@ -6,8 +6,6 @@
 class CAlertStats
 {
 public:
-	CAlertStats();
-
 	~CAlertStats();
 
 	static CAlertStats* GetInstance();
@@ -33,6 +31,7 @@ public:
 	void GetVin(uint8_t pVin[]);
 
 private:
+	CAlertStats();
 
 	HANDLE m_hThreadAlertRank;
 

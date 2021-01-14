@@ -34,6 +34,7 @@ SOCKET CInfoSocket::OnConnect(const sockaddr_in serAddr, HWND hWnd)
 		return INVALID_SOCKET;
 	}
 
+#ifndef _DEBUG
 	if (WSAAsyncSelect(m_pSocket, hWnd, NETWORK_EVENT, FD_READ))
 	{
 		DWORD dwErr = GetLastError();
@@ -42,6 +43,7 @@ SOCKET CInfoSocket::OnConnect(const sockaddr_in serAddr, HWND hWnd)
 		m_pSocket = INVALID_SOCKET;
 		return INVALID_SOCKET;
 	}
+#endif
 
 	memcpy(&m_serAddr, &serAddr, sizeof(m_serAddr));
 	m_hWnd = hWnd;
