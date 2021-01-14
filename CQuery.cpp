@@ -93,7 +93,7 @@ void CQuery::OnBnClickedBtnQuery()
 	int iLength = WideCharToMultiByte(CP_ACP, 0, (LPCWCH)&tchVin, -1, NULL, 0, NULL, NULL);
 	WideCharToMultiByte(CP_ACP, 0, (LPCWCH)&tchVin, -1, chVin, iLength, NULL, NULL);
 
-	STRECVDATA stData;
+	STRECVDATATYPE1TO7 stData;
 	memset(&stData, 0, sizeof(stData));
 
 	bool bRet = CInfoRecord::GetInstance()->QueryLatestInfo((uint8_t*)chVin, stData);
